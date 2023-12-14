@@ -4,6 +4,10 @@ Comming soon, another MVG Integration for Home Assistant
 
 ![Screenshot_33](https://github.com/Nisbo/another_mvg/assets/26260572/c24cd351-2a44-4c5f-9250-5a4bb1f07450)
 
+
+![Screenshot_34](https://github.com/Nisbo/another_mvg/assets/26260572/29985729-abfa-4049-8c4b-6b375303ceb1)
+
+
 add to **configuration.yaml**
 ```
 sensor:
