@@ -9,12 +9,15 @@ add to **configuration.yaml**
 To load the integration, you have to add
 
 
-```  - platform: another_mvg``` ***Required***
+```  - platform: another_mvg``` **Required**
 
-to the ***sensor:*** part in your configuration.
-Dont add the line ***sensor:*** a second time, if it is already there. Just put it below your other platforms.
+to the **sensor:** part in your configuration.
 
-```   globalid: "de:09179:6110"``` ***Required***
+> [!CAUTION]
+> Don't add the line ```sensor:``` a second time! If it is already there, just put ```  - platform: another_mvg``` below your other **platforms** in the sensor part.
+
+
+```   globalid: "de:09179:6110"``` **Required**
 
 Is the station identifier of the stop/station. I decided to use the identifier instead of names, because it is more clear and leads to less problems.
 The only problem you have, is to find the identifier (globalid) by your own.
@@ -22,7 +25,7 @@ Here you can find the globalid for your station, just replace the name in the qu
 If there are more than one entry, you have to find the correct one. I recommend to open the link on your PC/Notebook.
 ```https://www.mvg.de/api/fib/v2/location?query=Pasing```
 
-```    name: "Olching"``` ***Optional, but strongly recommended***
+```    name: "Olching"``` **Optional, but strongly recommended**
 
 Is the name of the table and will be used for the sensorname. NOT the name of the station for the API call.
 
@@ -45,6 +48,7 @@ sensor:
 
 ```   globalid2```
 
+Show only some lines
 ```   onlyline: "S3,S4,S20"```
 
 If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.
