@@ -28,6 +28,9 @@ Is the station identifier of the stop/station. I decided to use the identifier i
 The only problem you have, is to find the identifier (globalid) by your own.
 TODO: I will provide a link later
 
+```    name: "Olching"``` ***Optional, but strongly recommended***
+It is the name of the table and will be used for the sensorname.
+
 Minimal configuration
 ```
 sensor:
