@@ -19,16 +19,18 @@ add to **configuration.yaml**
 To load the integration, you have to add
 
 
-```  - platform: another_mvg```
+```  - platform: another_mvg``` ***Required***
 
 to the ***sensor:*** part in your configuration.
 Dont add the line ***sensor:*** a second time, if it is already there. Just put it below your other platforms.
 
-```globalid: "de:09179:6110"```
+```globalid: "de:09179:6110"``` ***Required***
 
 Is the station identifier of the stop/station. I decided to use the identifier instead of names, because it is more clear and leads to less problems.
 The only problem you have, is to find the identifier (globalid) by your own.
-TODO: I will provide a link later
+Here you can find the globalid for your station, just replace the name in the query.
+If there are more than one entry, you have to find the correct one. I recommend to open the link on your PC/Notebook.
+```https://www.mvg.de/api/fib/v2/location?query=Pasing```
 
 ```    name: "Olching"``` ***Optional, but strongly recommended***
 
