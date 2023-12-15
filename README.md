@@ -4,32 +4,37 @@ Comming soon, another MVG Integration for Home Assistant
 
 
 
-add to **configuration.yaml**
+# Code for your configuration.yaml
+
+### Add the name of this integration
 
 To load the integration, you have to add
-
 
 ```  - platform: another_mvg``` **Required**
 
 to the **sensor:** part in your configuration.
 
 > [!CAUTION]
-> Don't add the line ```sensor:``` a second time! If it is already there, just put ```  - platform: another_mvg``` below your other **platforms** in the sensor part.
+> Don't add the line ```sensor:``` a second time!
+> If it is already there, just put ```  - platform: another_mvg``` below your other **platforms** in the sensor part.
 
-
-```   globalid: "de:09179:6110"``` **Required**
-
-Is the station identifier of the stop/station. I decided to use the identifier instead of names, because it is more clear and leads to less problems.
+### Define your station / stop / location
+```   globalid: "de:09162:10"``` **Required**
+> [!IMPORTANT]
+> The station identifier of the stop/station/location. I decided to use the identifier, instead of names, because it is more clear (for the API) and leads to less problems.
 The only problem you have, is to find the identifier (globalid) by your own.
-Here you can find the globalid for your station, just replace the name in the query.
-If there are more than one entry, you have to find the correct one. I recommend to open the link on your PC/Notebook.
-```https://www.mvg.de/api/fib/v2/location?query=Pasing```
+Here you can find the globalid for your station.
+> ```https://www.mvg.de/api/fib/v2/location?query=Pasing```
+> Just replace the name in the query. If there is more than one entry, you have to find the correct one. I recommend to open the link on your PC/Notebook.
 
-```    name: "Olching"``` **Optional, but strongly recommended**
 
-Is the name of the table and will be used for the sensorname. NOT the name of the station for the API call.
 
-Minimal configuration example
+### Name of the table
+```    name: "Pasing"``` **Optional, but strongly recommended**
+
+Is the name of the table and will be used for the sensorname. It is **NOT** the name of the station for the API call.
+
+### Minimal configuration example
 ```
 sensor:
   - platform: another_mvg
