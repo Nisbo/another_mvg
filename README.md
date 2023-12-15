@@ -54,6 +54,13 @@ This should be selfexplaining. Add the types of trasportation comma separated.
 BUS and REGIONAL_BUS are different. BUS is MVG and REGIONAL_BUS is MVV. Just add both, to be save.
 As mentioned above, by default only S-Bahn ist enabled. If you want to see more, you have to use this parameter.
 
+### Show only some lines
+
+```   onlyline: "S3,S4,S20"```
+
+If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.
+
+
 ### Hide some destinations
 
 ```   hidedestination: "Mammendorf;Maisach"```
@@ -65,22 +72,31 @@ The names should be ```;``` separated. They can be ```,``` sepatared, but this c
 
 ### Define the number of departures
 
-```   limit```
+```   limit: 15```
 
+By default you will see 6 departures. If you want to see more or less, you have to configure it.
+Please add **_only a number_ and _no quotes_**.
+Die API will pull a maximum of 80 departures. 
+If you use "filters" like **hidedestination**, witch filter out 40 entries, you will only see the remaining 40 as maximum.
 
 ### doublestationnumber
 
-```   doublestationnumber```
+```   doublestationnumber: "2"```
 
-```   globalid2```
+> [!IMPORTANT]
+> If you want to create 2 or more cards for the same globalid, you have to use this parameter.
+It can be a number or a letter. Also more than numbers or letters are possible. No special chars are allowed and also no space.
 
-Show only some lines
-```   onlyline: "S3,S4,S20"```
+### Merge 2 different stations in one display
+```   globalid2: "de:09179:6180"```
 
-If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.
+If you have 2 stations close together (or far far away) like a train station and a bus stop, you can combine both in one card.
+Keep in mind, that you have to insert all transportations in ``` transporttypes```.
+The use of this function can lead to problems, because there are 2 API calls in 1 second and it can happen, that the API blocks the 2nd call.
+If you use it only in one card, it should be no problem. If you use more, the risk is higher that the API blocks the request.
 
 
-Complex configuration example
+## Complex configuration example
 ```
 sensor:
   - platform: another_mvg
@@ -131,13 +147,13 @@ sensor:
     doublestationnumber: "3"
 ```
 
-Browser View
+# Browser View
 
 ![Screenshot_33](https://github.com/Nisbo/another_mvg/assets/26260572/c24cd351-2a44-4c5f-9250-5a4bb1f07450)
 
 ![Screenshot_34](https://github.com/Nisbo/another_mvg/assets/26260572/29985729-abfa-4049-8c4b-6b375303ceb1)
 
-Mobile App View
+# Mobile App View
 
 ![20231214_202848000_iOS](https://github.com/Nisbo/another_mvg/assets/26260572/17f56859-fe8c-440f-8168-dc491c42952e)
 
