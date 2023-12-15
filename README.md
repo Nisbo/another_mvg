@@ -2,6 +2,10 @@
 
 Comming soon, another MVG Integration for Home Assistant
 
+**This is an unofficial integration and does not belong to the MVG.**
+
+
+
 
 
 # Code for your configuration.yaml
@@ -158,3 +162,19 @@ sensor:
 ![20231214_202848000_iOS](https://github.com/Nisbo/another_mvg/assets/26260572/17f56859-fe8c-440f-8168-dc491c42952e)
 
 ![20231214_202831000_iOS](https://github.com/Nisbo/another_mvg/assets/26260572/a461b67e-9871-45bd-b98d-27e255d2350c)
+
+
+# Credits
+
+
+# MVG Disclaimer for the use of the data
+... Für private, nicht-kommerzielle Zwecke, wird eine gemäßigte Nutzung ohne unsere ausdrückliche Zustimmung geduldet. Jegliche Form von Data-Mining stellt keine gemäßigte Nutzung dar. Wir behalten uns vor, die Duldung grundsätzlich oder in Einzelfällen zu widerrufen. ...
+
+English: For private, non-commercial purposes, moderate use is tolerated without our express consent. Any form of data mining does not constitute moderate use. We reserve the right to revoke our tolerance in principle or in individual cases.
+
+Full (german) text can be found in the MVG impressum at the bottom
+
+https://www.mvg.de/impressum.html
+
+
+
