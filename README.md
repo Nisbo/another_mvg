@@ -24,7 +24,7 @@ To load the integration, you have to add
 to the ***sensor:*** part in your configuration.
 Dont add the line ***sensor:*** a second time, if it is already there. Just put it below your other platforms.
 
-```globalid: "de:09179:6110"``` ***Required***
+```   globalid: "de:09179:6110"``` ***Required***
 
 Is the station identifier of the stop/station. I decided to use the identifier instead of names, because it is more clear and leads to less problems.
 The only problem you have, is to find the identifier (globalid) by your own.
@@ -34,15 +34,24 @@ If there are more than one entry, you have to find the correct one. I recommend 
 
 ```    name: "Olching"``` ***Optional, but strongly recommended***
 
-It is the name of the table and will be used for the sensorname.
+Is the name of the table and will be used for the sensorname. NOT the name of the station for the API call.
 
 Minimal configuration
 ```
 sensor:
   - platform: another_mvg
-    name: "Olching"
-    globalid: "de:09179:6110"
+    name: "Pasing"
+    globalid: "de:09162:10"
 ```
+
+
+```   hidedestination```
+```   limit```
+```   transporttypes```
+```   doublestationnumber```
+```   globalid2```
+```   onlyline```
+
 
 Complex configuration
 ```
