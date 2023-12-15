@@ -54,11 +54,21 @@ This should be selfexplaining. Add the types of trasportation comma separated.
 BUS and REGIONAL_BUS are different. BUS is MVG and REGIONAL_BUS is MVV. Just add both, to be save.
 As mentioned above, by default only S-Bahn ist enabled. If you want to see more, you have to use this parameter.
 
-### hidedestination
+### Hide some destinations
 
-```   hidedestination```
+```   hidedestination: "Mammendorf;Maisach"```
+
+If you want to see only one direction, you have to insert the EXACT names of the unwanted destinations like shown in the connection display.
+The names should be ```;``` separated. They can be ```,``` sepatared, but this can lead to problems, if a ```,``` is in the name of the destination, as shown in the example below.
+
+```   hidedestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
+
+### Define the number of departures
 
 ```   limit```
+
+
+### doublestationnumber
 
 ```   doublestationnumber```
 
