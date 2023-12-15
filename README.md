@@ -2,9 +2,9 @@
 
 Comming soon, another MVG Integration for Home Assistant
 
-**This is an unofficial integration and does not belong to the MVG.**
+**This is an unofficial integration and does NOT belong to the MVG.**
 
-
+**Only for private use (due to MVG rules, see bottom of this page).**
 
 
 
@@ -168,11 +168,11 @@ sensor:
 
 
 # MVG Disclaimer for the use of the data
-... Für private, nicht-kommerzielle Zwecke, wird eine gemäßigte Nutzung ohne unsere ausdrückliche Zustimmung geduldet. Jegliche Form von Data-Mining stellt keine gemäßigte Nutzung dar. Wir behalten uns vor, die Duldung grundsätzlich oder in Einzelfällen zu widerrufen. ...
+German: ... Für private, nicht-kommerzielle Zwecke, wird eine gemäßigte Nutzung ohne unsere ausdrückliche Zustimmung geduldet. Jegliche Form von Data-Mining stellt keine gemäßigte Nutzung dar. Wir behalten uns vor, die Duldung grundsätzlich oder in Einzelfällen zu widerrufen. ...
 
-English: For private, non-commercial purposes, moderate use is tolerated without our express consent. Any form of data mining does not constitute moderate use. We reserve the right to revoke our tolerance in principle or in individual cases.
+English: ... For private, non-commercial purposes, moderate use is tolerated without our express consent. Any form of data mining does not constitute moderate use. We reserve the right to revoke our tolerance in principle or in individual cases. ...
 
-Full (german) text can be found in the MVG impressum at the bottom
+Full (german) text can be found in the MVG impressum at the bottom.
 
 https://www.mvg.de/impressum.html
 
