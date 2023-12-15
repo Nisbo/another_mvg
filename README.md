@@ -34,20 +34,31 @@ Here you can find the globalid for your station.
 
 Is the name of the table and will be used for the sensorname. It is **NOT** the name of the station for the API call.
 
-### Minimal configuration example
+## Minimal configuration example
 ```
 sensor:
   - platform: another_mvg
     name: "Pasing"
     globalid: "de:09162:10"
 ```
+The code above, will show all S-Bahn connections from Pasing.
+If you want to see also Bus, Regional Bus and Tram or U-Bahn (U-Bahn not in Pasing) you have to configure the ```   transporttypes```.
 
+## Extended Configuration
+
+### Types of public trasportation (Bus, Regional Bus, S-Bahn ...)
+
+```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS"```
+
+This should be selfexplaining. Add the types of trasportation comma separated.
+BUS and REGIONAL_BUS are different. BUS is MVG and REGIONAL_BUS is MVV. Just add both, to be save.
+As mentioned above, by default only S-Bahn ist enabled. If you want to see more, you have to use this parameter.
+
+### hidedestination
 
 ```   hidedestination```
 
 ```   limit```
-
-```   transporttypes```
 
 ```   doublestationnumber```
 
