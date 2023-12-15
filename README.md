@@ -36,7 +36,7 @@ If there are more than one entry, you have to find the correct one. I recommend 
 
 Is the name of the table and will be used for the sensorname. NOT the name of the station for the API call.
 
-Minimal configuration
+Minimal configuration example
 ```
 sensor:
   - platform: another_mvg
@@ -46,14 +46,20 @@ sensor:
 
 
 ```   hidedestination```
+
 ```   limit```
+
 ```   transporttypes```
+
 ```   doublestationnumber```
+
 ```   globalid2```
+
 ```   onlyline```
+If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated ```   onlyline: "S3,S4,S20"```
 
 
-Complex configuration
+Complex configuration example
 ```
 sensor:
   - platform: another_mvg
