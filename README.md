@@ -16,6 +16,16 @@ Mobile App View
 
 
 add to **configuration.yaml**
+
+Minimal configuration
+```
+sensor:
+  - platform: another_mvg
+    name: "Olching"
+    globalid: "de:09179:6110"
+```
+
+Complex configuration
 ```
 sensor:
   - platform: another_mvg
@@ -23,20 +33,45 @@ sensor:
     globalid: "de:09179:6110"
     hidedestination: "Mammendorf,Maisach"
     limit: 15
+    transporttypes: "SBAHN"
+  - platform: another_mvg
+    name: "Olching Busabfahrten"
+    globalid: "de:09179:6110"
+    hidedestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"
+    onlyline: "860,831,843"
+    limit: 15
+    transporttypes: "BUS,REGIONAL_BUS"
+    doublestationnumber: "2"
   - platform: another_mvg
     name: "Eichenau"
     globalid: "de:09179:6180"
     hidedestination: "Geltendorf,Buchenau,Grafrath"
     limit: 15
   - platform: another_mvg
+    name: "Eichenau Busabfahrten"
+    globalid: "de:09179:6181"
+    hidedestination: "Freiham (S) Süd"
+    limit: 15
+    transporttypes: "BUS,REGIONAL_BUS"
+    onlyline: "860"
+  - platform: another_mvg
     name: "Pasing"
     globalid: "de:09162:10"
     onlyline: "S3,S4,S20"
     limit: 20
-    hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof"
+    hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof,Haar,Ebersberg"
   - platform: another_mvg
     name: "Pasing - alle Abfahrten"
     globalid: "de:09162:10"
     limit: 20
     doublestationnumber: "2"
+    transporttypes: "SBAHN,BUS,REGIONAL_BUS"
+  - platform: another_mvg
+    name: "Olching und Eichenau"
+    globalid: "de:09179:6110"
+    globalid2: "de:09179:6180"
+    hidedestination: "Mammendorf,Maisach,Geltendorf,Buchenau,Grafrath"
+    limit: 15
+    transporttypes: "SBAHN"
+    doublestationnumber: "3"
 ```
