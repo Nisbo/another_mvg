@@ -50,8 +50,8 @@ If you want to see also Bus, Regional Bus and Tram or U-Bahn (U-Bahn not in Pasi
 
 ```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS"```
 
-This should be selfexplaining. Add the types of trasportation comma separated.
-BUS and REGIONAL_BUS are different. BUS is MVG and REGIONAL_BUS is MVV. Just add both, to be save.
+This should be selfexplaining. Add the types of transportation comma separated and without spaces in between.
+BUS and REGIONAL_BUS are different. BUS is MVG and REGIONAL_BUS is MVV. But it looks like, in the API they mixed it for some lines. Just add both, to be save.
 As mentioned above, by default only S-Bahn ist enabled. If you want to see more, you have to use this parameter.
 
 ### Show only some lines
