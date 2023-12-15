@@ -165,7 +165,13 @@ sensor:
 
 
 # Credits
+To all the guys in the Home Assistant forum for the help. 
 
+To the MVG for the API. 
+
+To other guys on github, were I was able to learn more about python code and Home Assistant. 
+
+And to my best friend Google. ^^
 
 # MVG Disclaimer for the use of the data
 German: ... Für private, nicht-kommerzielle Zwecke, wird eine gemäßigte Nutzung ohne unsere ausdrückliche Zustimmung geduldet. Jegliche Form von Data-Mining stellt keine gemäßigte Nutzung dar. Wir behalten uns vor, die Duldung grundsätzlich oder in Einzelfällen zu widerrufen. ...
