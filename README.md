@@ -1,10 +1,15 @@
 # another_mvg
 
-Comming soon, another MVG Integration for Home Assistant
+Comming soon, another MVG/MVV Integration for Home Assistant.
 
-**This is an unofficial integration and does NOT belong to the MVG.**
+This is my 1st integration for Home Assistant and also my 1st Python addon, so please be kind to me if something is not 100% perfect. ^^
 
-**Only for private use (due to MVG rules, see bottom of this page).**
+> [!IMPORTANT]
+> **This is an inofficial integration and does NOT belong to the MVG / MVV.**
+> 
+> **It is only for private use (due to MVG rules, see bottom of this page).**
+
+
 
 # Installation
 * Copy the ```another_mvg``` folder from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder.
