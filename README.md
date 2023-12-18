@@ -36,7 +36,7 @@ Here you can find the globalid for your station.
 ### Name of the table
 ```    name: "Pasing"``` **Optional, but strongly recommended**
 
-Is the name of the table and will be used for the sensorname. It is **NOT** the name of the station for the API call.
+Is the name of the table inside the card and will be used for the sensorname. It is **NOT** the name of the station for the API call.
 
 ## Minimal configuration example
 ```
@@ -45,8 +45,8 @@ sensor:
     name: "Pasing"
     globalid: "de:09162:10"
 ```
-The code above, will show all S-Bahn connections from Pasing.
-If you want to see also Bus, Regional Bus and Tram or U-Bahn (U-Bahn not in Pasing) you have to configure the ```   transporttypes```.
+The code above, will show all connections from Pasing. (Pasing has the globalid de:09162:10)
+If you want to see only Bus, Regional Bus, Tram and/or U-Bahn (U-Bahn of course not in Pasing) you have to configure the ```   transporttypes```.
 
 ## Extended Configuration
 
