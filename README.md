@@ -69,8 +69,8 @@ If you want to see only some lines, like S3, S4 and S20, you can configure it co
 
 ```   hidedestination: "Mammendorf;Maisach"```
 
-If you want to see only one direction, you have to insert the EXACT names of the unwanted destinations like shown in the connection display.
-The names should be ```;``` separated. They can be ```,``` sepatared, but this can lead to problems, if a ```,``` is in the name of the destination, as shown in the example below.
+If you want to see only some directions / destinations, you have to insert the EXACT names of the **unwanted** destinations like they are shown in the connection display. (card)
+The names should be ```;``` separated. They can be ```,``` or space sepatared, but this can lead to problems if a ```,``` or a space is in the name of the destination.
 
 ```   hidedestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
 
@@ -88,8 +88,8 @@ If you use "filters" like **hidedestination**, witch filter out 40 entries, you 
 ```   doublestationnumber: "2"```
 
 > [!IMPORTANT]
-> If you want to create 2 or more cards for the same globalid, you have to use this parameter.
-It can be a number or a letter. Also more than numbers or letters are possible. No special chars are allowed and also no space.
+> If you want to create 2 or more cards for the same globalid, you have to use this parameter. (e.g. one for BUS, one for SBAHN, one for TRAM)
+It can be a number or a letter. Also more numbers or letters are possible. No special chars are allowed and also no space.
 
 ### Merge 2 different stations in one display
 ```   globalid2: "de:09179:6180"```
