@@ -1,1 +1,10 @@
-
+{
+  "domain": "another_mvg",
+  "name": "Another MVG",
+  "codeowners": ["@Nisbo"],
+  "dependencies": [],
+  "documentation": "https://github.com/Nisbo/another_mvg",
+  "iot_class": "local_polling",
+  "requirements": [],
+  "version": "1.0.0"
+}
