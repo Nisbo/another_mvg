@@ -14,6 +14,10 @@ Comming soon, another MVG Integration for Home Assistant
 * configure the configuration.yaml (see guide below)
 * check configuration
 * restart HA again
+* create a manual card with this content
+*
+  ```type: custom:content-card-another-mvg
+entity: sensor.yourSensor```
 
 # Code for your configuration.yaml
 
