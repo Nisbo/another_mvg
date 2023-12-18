@@ -10,6 +10,10 @@ This is my 1st integration for Home Assistant and also my 1st Python addon, so p
 > **It is only for private use (due to MVG rules, see bottom of this page).**
 
 
+![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/43d7621f-3dc9-4c3e-be57-cecf41bb517a)
+
+
+
 
 # Installation
 * Copy the ```another_mvg``` folder from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder.
@@ -180,6 +184,9 @@ sensor:
 ![Screenshot_33](https://github.com/Nisbo/another_mvg/assets/26260572/c24cd351-2a44-4c5f-9250-5a4bb1f07450)
 
 ![Screenshot_34](https://github.com/Nisbo/another_mvg/assets/26260572/29985729-abfa-4049-8c4b-6b375303ceb1)
+
+![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/9bad6d00-67d2-4fad-9444-29b2dafcf646)
+
 
 # Mobile App View
 
