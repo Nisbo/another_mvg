@@ -9,11 +9,9 @@ This is my 1st integration for Home Assistant and also my 1st Python addon, so p
 > 
 > **It is only for private use (due to MVG rules, see bottom of this page).**
 
-
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/43d7621f-3dc9-4c3e-be57-cecf41bb517a)
 
-
-
+More screenshots at the bottom of this document.
 
 # Installation
 * Copy the ```another_mvg``` folder from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder.
@@ -60,7 +58,6 @@ https://www.mvg.de/api/fib/v2/location?query=Pasing
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/ec7bfb9b-48a0-45bc-a50d-16d960433caa)
 
-More screenshots at the bottom of this document.
 
 ### Name of the display
 ```    name: "Pasing"``` **Required**
