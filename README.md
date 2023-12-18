@@ -20,6 +20,7 @@ Comming soon, another MVG Integration for Home Assistant
 type: custom:content-card-another-mvg
 entity: sensor.yourSensor
 ```
+* replace ```sensor.yourSensor``` with the name of your sensor. Should be something with **sensor.name** where name, the name from the parameter in the configuration.yaml is.
 * Enjoy
 
 
