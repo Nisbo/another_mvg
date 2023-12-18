@@ -9,7 +9,8 @@ Comming soon, another MVG Integration for Home Assistant
 # Installation
 * Copy the ```another_mvg``` folder from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder.
 * Copy the content (1 file) from the ```config/www``` folder to your ```config/www``` folder.
-* Add the resource ```local/content-card-another-mvg.js```
+* Under Settings --> Dashboards --> 3 dots on the top right corner --> resourses
+* Add the resource ```/local/content-card-another-mvg.js``` as **JavaScripts-Modul** 
 * Restart HA
 * Configure the configuration.yaml (see guide below)
 * Check configuration.yaml with the check function under Dev-Tools
