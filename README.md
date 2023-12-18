@@ -33,10 +33,10 @@ Here you can find the globalid for your station.
 
 
 
-### Name of the table
+### Name of the display
 ```    name: "Pasing"``` **Required**
 
-Is the name of the table inside the card and will be used for the sensorname. It is **NOT** the name of the station for the API call.
+Is the name of the display inside the card and will be used for the sensorname. It is **NOT** the name of the station for the API call.
 
 ## Minimal configuration example
 ```
