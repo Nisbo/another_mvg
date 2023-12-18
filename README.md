@@ -6,7 +6,14 @@ Comming soon, another MVG Integration for Home Assistant
 
 **Only for private use (due to MVG rules, see bottom of this page).**
 
-
+# Installation
+copy the ```another_mvg``` folder from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder
+copy the content (1 file) from the ```config/www``` folder to your ```config/www``` folder
+add the resource ```local/content-card-another-mvg.js```
+restart HA
+configure the configuration.yaml (see guide below)
+check configuration
+restart HA again
 
 # Code for your configuration.yaml
 
