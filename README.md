@@ -7,17 +7,20 @@ Comming soon, another MVG Integration for Home Assistant
 **Only for private use (due to MVG rules, see bottom of this page).**
 
 # Installation
-* Copy the ```another_mvg``` folder from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder
-* copy the content (1 file) from the ```config/www``` folder to your ```config/www``` folder
-* add the resource ```local/content-card-another-mvg.js```
-* restart HA
-* configure the configuration.yaml (see guide below)
-* check configuration
-* restart HA again
-* create a manual card with this content
-*
-  ```type: custom:content-card-another-mvg
-entity: sensor.yourSensor```
+* Copy the ```another_mvg``` folder from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder.
+* Copy the content (1 file) from the ```config/www``` folder to your ```config/www``` folder.
+* Add the resource ```local/content-card-another-mvg.js```
+* Restart HA
+* Configure the configuration.yaml (see guide below)
+* Check configuration.yaml with the check function under Dev-Tools
+* Restart HA again
+* create a manual card with this content:
+```
+type: custom:content-card-another-mvg
+entity: sensor.yourSensor
+```
+* Enjoy
+
 
 # Code for your configuration.yaml
 
