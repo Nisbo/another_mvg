@@ -81,7 +81,7 @@ If you want to see only Bus, Regional Bus, Tram and/or U-Bahn (U-Bahn of course 
 ```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS"```
 
 This should be selfexplaining. Add the types of transportation **comma separated and without spaces** in between.
-BUS and REGIONAL_BUS are different. BUS is MVG and REGIONAL_BUS is MVV. But it looks like, in the API they mixed it for some lines. Just add both, to be save.
+**BUS** and **REGIONAL_BUS** <ins>are different</ins>. **BUS** is **MVG** and **REGIONAL_BUS** is **MVV**. But it looks like, in the API they mixed it for some lines. Just <ins>add both</ins>, to be save.
 As mentioned above, by default all transportations are enabled. If you want to see only some, you have to use this parameter.
 
 ### Show only some lines
