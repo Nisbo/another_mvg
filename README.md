@@ -15,7 +15,7 @@ More screenshots at the bottom of this document.
 
 # Installation
 * Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/config/custom_components) folder from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder.
-* Copy the content (1 file) from the ```config/www``` folder to your ```config/www``` folder.
+* For the lovelace card, copy the content (1 file) from the ```config/www``` folder to your ```config/www``` folder.
 * Under Settings --> Dashboards --> 3 dots on the top right corner --> resourses
 * Add the resource ```/local/content-card-another-mvg.js``` as **JavaScripts-Modul** 
 * Restart HA
