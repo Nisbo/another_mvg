@@ -13,7 +13,7 @@ This is my 1st integration for Home Assistant and also my 1st Python addon, so p
 > [!IMPORTANT]
 > **This is an inofficial integration and does NOT belong to the MVG / MVV.**
 > 
-> **For private use only (due to MVG rules, see bottom of this page).**
+> **The use of the data (API) is for private use only (due to MVG rules, see bottom of this page).**
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68)
 
