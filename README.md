@@ -7,14 +7,13 @@ Comming soon, another MVG/MVV Integration for Home Assistant.
 
 Usually, I am lazy and use the add-ons and integrations that already exist. Home Assistant has plenty of them. While there are already some MVG integrations, some of them don't work or no longer function, and they may lack the features I desire. Since I had already programmed something similar in PHP for IP-Symcon, I have now implemented it in Home Assistant as well.
 
-You can see what the integration can display in the screenshots below.
 
 This is my 1st integration for Home Assistant and also my 1st Python addon, so please be kind to me if something is not 100% perfect. ^^
 
 > [!IMPORTANT]
 > **This is an inofficial integration and does NOT belong to the MVG / MVV.**
 > 
-> **It is only for private use (due to MVG rules, see bottom of this page).**
+> **For private use only (due to MVG rules, see bottom of this page).**
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68)
 
