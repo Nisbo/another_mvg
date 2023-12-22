@@ -218,21 +218,33 @@ Pasing S3, S4, S20 western direction
     hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof,Haar,Ebersberg, München Hbf, Höllriegelskreuth"
 ```
 
+Bus / Regional Bus Olching - some directions and lines
 
-
-
-Bus Olching
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/0bfc9858-54ea-4b1a-8cd0-a031df044b1d)
 
+```
+  - platform: another_mvg
+    name: "Olching Busabfahrten"
+    globalid: "de:09179:6110"
+    hidedestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"
+    onlyline: "860,831,843"
+    limit: 15
+    transporttypes: "BUS,REGIONAL_BUS"
+```
+
+
 U-Bahn
+
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/b725a2d4-938e-479d-89d9-0bdbb714360e)
 
 
 
 Eichenau S-Bahn
+
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/0cd07461-b429-417e-907a-4316656dea59)
 
 Eichenau / Olching kombiniert
+
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c715acb4-1102-48c7-8763-77c8357a18ed)
 
 
