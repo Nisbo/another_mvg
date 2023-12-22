@@ -192,6 +192,33 @@ sensor:
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/9bad6d00-67d2-4fad-9444-29b2dafcf646)
 
 
+Pasing all departures
+
+![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68)
+
+```
+  - platform: another_mvg
+    name: "Pasing - alle Abfahrten"
+    globalid: "de:09162:10"
+    limit: 20
+```
+
+
+Pasing S3, S4, S20 western direction
+
+![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/6336adc3-8084-40bf-b4bb-2747fa13e6c1)
+
+```
+  - platform: another_mvg
+    name: "Pasing"
+    globalid: "de:09162:10"
+    onlyline: "S3,S4,S20"
+    limit: 20
+    transporttypes: "SBAHN"
+    hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof,Haar,Ebersberg, München Hbf, Höllriegelskreuth"
+```
+
+
 
 
 Bus Olching
@@ -200,11 +227,7 @@ Bus Olching
 U-Bahn
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/b725a2d4-938e-479d-89d9-0bdbb714360e)
 
-Pasing alles
-![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68)
 
-Pasing Olching / Eichenau
-![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/6336adc3-8084-40bf-b4bb-2747fa13e6c1)
 
 Eichenau S-Bahn
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/0cd07461-b429-417e-907a-4316656dea59)
