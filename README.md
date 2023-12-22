@@ -112,7 +112,8 @@ If you use "filters" like **hidedestination**, witch filter out 40 entries, you 
 ### Hide the name of the card (the row above the yellow row)
 
 ```   hidename: True```
-If you dont want to see the name of the card (the name of the station you configured in configuration.yaml with the **name** parameter) you have to set this parameter to ```True```.
+
+If you don't want to see the name of the card (the name of the station you configured in configuration.yaml with the **name** parameter) you have to set this parameter to ```True```.
 
 ### doublestationnumber
 
