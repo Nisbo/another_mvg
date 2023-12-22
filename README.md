@@ -283,6 +283,10 @@ sensor:
 | Mobile App View  | Mobile App View |
 | ------------- | ------------- |
 | ![20231214_202848000_iOS](https://github.com/Nisbo/another_mvg/assets/26260572/17f56859-fe8c-440f-8168-dc491c42952e) | ![20231214_202831000_iOS](https://github.com/Nisbo/another_mvg/assets/26260572/a461b67e-9871-45bd-b98d-27e255d2350c) |
+| ![IMG_5431](https://github.com/Nisbo/another_mvg/assets/26260572/6c7b5d15-8d45-44f6-bc47-ff6eb4e3fde2) | ![IMG_5432](https://github.com/Nisbo/another_mvg/assets/26260572/ab42f3a4-2432-43c1-939a-2a237e39c36f) |
+| ![IMG_5433](https://github.com/Nisbo/another_mvg/assets/26260572/fb3b9fd0-7753-43c8-a8e8-902e53114623) | ![IMG_5434](https://github.com/Nisbo/another_mvg/assets/26260572/0ae7381b-a0d0-4995-b241-7ca9c7b3557c) |
+
+
 
 
 # Credits
