@@ -303,6 +303,29 @@ To other guys on github, were I was able to learn more about python code and Hom
 
 And to my best friend Google. ^^
 
+# Disclaimer / Haftungsausschluss
+
+### Deutsch
+
+Die Nutzung der Home Assistant Integration **another_mvg** erfolgt auf eigene Gefahr. Der Entwickler übernimmt keine Verantwortung oder Haftung für etwaige Schäden, die durch die Verwendung dieser Integration entstehen können. Dieser Haftungsausschluss erstreckt sich auf direkte oder indirekte Schäden, finanzielle Verluste, Datenverluste, Beeinträchtigung des Systembetriebs oder andere potenzielle Unannehmlichkeiten.
+
+Die Integration wird "wie sie ist" und ohne jegliche Gewährleistung bereitgestellt. Der Entwickler übernimmt keine Garantie für die Richtigkeit, Vollständigkeit oder Zuverlässigkeit der Funktionen dieser Integration. Es wird empfohlen, regelmäßige Sicherungen durchzuführen und alle notwendigen Sicherheitsvorkehrungen zu treffen, um unerwünschte Folgen zu vermeiden.
+
+Die Benutzer sind angehalten, die Anweisungen und Empfehlungen in der Dokumentation der Integration zu befolgen. Jegliche Modifikationen oder Anpassungen an der Integration erfolgen auf eigenes Risiko und können die Funktionalität beeinträchtigen.
+
+Durch die Verwendung dieser Home Assistant Integration erklärt sich der Benutzer mit den Bedingungen dieses Haftungsausschlusses einverstanden. Es wird empfohlen, regelmäßig auf Aktualisierungen oder Änderungen der Integration zu achten und diese entsprechend zu berücksichtigen.
+
+### English
+
+The use of the Home Assistant Integration **another_mvg** is at your own risk. The developer assumes no responsibility or liability for any damages that may arise from the use of this integration. This disclaimer extends to direct or indirect damages, financial losses, data loss, impairment of system operation, or other potential inconveniences.
+
+The integration is provided "as-is" and without any warranty. The developer makes no guarantees regarding the accuracy, completeness, or reliability of the functions of this integration. It is recommended to perform regular backups and take all necessary security precautions to avoid undesirable consequences.
+
+Users are encouraged to follow the instructions and recommendations in the documentation of the integration. Any modifications or adjustments to the integration are done at your own risk and may affect its functionality.
+
+By using this Home Assistant Integration, the user agrees to the terms of this disclaimer. It is advised to regularly check for updates or changes to the integration and take them into consideration accordingly.
+
+
 # MVG Disclaimer for the use of the data
 German: ... Für private, nicht-kommerzielle Zwecke, wird eine gemäßigte Nutzung ohne unsere ausdrückliche Zustimmung geduldet. Jegliche Form von Data-Mining stellt keine gemäßigte Nutzung dar. Wir behalten uns vor, die Duldung grundsätzlich oder in Einzelfällen zu widerrufen. ...
 
