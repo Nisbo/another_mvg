@@ -185,14 +185,7 @@ sensor:
 
 # Browser View
 
-![Screenshot_33](https://github.com/Nisbo/another_mvg/assets/26260572/c24cd351-2a44-4c5f-9250-5a4bb1f07450)
-
-![Screenshot_34](https://github.com/Nisbo/another_mvg/assets/26260572/29985729-abfa-4049-8c4b-6b375303ceb1)
-
-![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/9bad6d00-67d2-4fad-9444-29b2dafcf646)
-
-
-Pasing all departures
+### Pasing all departures
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68)
 
@@ -204,7 +197,7 @@ Pasing all departures
 ```
 
 
-Pasing S3, S4, S20 western direction
+### Pasing S3, S4, S20 western direction
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/6336adc3-8084-40bf-b4bb-2747fa13e6c1)
 
@@ -218,7 +211,7 @@ Pasing S3, S4, S20 western direction
     hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof,Haar,Ebersberg, München Hbf, Höllriegelskreuth"
 ```
 
-Bus / Regional Bus Olching - some directions and lines
+### Bus / Regional Bus Olching - some directions and lines
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/0bfc9858-54ea-4b1a-8cd0-a031df044b1d)
 
@@ -233,21 +226,45 @@ Bus / Regional Bus Olching - some directions and lines
 ```
 
 
-U-Bahn
+### U-Bahn
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/b725a2d4-938e-479d-89d9-0bdbb714360e)
 
+```
+  - platform: another_mvg
+    name: "UBahn Test"
+    globalid: "de:09162:360"
+    transporttypes: "UBAHN"
+    limit: 15
+    hidename: True
+```
 
-
-Eichenau S-Bahn
+### Eichenau S-Bahn
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/0cd07461-b429-417e-907a-4316656dea59)
 
-Eichenau / Olching kombiniert
+```
+  - platform: another_mvg
+    name: "Eichenau"
+    globalid: "de:09179:6180"
+    hidedestination: "Geltendorf,Buchenau,Grafrath"
+    limit: 15
+    transporttypes: "SBAHN"
+```
+
+### Eichenau / Olching S-Bahn station combined in one card
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c715acb4-1102-48c7-8763-77c8357a18ed)
 
-
+```
+  - platform: another_mvg
+    name: "Olching und Eichenau"
+    globalid: "de:09179:6110"
+    globalid2: "de:09179:6180"
+    hidedestination: "Mammendorf,Maisach,Geltendorf,Buchenau,Grafrath"
+    limit: 15
+    transporttypes: "SBAHN"
+```
 
 # Mobile App View
 
