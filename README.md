@@ -154,6 +154,7 @@ sensor:
     globalid: "de:09179:6180"
     hidedestination: "Geltendorf,Buchenau,Grafrath"
     limit: 15
+    transporttypes: "SBAHN"
   - platform: another_mvg
     name: "Eichenau Busabfahrten"
     globalid: "de:09179:6181"
@@ -166,13 +167,14 @@ sensor:
     globalid: "de:09162:10"
     onlyline: "S3,S4,S20"
     limit: 20
-    hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof,Haar,Ebersberg"
+    transporttypes: "SBAHN"
+    hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof,Haar,Ebersberg, München Hbf, Höllriegelskreuth"
   - platform: another_mvg
     name: "Pasing - alle Abfahrten"
     globalid: "de:09162:10"
     limit: 20
     doublestationnumber: "2"
-    transporttypes: "SBAHN,BUS,REGIONAL_BUS"
+    transporttypes: "SBAHN,BUS,REGIONAL_BUS,TRAM"
   - platform: another_mvg
     name: "Olching und Eichenau"
     globalid: "de:09179:6110"
@@ -181,9 +183,16 @@ sensor:
     limit: 15
     transporttypes: "SBAHN"
     doublestationnumber: "3"
+  - platform: another_mvg
+    name: "UBahn Test"
+    globalid: "de:09162:360"
+    transporttypes: "UBAHN"
+    limit: 15
+    hidename: True
 ```
 
 # Browser View
+
 
 ### Pasing all departures
 
@@ -239,6 +248,7 @@ sensor:
     hidename: True
 ```
 
+
 ### Eichenau S-Bahn
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/0cd07461-b429-417e-907a-4316656dea59)
@@ -251,6 +261,7 @@ sensor:
     limit: 15
     transporttypes: "SBAHN"
 ```
+
 
 ### Eichenau / Olching S-Bahn station combined in one card
 
@@ -265,6 +276,7 @@ sensor:
     limit: 15
     transporttypes: "SBAHN"
 ```
+
 
 # Mobile App View
 
