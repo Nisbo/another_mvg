@@ -1,6 +1,6 @@
 # another_mvg
 
-Comming soon, another MVG/MVV Integration for Home Assistant.
+
 
 
 **Why another MVG/MVV integration for Home Assistant?**
