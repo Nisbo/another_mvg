@@ -10,3 +10,4 @@ CONF_LIMIT               = "limit"               # optional --> max 80
 CONF_HIDEDESTINATION     = "hidedestination"     # optional
 CONF_DOUBLESTATIONNUMBER = "doublestationnumber" # optional --> any String, if you want the globalid more than 1 times
 CONF_TRANSPORTTYPES      = "transporttypes"      # SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS (SCHIFF - There is a parameter in the MVG API, but dont know if it will return data, at the moment not supported)
+CONF_HIDENAME            = "hidename"            # Hide the name of the card
