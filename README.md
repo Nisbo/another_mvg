@@ -109,6 +109,11 @@ Please add **_only a number_ and _no quotes_**.
 Die API will pull a maximum of 80 departures. 
 If you use "filters" like **hidedestination**, witch filter out 40 entries, you will only see the remaining 40 as maximum.
 
+### Hide the name of the card (the row above the yellow row)
+
+```   hidename: True```
+If you dont want to see the name of the card (the name of the station you configured in configuration.yaml with the **name** parameter) you have to set this parameter to ```True```.
+
 ### doublestationnumber
 
 ```   doublestationnumber: "2"```
