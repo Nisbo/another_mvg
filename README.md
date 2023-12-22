@@ -5,7 +5,7 @@ Comming soon, another MVG/MVV Integration for Home Assistant.
 
 **Why another MVG/MVV integration for Home Assistant?**
 
-Usually, I am lazy and use the add-ons and integrations that already exist. Home Assistant has plenty of them. While there are add-ons for MVG integration, some of them don't work or no longer function, and they may lack the features I desire. Since I had already programmed something similar in PHP for IP-Symcon, I have now implemented it in Home Assistant as well.
+Usually, I am lazy and use the add-ons and integrations that already exist. Home Assistant has plenty of them. While there are already some MVG integrations, some of them don't work or no longer function, and they may lack the features I desire. Since I had already programmed something similar in PHP for IP-Symcon, I have now implemented it in Home Assistant as well.
 
 You can see what the integration can display in the screenshots below.
 
