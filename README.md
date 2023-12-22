@@ -9,8 +9,6 @@ This is my 1st integration for Home Assistant and also my 1st Python addon, so p
 > 
 > **It is only for private use (due to MVG rules, see bottom of this page).**
 
-![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/43d7621f-3dc9-4c3e-be57-cecf41bb517a)
-
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68)
 
 More screenshots at the bottom of this document.
