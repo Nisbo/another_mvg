@@ -31,7 +31,9 @@ from .const import (
 )
 
 # integration imports start
+import socket
 import urllib.request, json
+import urllib.error
 import pytz
 from datetime import datetime
 from datetime import date
@@ -130,33 +132,54 @@ class ConnectionInfo(SensorEntity):
 
         # 1st API call for globalid1
         try:
-           url  = "https://www.mvg.de/api/fib/v2/departure?globalId=" + self._globalid + "&limit=80&offsetInMinutes=0&transportTypes=" + self._transporttypes
-           req  = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-           resp = urllib.request.urlopen(req)
-           responsecode1 = resp.getcode()
-           html = resp.read()
+           url = "https://www.mvg.de/api/fib/v2/departure?globalId=" + self._globalid + "&limit=80&offsetInMinutes=0&transportTypes=" + self._transporttypes
+           headers1 = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+           req = urllib.request.Request(url, headers=headers1)
+           
+           # Setze das Timeout auf 10 Sekunden
+           with urllib.request.urlopen(req, timeout=10) as resp:
+               responsecode1 = resp.getcode()
+               html = resp.read()
+        
+        except urllib.error.URLError as e:
+           if isinstance(e.reason, socket.timeout):
+               _LOGGER.error("Timeout beim Verbinden mit der URL für globalid1 - " + self._name)
+               return "Timeout beim Verbinden mit der URL für globalid1 - " + self._name
+           else:
+               _LOGGER.error("Connection Problem globalid1 - " + self._name + " - " + str(e))
+               return "Connection Problem globalid1 - " + self._name
         except Exception as e:
-           _LOGGER.error("Connection Problem globalid1 - " + str(e))
-           return "Connection Problem globalid1"
-           #print(f'Error:  {url} : {str(e)}')
-
+           _LOGGER.error("Anderes Problem bei der Verbindung mit globalid1 - " + self._name + " - " + str(e))
+           return "Anderes Problem bei der Verbindung mit globalid1 - " + self._name
+        
+        
         # 2nd API call for globalid2
         if self._globalid2 != "" :
            # do the 2nd call
            # wait 1 second because of 509 error
            time.sleep(1)
-
+           
            try:
-              url2  = "https://www.mvg.de/api/fib/v2/departure?globalId=" + self._globalid2 + "&limit=80&offsetInMinutes=0&transportTypes=" + self._transporttypes
-              req2  = urllib.request.Request(url2, headers={'User-Agent': 'Mozilla/5.0'})
-              resp2 = urllib.request.urlopen(req2)
-              responsecode2 = resp2.getcode()
-              html2 = resp2.read()
+              url2 = "https://www.mvg.de/api/fib/v2/departure?globalId=" + self._globalid2 + "&limit=80&offsetInMinutes=0&transportTypes=" + self._transporttypes
+              headers2 = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+              req2 = urllib.request.Request(url2, headers=headers2)
+              
+              # Setze das Timeout auf 10 Sekunden
+              with urllib.request.urlopen(req2, timeout=10) as resp2:
+                  responsecode2 = resp2.getcode()
+                  html2 = resp2.read()
+           
+           except urllib.error.URLError as e:
+              if isinstance(e.reason, socket.timeout):
+                  _LOGGER.error("Timeout beim Verbinden mit der URL für globalid2 - " + self._name)
+                  return "Timeout beim Verbinden mit der URL für globalid2 - " + self._name
+              else:                   
+                  _LOGGER.error("Connection Problem globalid2 - " + self._name + " - " + str(e))
+                  return "Connection Problem globalid2 - " + self._name
            except Exception as e:
-              _LOGGER.error("Connection Problem globalid2 - " + str(e))
-              return "Connection Problem globalid2"
-              #print(f'Error:  {url} : {str(e)}')
-
+              _LOGGER.error("Anderes Problem bei der Verbindung mit globalid2 - " + self._name + " - " + str(e))
+              return "Anderes Problem bei der Verbindung mit globalid2 - " + self._name
+           
            data  = json.loads(html)
            data2 = json.loads(html2)
 
@@ -213,6 +236,10 @@ class ConnectionInfo(SensorEntity):
                 
           if user['transportType'] == "BUS"          : user['platform'] = 'Bus'
           if user['transportType'] == "REGIONAL_BUS" : user['platform'] = 'Bus'
+          
+          if 'platform' not in user:
+             # Der Schlüssel 'platform' existiert nicht im Dictionary user
+             user['platform'] = '---'
           
           if not user['cancelled'] : 
             track = "" + str(user['platform'])
