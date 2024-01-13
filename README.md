@@ -294,6 +294,10 @@ sensor:
 | ![IMG_5433](https://github.com/Nisbo/another_mvg/assets/26260572/fb3b9fd0-7753-43c8-a8e8-902e53114623) | ![IMG_5434](https://github.com/Nisbo/another_mvg/assets/26260572/0ae7381b-a0d0-4995-b241-7ca9c7b3557c) |
 
 
+# Change log
+13.01.2024 - Version 1.1.0
+- better error handling for connection problems
+
 
 # Credits
 To all the guys in the Home Assistant forum for the help. 
