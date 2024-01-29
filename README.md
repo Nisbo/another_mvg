@@ -139,6 +139,15 @@ Keep in mind, that you have to insert all transportations in ``` transporttypes`
 The use of this function can lead to problems, because there are 2 API calls in 1 second and it can happen, that the API blocks the 2nd call.
 If you use it only in one card, it should be no problem. If you use more, the risk is higher that the API blocks the request.
 
+### Time Zone options ###
+Default is "Europe/Berlin".
+If your system is running with UTC settings, you can use UTC in ```timezone_from```. 
+If you want to display a different timezone, you can define it in ```timezone_to```
+```
+    timezone_from : "UTC"
+    timezone_to   : "Europe/Berlin"
+``` 
+
 
 ## Complex configuration example
 ```
@@ -177,6 +186,8 @@ sensor:
     limit: 20
     transporttypes: "SBAHN"
     hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof,Haar,Ebersberg, München Hbf, Höllriegelskreuth"
+    timezone_from : "Europe/Berlin"
+    timezone_to   : "Europe/Berlin"
   - platform: another_mvg
     name: "Pasing - alle Abfahrten"
     globalid: "de:09162:10"
@@ -298,6 +309,13 @@ sensor:
 13.01.2024 - Version 1.1.0
 - better error handling for connection problems
 
+29.01.2024 - Version 1.2.0
+- added timezone options, default is "Europe/Berlin" if your system is running with UTC settings, you can use UTC in ```timezone_from```. If you want to display a different timezone, you can define it in ```timezone_to```
+- ```
+    timezone_from : "UTC"
+    timezone_to   : "Europe/Berlin"
+  ``` 
+- minor fixes
 
 # Credits
 To all the guys in the Home Assistant forum for the help. 
