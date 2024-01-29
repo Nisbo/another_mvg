@@ -28,6 +28,8 @@ from .const import (
     CONF_DOUBLESTATIONNUMBER,
     CONF_TRANSPORTTYPES,
     CONF_HIDENAME,
+    CONF_TIMEZONE_FROM,
+    CONF_TIMEZONE_TO,
 )
 
 # integration imports start
@@ -45,7 +47,8 @@ DEFAULT_LIMIT = 6
 DEFAULT_CONF_DOUBLESTATIONNUMBER = ""
 DEFAULT_CONF_TRANSPORTTYPES = "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS"
 DEFAULT_CONF_GLOBALID2 = ""
-DEFAULT_TIMEZONE = "Europe/Berlin"
+DEFAULT_TIMEZONE_FROM = "Europe/Berlin" # or UTC
+DEFAULT_TIMEZONE_TO   = "Europe/Berlin"
 DEFAULT_HIDENAME = False
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,6 +64,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES): cv.string,
         vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): cv.string,
         vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME): cv.boolean,
+        vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): cv.string,
+        vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): cv.string,
     }
 )
 
@@ -80,11 +85,13 @@ async def async_setup_platform(
     doublestationnumber = config[CONF_DOUBLESTATIONNUMBER]
     transporttypes      = config[CONF_TRANSPORTTYPES]
     hidename            = config[CONF_HIDENAME]
-    add_entities([ConnectionInfo(hass, globalid, globalid2, name, onlyline, limit, hidedestination, doublestationnumber, transporttypes, hidename)], True)
+    timezoneFrom        = config[CONF_TIMEZONE_FROM]
+    timezoneTo          = config[CONF_TIMEZONE_TO]
+    add_entities([ConnectionInfo(hass, globalid, globalid2, name, onlyline, limit, hidedestination, doublestationnumber, transporttypes, hidename, timezoneFrom, timezoneTo)], True)
 
 class ConnectionInfo(SensorEntity):
 
-    def __init__(self, hass, globalid, globalid2, name, onlyline, limit, hidedestination, doublestationnumber, transporttypes, hidename) -> None:
+    def __init__(self, hass, globalid, globalid2, name, onlyline, limit, hidedestination, doublestationnumber, transporttypes, hidename, timezoneFrom, timezoneTo) -> None:
         self._onlyline               = onlyline
         self._limit                  = limit
         self._hidedestination        = hidedestination
@@ -96,6 +103,8 @@ class ConnectionInfo(SensorEntity):
         self._doublestationnumber    = doublestationnumber
         self._transporttypes         = transporttypes
         self._hidename               = hidename
+        self._timezoneFrom           = timezoneFrom
+        self._timezoneTo             = timezoneTo
         self._hass.custom_attributes = {}
 
     @property
@@ -129,6 +138,10 @@ class ConnectionInfo(SensorEntity):
 
     def departure(self) -> str:
         limit = self._limit
+
+        # check if self._hass.custom_attributes is set to avoid undefined messages if the API is down
+        if not self._hass.custom_attributes:
+           self._hass.custom_attributes = "Try to connect to the MVG API. If this message remains longer, maybe mvg.de is down."
 
         # 1st API call for globalid1
         try:
@@ -219,10 +232,10 @@ class ConnectionInfo(SensorEntity):
             if user['destination'].lower() in self._hidedestination.lower(): continue
 
           timestampPlannedDeparture = user['plannedDepartureTime'] / 1000
-          dt_object = self.convert_datetime_timezone(datetime.fromtimestamp(timestampPlannedDeparture), "UTC", DEFAULT_TIMEZONE)
+          dt_object = self.convert_datetime_timezone(datetime.fromtimestamp(timestampPlannedDeparture), self._timezoneFrom, self._timezoneTo)
           
           timestampRealDeparture = user['realtimeDepartureTime'] / 1000
-          dt_objectReal = self.convert_datetime_timezone(datetime.fromtimestamp(timestampRealDeparture), "UTC", DEFAULT_TIMEZONE)
+          dt_objectReal = self.convert_datetime_timezone(datetime.fromtimestamp(timestampRealDeparture), self._timezoneFrom, self._timezoneTo)
 
           t = dt_object.strftime("%H:%M")
           d = dt_object.strftime("%d.%m.%Y")
