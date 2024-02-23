@@ -10,51 +10,59 @@ class ContentAnotherMVG extends HTMLElement {
       const style   = document.createElement('style');
 
       style.textContent = `
-         table {
-           background-color: #000080;
-           color: #FFFFFF;
-           width: 100%;
-           border-spacing: 0px;
-           border-collapse: separate;
-           border-radius: 10px;
+
+        /* Card background */
+        .mvg-card {
+          background-color: #000080;
+          border-radius: var(--ha-card-border-radius,12px);
         }
 
-        table tr {
-          border-radius: 10px;
+        /* Table Header - Linie, Ziel, Gleis, Abfahrt */
+        .headline {
+          display: flex;
+          font-weight: bold;
+          background-color: #FAE10C;
+          color: #000080;
         }
 
-        table td {
-          padding: 2px;
-          vertical-align: top;
+        .content {
+          padding: 5px 3px;
         }
 
-        table tr:first-child td:first-child {
-          border-radius: 9px 0 0 0;
+        /* Column widths */
+        .label {
+          width: 15%;
+          padding-left: 5px;
+        }
+        .destination {
+          width: 45%;
+        }
+        .track {
+          width: 15%;
+        }
+        .time {
+          width: 25%;
         }
 
-        table tr:first-child td:last-child {
-          border-radius: 0 9px 0 0;
+        /* Record row */
+        .item {
+          display: flex;
+          padding-left: 4px;
         }
 
-        table tr:last-child td:first-child {
-          border-radius: 0 0 0 10px;
+        /* Name of the card - from name parameter */
+        .cardname {
+          font-weight: bold;
+          font-size:1.0em;
+          padding: 2px 0 2px 8px;
         }
 
-        table tr:last-child td:last-child {
-          border-radius: 0 0 10px 0;
+        .cancelled {
+          color: red;
         }
 
-
-        table tr td:last-child {
-          white-space: nowrap;
-        }
-
-        table tr td:first-child {
-          vertical-align: middle;
-        }
-
-        table tr:last-child td {
-          padding-bottom: 10px;
+        .delay {
+          color: red;
         }
 
         /* General formatting for the labels */
@@ -64,34 +72,22 @@ class ContentAnotherMVG extends HTMLElement {
           background-color: #000000;
           border: 1px solid #FFFFFF;
           font-size:0.9em;
-          padding:2px 8px 2px 8px;
           margin-right:0.5em;
           margin-left:0.1em;
-        }
-
-        /* Table Header - Linie, Ziel, Gleis, Abfahrt */
-        .headline {
-          font-weight: bold;
-          background-color: #FAE10C;
-          color: #000080;
-        }
-
-        /* Name of the card - from name parameter */
-        .cardname {
-          font-weight: bold;
-          font-size:1.0em;
+          display: block;
+          text-align: center;
+          width: 35px;
+          margin: 2px 0;
         }
 
         /* BUS */
         span.BUS {
           background-color: #00586A;
-          padding:2px 4px 2px 4px;
         }
 
         /* REGIONAL_BUS */
         span.REGIONAL_BUS {
           background-color: #4682B4;
-          padding:2px 4px 2px 4px;
         }
 
         /* SBAHN */
@@ -121,6 +117,7 @@ class ContentAnotherMVG extends HTMLElement {
         span.U6 {background-color: #006CB3;}
         span.U7 {background: linear-gradient(322deg, #C40C37 50%, #438136 50%);}
         span.U8 {background: linear-gradient(322deg, #F36E31 50%, #C40C37 50%);}
+
         `
       card.appendChild(style);
       card.appendChild(this.content);
@@ -131,11 +128,36 @@ class ContentAnotherMVG extends HTMLElement {
     const state    = hass.states[entityId];
     const stateStr = state ? state.state : "unavailable";
 
-    this.content.innerHTML = `
-      ${state.attributes.connections}
-      <!-- ANOTHER-MVG -->
-      <!-- The state of ${entityId} is ${stateStr} -->
-    `;
+    let html = `
+      <div class="mvg-card">
+        ${!state.attributes.config.hide_name ? `<div class="cardname">${state.attributes.config.name}</div>` : ""}
+        <div class="headline">
+          <div class="label">Linie</div>
+          <div class="destination">Ziel</div>
+          <div class="track">Gleis</div>
+          <div class="time">Abfahrt</div>
+        </div>
+        <div class="content">
+      `;
+    this.data = state.attributes.departures;
+    this.data.forEach((departure) => {
+      html += `<div class="item">`;
+      html += `<div class="label"><span class="line ${departure.transport_type} ${departure.label}" > ${departure.label}</span></div>`;
+      html += `<div class="destination">${departure.destination}</div>`;
+      html += `<div class="track">${departure.track}</div>`;
+      let delay = ``;
+      if (departure.cancelled) {
+        delay = `<span class="cancelled">Entfällt</span>`;
+      } else if(departure.delay > 0) {
+        delay = `<span class="delay"> +${departure.delay}</span> <span class="expected">(${departure.expected_departure})</span>`;
+      }
+      html += `<div class="time">${departure.planned_departure} ${delay ? delay: ""}</div>`;
+      html += `</div>`;
+    });
+    html += `</div></div>`;
+
+    this.content.innerHTML = html;
+
   }
 
   // The user supplied configuration. Throw an exception and Home Assistant
@@ -155,3 +177,5 @@ class ContentAnotherMVG extends HTMLElement {
 }
 
 customElements.define("content-card-another-mvg", ContentAnotherMVG);
+
+
