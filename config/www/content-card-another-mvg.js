@@ -15,6 +15,7 @@ class ContentAnotherMVG extends HTMLElement {
         .container {
           background-color: #000080;
           border-radius: var(--ha-card-border-radius,12px);
+          padding-bottom: 5px;
         }
         /* Name of the card - from name parameter */
         .cardname {
@@ -43,7 +44,8 @@ class ContentAnotherMVG extends HTMLElement {
           padding: 0 6px;
         }
         .destination {
-          width: 50%;
+          width: 60%;
+          text-wrap: wrap;
         }
         .track {
           padding: 0 5px;
