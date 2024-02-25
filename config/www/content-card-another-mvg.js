@@ -12,55 +12,52 @@ class ContentAnotherMVG extends HTMLElement {
       style.textContent = `
 
         /* Card background */
-        .mvg-card {
+        .container {
           background-color: #000080;
           border-radius: var(--ha-card-border-radius,12px);
         }
-
-        /* Table Header - Linie, Ziel, Gleis, Abfahrt */
-        .headline {
-          display: flex;
-          font-weight: bold;
-          background-color: #FAE10C;
-          color: #000080;
-        }
-
-        .content {
-          padding: 5px 3px;
-        }
-
-        /* Column widths */
-        .label {
-          width: 15%;
-          padding-left: 5px;
-        }
-        .destination {
-          width: 45%;
-        }
-        .track {
-          width: 15%;
-        }
-        .time {
-          width: 25%;
-        }
-
-        /* Record row */
-        .item {
-          display: flex;
-          padding-left: 4px;
-        }
-
         /* Name of the card - from name parameter */
         .cardname {
           font-weight: bold;
           font-size:1.0em;
           padding: 2px 0 2px 8px;
         }
+        /* Table */
+        .mvg-table {
+          width: 100%;
+          border-collapse:collapse;
+        }
+
+        /* Table Header - Linie, Ziel, Gleis, Abfahrt */
+        .headline {
+          font-weight: bold;
+          background-color: #FAE10C;
+          color: #000080;
+          border-width: 0;
+          text-align: left;
+        }
+
+        /* Column widths and spacing */
+        .label {
+          width: 10%;
+          padding: 0 6px;
+        }
+        .destination {
+          width: 50%;
+        }
+        .track {
+          padding: 0 5px;
+          width: fit-content;
+        }
+        .time {
+          padding-right: 5px;
+          width: fit-content;
+          white-space: nowrap;
+        }
 
         .cancelled {
           color: red;
         }
-
         .delay {
           color: red;
         }
@@ -129,32 +126,32 @@ class ContentAnotherMVG extends HTMLElement {
     const stateStr = state ? state.state : "unavailable";
 
     let html = `
-      <div class="mvg-card">
-        ${!state.attributes.config.hide_name ? `<div class="cardname">${state.attributes.config.name}</div>` : ""}
-        <div class="headline">
-          <div class="label">Linie</div>
-          <div class="destination">Ziel</div>
-          <div class="track">Gleis</div>
-          <div class="time">Abfahrt</div>
-        </div>
-        <div class="content">
+    <div class="container">
+      ${!state.attributes.config.hide_name ? `<div class="cardname">${state.attributes.config.name}</div>` : ""}
+      <table class="mvg-table">
+        <tr class="headline">
+          <th class="label">Linie</th>
+          <th class="destination">Ziel</th>
+          <th class="track">Gleis</th>
+          <th class="time">Abfahrt</th>
+        </tr>
       `;
     this.data = state.attributes.departures;
     this.data.forEach((departure) => {
-      html += `<div class="item">`;
-      html += `<div class="label"><span class="line ${departure.transport_type} ${departure.label}" > ${departure.label}</span></div>`;
-      html += `<div class="destination">${departure.destination}</div>`;
-      html += `<div class="track">${departure.track}</div>`;
+      html += `<tr class="item">`;
+      html += `<td class="label"><span class="line ${departure.transport_type} ${departure.label}" > ${departure.label}</span></td>`;
+      html += `<td class="destination">${departure.destination}</td>`;
+      html += `<td class="track">${departure.track}</td>`;
       let delay = ``;
       if (departure.cancelled) {
         delay = `<span class="cancelled">Entfällt</span>`;
       } else if(departure.delay > 0) {
         delay = `<span class="delay"> +${departure.delay}</span> <span class="expected">(${departure.expected_departure})</span>`;
       }
-      html += `<div class="time">${departure.planned_departure} ${delay ? delay: ""}</div>`;
-      html += `</div>`;
+      html += `<td class="time">${departure.planned_departure} ${delay ? delay: ""}</td>`;
+      html += `</tr>`;
     });
-    html += `</div></div>`;
+    html += `</table></div>`;
 
     this.content.innerHTML = html;
 
