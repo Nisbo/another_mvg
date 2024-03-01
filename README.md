@@ -23,9 +23,10 @@ More screenshots at the bottom of this document.
 
 # Installation
 * Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/config/custom_components) folder (the folder, not only the content of the folder) from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder.
-* For the lovelace card, copy the content (1 file) from the ```config/www``` folder to your ```config/www``` folder.
+* For the lovelace cards, copy the content (2 files) from the ```config/www``` folder to your ```config/www``` folder.
 * Under Settings --> Dashboards --> 3 dots on the top right corner --> resourses
-* Add the resource ```/local/content-card-another-mvg.js``` as **JavaScripts-Modul** 
+* Add the resource ```/local/content-card-another-mvg.js``` as **JavaScripts-Modul**
+* Add the resource ```/local/content-card-another-mvg-big.js``` as **JavaScripts-Modul** 
 * Restart HA
 * Configure the configuration.yaml (see guide below)
 * Check configuration.yaml with the check function under Dev-Tools
@@ -33,6 +34,11 @@ More screenshots at the bottom of this document.
 * create a manual card with this content:
 ```
 type: custom:content-card-another-mvg
+entity: sensor.yourSensor
+```
+* create a manual card with this content, if you want to use the card with the big font as a single card:
+```
+type: custom:content-card-another-mvg-big
 entity: sensor.yourSensor
 ```
 * replace ```sensor.yourSensor``` with the name of your sensor. Should be something with **sensor.name** where name, the name from the parameter in the configuration.yaml is.
@@ -181,7 +187,7 @@ The possible values from ```above``` in this example are
 * 0 --> departure is in time
 * greater than 0 --> the delay in minutes of this departure
 
-I am using this in an automation to change the color of an LED from WLED
+I am using this in an automation to change the color of a LED from WLED
 ```
 alias: WLED Test - Unten Gelb
 description: ""
@@ -383,6 +389,17 @@ sensor:
     timezone_to   : "Europe/Berlin"
   ``` 
 - minor fixes
+
+01.03.2024 - Version 1.3.0
+- added an option ```alert_for: "S3,S4,S20"``` to set attributes for your sensor if the next 3 departures of defined lines are late or cancelled .... or in time. (Ref to "Alert Settings")
+- there is a 2nd lovalace card for single card use. Means with big font so that you can put it on a screen or on an Amazon Show 15 (with the silk browser and the kiosk mode HA addon via Media Function from HA)
+- You have to add the resource ```/local/content-card-another-mvg-big.js``` as **JavaScripts-Modul** 
+- improved error handling, additionally there will be an indicator on the card (Stop Name - nicht aktuell) if the data is outdated (older than 1 minute)
+- fixed a bug where the sensor was updated with wrong data (thx to @msp1974 )
+
+To update, replace all files with the new files, add the new resource mentioned above and restart HA.
+Afterwards you have to clear the frontend cache on all devices.
+
 
 # Credits
 To all the guys in the Home Assistant forum for the help. 
