@@ -148,6 +148,72 @@ If you want to display a different timezone, you can define it in ```timezone_to
     timezone_to   : "Europe/Berlin"
 ``` 
 
+### Alert Settings ###
+
+```
+    alert_for: "S3,S4,S20"
+``` 
+
+If you configure this option, there will be 3 additional attributes (per line) for your sensor.
+Format:
+```
+notifyLateMvgConnectionLine_1
+notifyLateMvgConnectionLine_2
+notifyLateMvgConnectionLine_3
+```
+If you configure the the alert for S4 the name of the attributes are as follow
+```
+notifyLateMvgConnectionS4_1
+notifyLateMvgConnectionS4_2
+notifyLateMvgConnectionS4_3
+```
+You can use it e.g. in an automation as condition 
+
+```
+condition:
+  - condition: numeric_state
+    entity_id: sensor.olching_und_eichenau
+    attribute: notifyLateMvgConnectionS4_3
+    above: 0
+```
+The possible values from ```above``` in this example are
+* -1 --> departure is cancelled
+* 0 --> departure is in time
+* greater than 0 --> the delay in minutes of this departure
+
+I am using this in an automation to change the color of an LED from WLED
+```
+alias: WLED Test - Unten Gelb
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.olching_und_eichenau
+    attribute: connections
+  - platform: time_pattern
+    minutes: "*"
+condition:
+  - condition: numeric_state
+    entity_id: sensor.olching_und_eichenau
+    attribute: notifyLateMvgConnectionS4_3
+    above: 0
+action:
+  - service: select.select_option
+    target:
+      device_id: 2e48d67fbe95d4ee7c9ef03bdf8ffe08
+    data:
+      option: Unten Gelb
+  - service: select.select_option
+    target:
+      device_id: d99baaee5d4ecce453980a792ec2f3a1
+    data:
+      option: Bahn 3 gelb
+mode: single
+```
+This is an example code from my WLED configuration, dont copy and paste it, if you dont know what you are doing. ;) 
+
+
+
 
 ## Complex configuration example
 ```
@@ -202,6 +268,7 @@ sensor:
     limit: 15
     transporttypes: "SBAHN"
     doublestationnumber: "3"
+    alert_for: "S3,S4,S20"
   - platform: another_mvg
     name: "UBahn Test"
     globalid: "de:09162:360"
