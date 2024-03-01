@@ -393,6 +393,7 @@ sensor:
 01.03.2024 - Version 1.3.0
 - added an option ```alert_for: "S3,S4,S20"``` to set attributes for your sensor if the next 3 departures of defined lines are late or cancelled .... or in time. (Ref to "Alert Settings")
 - there is a 2nd lovalace card for single card use. Means with big font so that you can put it on a screen or on an Amazon Show 15 (with the silk browser and the kiosk mode HA addon via Media Function from HA)
+- ![20240301_152359025_iOS](https://github.com/Nisbo/another_mvg/assets/26260572/4a9133e4-4047-4fce-9240-0dbdbdf0e3c2)
 - You have to add the resource ```/local/content-card-another-mvg-big.js``` as **JavaScripts-Modul** 
 - improved error handling, additionally there will be an indicator on the card (Stop Name - nicht aktuell) if the data is outdated (older than 1 minute)
 - fixed a bug where the sensor was updated with wrong data (thx to @msp1974 )
