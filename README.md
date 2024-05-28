@@ -28,7 +28,7 @@ More screenshots at the bottom of this document.
 * For the lovelace cards, copy the content (2 files) from the ```config/www``` folder to your ```config/www``` folder.
 * Under Settings --> Dashboards --> 3 dots on the top right corner --> resourses
 * Add the resource ```/local/content-card-another-mvg.js``` as **JavaScripts-Modul**
-* Add the resource ```/local/content-card-another-mvg-big.js``` as **JavaScripts-Modul** 
+* Add the resource ```/local/content-card-another-mvg-big.js``` as **JavaScripts-Modul** (this card is for single card use only, e.g. in fullscreen kiosk mode)
 * Restart HA
 * Configure the configuration.yaml (see guide below)
 * Check configuration.yaml with the check function under Dev-Tools
