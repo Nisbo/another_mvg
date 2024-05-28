@@ -411,7 +411,7 @@ Afterwards you have to clear the frontend cache on all devices.
 28.05.2024 - Version 1.4.0
 - improved error handling
 - improved error reporting in the system log
-- workaround for missing track 2a (not provided by the API) in Ebersberg
+- workaround for missing track 2a (not provided by the API) in Ebersberg. It assumes that if there is no platform provided by the API that the departure is from track 2a (Gleis 2a).
 - fixed an issue with CSS on some installations (possible problems with other addons)
 - You can also use ```BAHN``` but this feature is not fully integrated and not enabled by default. There is also no special design / labeling available.
 If you want to include it to your departure list, you can use this code:
