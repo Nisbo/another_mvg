@@ -70,7 +70,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         }
 
         /* Table Header - Linie, Ziel, Gleis, Abfahrt */
-        .headline {
+        .amvg-headline {
           font-weight: bold;
           background-color: #FAE10C;
           font-size:3.9em;
@@ -84,12 +84,14 @@ class ContentAnotherMVGbig extends HTMLElement {
           height:65px;
 		  font-size:3.9em;
 		  vertical-align: middle;
+		  color: #FFFFFF;
 		}
 
         /* Name of the card - from name parameter */
-        .cardname {
+        .amvg-cardname {
           font-weight: bold;
           font-size:1.0em;
+          color: #FFFFFF;
         }
 
         .cancelled {
@@ -149,12 +151,12 @@ class ContentAnotherMVGbig extends HTMLElement {
     const state    = hass.states[entityId];
     const stateStr = state ? state.state : "unavailable";
 
-    let html = `<table><tr><td colspan="4" class="cardname">${state.attributes.config.name}</td></tr>
+    let html = `<table><tr><td colspan="4" class="amvg-cardname">${state.attributes.config.name}</td></tr>
                           <tr>
-                            <td class="headline">Linie</td>
-                            <td class="headline">Ziel</td>
-                            <td class="headline">Gleis</td>
-                            <td class="headline">Abfahrt</td>
+                            <td class="amvg-headline">Linie</td>
+                            <td class="amvg-headline">Ziel</td>
+                            <td class="amvg-headline">Gleis</td>
+                            <td class="amvg-headline">Abfahrt</td>
                           </tr>
       `;
     this.data = state.attributes.departures;
