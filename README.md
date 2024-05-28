@@ -403,6 +403,13 @@ sensor:
 To update, replace all files with the new files, add the new resource mentioned above and restart HA.
 Afterwards you have to clear the frontend cache on all devices.
 
+28.05.2024 - Version 1.4.0
+- improved error handling
+- improved error reporting in the system log
+- fixed an issue with CSS on some installations (possible problems with other addons)
+
+To update, replace all files with the new files and restart HA.
+Afterwards you have to clear the frontend cache on all devices.
 
 # Credits
 To all the guys in the Home Assistant forum for the help. 
