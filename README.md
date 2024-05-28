@@ -28,7 +28,7 @@ More screenshots at the bottom of this document.
 * For the lovelace cards, copy the content (2 files) from the ```config/www``` folder to your ```config/www``` folder.
 * Under Settings --> Dashboards --> 3 dots on the top right corner --> resourses
 * Add the resource ```/local/content-card-another-mvg.js``` as **JavaScripts-Modul**
-* Add the resource ```/local/content-card-another-mvg-big.js``` as **JavaScripts-Modul** 
+* Add the resource ```/local/content-card-another-mvg-big.js``` as **JavaScripts-Modul** (this card is for single card use only, e.g. in fullscreen kiosk mode)
 * Restart HA
 * Configure the configuration.yaml (see guide below)
 * Check configuration.yaml with the check function under Dev-Tools
@@ -99,6 +99,11 @@ If you want to see only Bus, Regional Bus, Tram and/or U-Bahn (U-Bahn of course 
 This should be selfexplaining. Add the types of transportation **comma separated and without spaces** in between.
 **BUS** and **REGIONAL_BUS** <ins>are different</ins>. **BUS** is **MVG** and **REGIONAL_BUS** is **MVV**. But it looks like, in the API they mixed it for some lines. Just <ins>add both</ins>, to be save.
 As mentioned above, by default all transportations are enabled. If you want to see only some, you have to use this parameter.
+
+You can also use ```BAHN``` but this feature is not fully integrated and not enabled by default. There is also no special design / labeling available.
+If you want to include it to your departure list, you can use this code:
+
+```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS,BAHN"```
 
 ### Show only some lines
 
@@ -403,6 +408,18 @@ sensor:
 To update, replace all files with the new files, add the new resource mentioned above and restart HA.
 Afterwards you have to clear the frontend cache on all devices.
 
+28.05.2024 - Version 1.4.0
+- improved error handling
+- improved error reporting in the system log
+- workaround for missing track 2a (not provided by the API) in Ebersberg. It assumes that if there is no platform provided by the API that the departure is from track 2a (Gleis 2a).
+- fixed an issue with CSS on some installations (possible problems with other addons)
+- You can also use ```BAHN``` but this feature is not fully integrated and not enabled by default. There is also no special design / labeling available.
+If you want to include it to your departure list, you can use this code:
+
+```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS,BAHN"```
+
+To update, replace all files with the new files and restart HA.
+Afterwards you have to clear the frontend cache on all devices.
 
 # Credits
 To all the guys in the Home Assistant forum for the help. 

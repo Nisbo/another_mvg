@@ -12,25 +12,26 @@ class ContentAnotherMVG extends HTMLElement {
       style.textContent = `
 
         /* Card background */
-        .container {
+        .amvg-container {
           background-color: #000080;
           border-radius: var(--ha-card-border-radius,12px);
           padding-bottom: 5px;
         }
         /* Name of the card - from name parameter */
-        .cardname {
+        .amvg-cardname {
           font-weight: bold;
           font-size:1.0em;
           padding: 2px 0 2px 8px;
+          color: #FFFFFF;
         }
         /* Table */
-        .mvg-table {
+        .amvg-table {
           width: 100%;
           border-collapse:collapse;
         }
 
         /* Table Header - Linie, Ziel, Gleis, Abfahrt */
-        .headline {
+        .amvg-headline {
           font-weight: bold;
           background-color: #FAE10C;
           color: #000080;
@@ -46,12 +47,32 @@ class ContentAnotherMVG extends HTMLElement {
         .destination {
           width: 60%;
           text-wrap: wrap;
+          color: #FFFFFF;
         }
         .track {
           padding: 0 5px;
           width: fit-content;
+          color: #FFFFFF;
         }
         .time {
+          padding-right: 5px;
+          width: fit-content;
+          white-space: nowrap;
+          color: #FFFFFF;
+        }
+        .labelHL {
+          width: 10%;
+          padding: 0 6px;
+        }
+        .destinationHL {
+          width: 60%;
+          text-wrap: wrap;
+        }
+        .trackHL {
+          padding: 0 5px;
+          width: fit-content;
+        }
+        .timeHL {
           padding-right: 5px;
           width: fit-content;
           white-space: nowrap;
@@ -128,14 +149,14 @@ class ContentAnotherMVG extends HTMLElement {
     const stateStr = state ? state.state : "unavailable";
 
     let html = `
-    <div class="container">
-      ${!state.attributes.config.hide_name ? `<div class="cardname">${state.attributes.config.name} ${state.attributes.dataOutdated}</div>` : ""}
-      <table class="mvg-table">
-        <tr class="headline">
-          <th class="label">Linie</th>
-          <th class="destination">Ziel</th>
-          <th class="track">Gleis</th>
-          <th class="time">Abfahrt</th>
+    <div class="amvg-container">
+      ${!state.attributes.config.hide_name ? `<div class="amvg-cardname">${state.attributes.config.name} ${state.attributes.dataOutdated}</div>` : ""}
+      <table class="amvg-table">
+        <tr class="amvg-headline">
+          <th class="labelHL">Linie</th>
+          <th class="destinationHL">Ziel</th>
+          <th class="trackHL">Gleis</th>
+          <th class="timeHL">Abfahrt</th>
         </tr>
       `;
     this.data = state.attributes.departures;
@@ -176,4 +197,3 @@ class ContentAnotherMVG extends HTMLElement {
 }
 
 customElements.define("content-card-another-mvg", ContentAnotherMVG);
-
