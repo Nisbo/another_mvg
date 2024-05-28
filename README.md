@@ -100,6 +100,11 @@ This should be selfexplaining. Add the types of transportation **comma separated
 **BUS** and **REGIONAL_BUS** <ins>are different</ins>. **BUS** is **MVG** and **REGIONAL_BUS** is **MVV**. But it looks like, in the API they mixed it for some lines. Just <ins>add both</ins>, to be save.
 As mentioned above, by default all transportations are enabled. If you want to see only some, you have to use this parameter.
 
+You can also use ```BAHN``` but this feature is not fully integrated and not enabled by default. There is also no special design / labeling available.
+If you want to include it to your departure list, you can use this code:
+
+```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS,BAHN"```
+
 ### Show only some lines
 
 ```   onlyline: "S3,S4,S20"```
@@ -407,6 +412,10 @@ Afterwards you have to clear the frontend cache on all devices.
 - improved error handling
 - improved error reporting in the system log
 - fixed an issue with CSS on some installations (possible problems with other addons)
+- You can also use ```BAHN``` but this feature is not fully integrated and not enabled by default. There is also no special design / labeling available.
+If you want to include it to your departure list, you can use this code:
+
+```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS,BAHN"```
 
 To update, replace all files with the new files and restart HA.
 Afterwards you have to clear the frontend cache on all devices.
