@@ -222,6 +222,23 @@ class ConnectionInfo(SensorEntity):
             # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
             # because returning an ex leads to an error: Unable to serialize to JSON. Bad data found
             self._dataOutdated = " - nicht aktuell"
+            if not self._custom_attributes["departures"]:
+                # Add a dummy connection
+                departures = []
+                departures.append(
+                    Departure(
+                        transport_type="BUS",
+                        label="ERROR",
+                        destination="Try to connect to the MVG API. If this message remains longer, maybe mvg.de is down.",
+                        track="---",
+                        planned_departure="---",
+                        expected_departure="---",
+                        cancelled=False,
+                        delay=0,
+                    )
+                )
+                self._custom_attributes["departures"] = departures
+            
             return self._custom_attributes["departures"]
 
         # 2nd API call for globalid2
@@ -236,6 +253,23 @@ class ConnectionInfo(SensorEntity):
                 # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
                 # because returning an ex leads to an error: Unable to serialize to JSON. Bad data found
                 self._dataOutdated = " - nicht aktuell"
+                if not self._custom_attributes["departures"]:
+                    # Add a dummy connection
+                    departures = []
+                    departures.append(
+                        Departure(
+                            transport_type="BUS",
+                            label="ERROR",
+                            destination="Try to connect to the MVG API. If this message remains longer, maybe mvg.de is down.",
+                            track="---",
+                            planned_departure="---",
+                            expected_departure="---",
+                            cancelled=False,
+                            delay=0,
+                        )
+                    )
+                    self._custom_attributes["departures"] = departures
+                    
                 return self._custom_attributes["departures"]
             if data:
                 try:
@@ -271,8 +305,6 @@ class ConnectionInfo(SensorEntity):
         """Preformat necessary values into list of Departure."""
         
         connectioninfos = []
-        
-        # verbindungen = "S3,S4,S20"
         verbindungen_list = self._alert_for.split(",")
         counter_dict = {wert: 0 for wert in verbindungen_list}
         
@@ -296,6 +328,10 @@ class ConnectionInfo(SensorEntity):
                 track = "Bus"
             elif "platform" in departure:
                 track = str(departure["platform"])
+            elif self._globalid == "de:09175:4070" or self._globalid2 == "de:09175:4070":
+                # Work Around for missing track 2a in Ebersberg
+                # If there is no platform available, assume that the departure is from Gleis 2a
+                track = "2a"
             else:
                 # the key 'platform' doesnt exist in Dictionary user
                 track = "---"
@@ -359,6 +395,11 @@ class ConnectionInfo(SensorEntity):
                 break
         
         self.lateConnections = connectioninfos
+        
+        # if there was an empty result from the API, return the old value
+        if "departures" in self._custom_attributes and len(departures) == 0:
+            self._dataOutdated = " - nicht aktuell"
+            return self._custom_attributes["departures"]
         
         return departures
 
