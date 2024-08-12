@@ -8,12 +8,14 @@ from .frontend import AnotherMvgCardRegistration
 # The domain of your component. Should be equal to the name of your component.
 from .const import DOMAIN
 
-def setup(hass: HomeAssistant, config: ConfigType) -> bool:
+# def setup(hass: HomeAssistant, config: ConfigType) -> bool:
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up a skeleton component."""
     # States are in the format DOMAIN.OBJECT_ID.
     # hass.states.set('another_mvg.connections', 'Not used at the moment')
     # Register custom cards
     cards = AnotherMvgCardRegistration(hass)
+    await cards.register()
     
     # Return boolean to indicate that initialization was successfully.
     return True
