@@ -15,7 +15,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # hass.states.set('another_mvg.connections', 'Not used at the moment')
     # Register custom cards
     cards = AnotherMvgCardRegistration(hass)
-    await cards.register()
+    await cards.async_register()
     
     # Return boolean to indicate that initialization was successfully.
     return True
