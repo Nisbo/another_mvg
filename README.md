@@ -1,4 +1,4 @@
-# currently I am making this addon available in HACS (12.08.2024)
+# currently I am making this addon available in HACS (12.08.2024) thx @msp1974
 So far the installation via HACS is working as a custom repository. I still have to update the manual. Will do this tomorrow (13.08.2024)
 
 # another_mvg
@@ -425,6 +425,8 @@ Afterwards you have to clear the frontend cache on all devices.
 
 # Credits
 To all the guys in the Home Assistant forum for the help. 
+
+@msp1974 for his code for the card integration
 
 To the MVG for the API. 
 
