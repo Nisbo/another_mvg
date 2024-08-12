@@ -1,10 +1,19 @@
 {
   "domain": "another_mvg",
   "name": "Another MVG",
-  "codeowners": ["@Nisbo"],
-  "dependencies": [],
+  "version": "1.4.0",
   "documentation": "https://github.com/Nisbo/another_mvg",
-  "iot_class": "local_polling",
   "requirements": [],
-  "version": "1.4.0"
+  "dependencies": [],
+  "codeowners": ["@Nisbo"],
+  "resources": [
+    {
+      "url": "/local/content-card-another-mvg-big.js",
+      "type": "module"
+    },
+    {
+      "url": "/local/content-card-another-mvg.js",
+      "type": "module"
+    }
+  ]
 }
