@@ -22,3 +22,17 @@ CONF_HIDENAME = "hidename"  # Hide the name of the card
 CONF_TIMEZONE_FROM = "timezone_from"  # like "Europe/Berlin" or "UTC" if your system is running with UTC settings
 CONF_TIMEZONE_TO = "timezone_to"  # like "Europe/Berlin"
 CONF_ALERT_FOR = "alert_for"  # optional
+
+URL_BASE = "/another_mvg"
+ANOTHER_MVG_CARDS = [
+    {
+        "name": "Another MVG Card",
+        "filename": "content-card-another-mvg.js",
+        "version": "1.4.0",
+    },
+    {
+        "name": "Another MVG Big Card",
+        "filename": "content-card-another-mvg-big.js",
+        "version": "1.4.0",
+    },
+]
