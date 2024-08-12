@@ -1,0 +1,11 @@
+{
+  "name": "Another MVG",
+  "description": "Home Assistant addon for MVG integration",
+  "url": "https://github.com/Nisbo/another_mvg",
+  "file_name": "another_mvg.zip",
+  "domains": ["sensor", "binary_sensor"], 
+  "homeassistant": "2023.8.0",
+  "country": "DE",
+  "iot_class": "cloud_polling",
+  "render_readme": true
+}
