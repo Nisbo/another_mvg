@@ -1,3 +1,5 @@
+# currently I am making this addon available in HACS, please dont install it (12.08.2024)
+
 # another_mvg
 
 
