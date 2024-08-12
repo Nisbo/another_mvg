@@ -4,16 +4,10 @@
   "version": "1.4.0",
   "documentation": "https://github.com/Nisbo/another_mvg",
   "requirements": [],
-  "dependencies": [],
-  "codeowners": ["@Nisbo"],
-  "resources": [
-    {
-      "url": "/local/content-card-another-mvg-big.js",
-      "type": "module"
-    },
-    {
-      "url": "/local/content-card-another-mvg.js",
-      "type": "module"
-    }
-  ]
+  "dependencies": [
+    "http",
+    "frontend",
+    "lovelace"
+  ],
+  "codeowners": ["@Nisbo"]
 }
