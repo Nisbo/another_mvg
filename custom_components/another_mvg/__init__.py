@@ -11,6 +11,10 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up a skeleton component."""
     # States are in the format DOMAIN.OBJECT_ID.
     # hass.states.set('another_mvg.connections', 'Not used at the moment')
-
+    
+    # Register custom cards
+    cards = AnotherMvgCardRegistration(hass)
+    await cards.async_register()
+    
     # Return boolean to indicate that initialization was successfully.
     return True
