@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
+from .frontend import AnotherMvgCardRegistration
 
 # This file is not used at the moment, because the integration works direct with the sensor
 # The domain of your component. Should be equal to the name of your component.
