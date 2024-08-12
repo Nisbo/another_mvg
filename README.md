@@ -1,4 +1,5 @@
 # currently I am making this addon available in HACS, please dont install it (12.08.2024)
+So far the installation via HACS is working as a custom repository. I still have to update the manual. Will do this tomorrow (13.08.2024)
 
 # another_mvg
 
