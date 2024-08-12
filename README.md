@@ -30,7 +30,7 @@ More screenshots at the bottom of this document.
 to be updated
 
 # Manual Installation
-* Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/config/custom_components) folder (the folder, not only the content of the folder) from the ```custom_components/``` folder to your ```config/custom_components/``` folder.
+* Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/custom_components) folder (the folder, not only the content of the folder) from the ```custom_components/``` folder to your ```config/custom_components/``` folder.
 * Restart HA
 * Configure the configuration.yaml (see guide below)
 * Check configuration.yaml with the check function under Dev-Tools
