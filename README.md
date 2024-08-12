@@ -26,12 +26,11 @@ This is my 1st integration for Home Assistant and also my 1st Python addon, so p
  
 More screenshots at the bottom of this document.
 
-# Installation
-* Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/config/custom_components) folder (the folder, not only the content of the folder) from the ```config/custom_components/``` folder to your ```config/custom_components/``` folder.
-* For the lovelace cards, copy the content (2 files) from the ```config/www``` folder to your ```config/www``` folder.
-* Under Settings --> Dashboards --> 3 dots on the top right corner --> resourses
-* Add the resource ```/local/content-card-another-mvg.js``` as **JavaScripts-Modul**
-* Add the resource ```/local/content-card-another-mvg-big.js``` as **JavaScripts-Modul** (this card is for single card use only, e.g. in fullscreen kiosk mode)
+# HACS installation
+to be updated
+
+# Manual Installation
+* Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/config/custom_components) folder (the folder, not only the content of the folder) from the ```custom_components/``` folder to your ```config/custom_components/``` folder.
 * Restart HA
 * Configure the configuration.yaml (see guide below)
 * Check configuration.yaml with the check function under Dev-Tools
