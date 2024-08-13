@@ -444,7 +444,7 @@ If you want to include it to your departure list, you can use this code:
 To update, replace all files with the new files and restart HA.
 Afterwards you have to clear the frontend cache on all devices.
 
-13.08.2024 - Version 1.5.0
+## 13.08.2024 - Version 1.5.0
 - Now with the option to install Another MVG via HACS
 - Custom cards will be registered automatically, not longer needed to add them manually
 
