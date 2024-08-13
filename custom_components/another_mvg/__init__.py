@@ -23,13 +23,17 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Another MVG from a config entry."""
     hass.data.setdefault(DOMAIN, {})
-    
-    # Den Sensor initialisieren
+
+    # Speichere die Daten aus dem ConfigEntry
+    hass.data[DOMAIN][entry.entry_id] = entry.data
+
+    # Starte die Sensor-Integration mit den neuen Daten
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setup(entry, "sensor")
     )
 
     return True
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
