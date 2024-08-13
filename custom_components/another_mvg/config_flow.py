@@ -47,16 +47,17 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
 
+        # CREATION Mask
         self.data_schema = vol.Schema({
-            vol.Required(CONF_GLOBALID): str,
             vol.Required(CONF_NAME): str,
+            vol.Required(CONF_GLOBALID): str,
+            vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): str,
+            vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): int,
+            vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES): str,
             vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): str,
             vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): str,
-            vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): int,
-            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
-            vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES): str,
-            vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): str,
             vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME): bool,
+            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
             vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): str,
             vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): str,
             vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR): str,
@@ -95,16 +96,17 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         # Bereite die Standardwerte vor, basierend auf den aktuellen Konfigurationsdaten
         current_data = self.config_entry.data
 
+        # EDIT Mask
         self.options_schema = vol.Schema({
             vol.Required(CONF_NAME, default=current_data.get(CONF_NAME)): str,
             vol.Required(CONF_GLOBALID, default=current_data.get(CONF_GLOBALID)): str,
             vol.Optional(CONF_GLOBALID2, default=current_data.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2)): str,
+            vol.Optional(CONF_LIMIT, default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
+            vol.Optional(CONF_TRANSPORTTYPES, default=current_data.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES)): str,
             vol.Optional(CONF_ONLYLINE, default=current_data.get(CONF_ONLYLINE, DEFAULT_ONLYLINE)): str,
             vol.Optional(CONF_HIDEDESTINATION, default=current_data.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION)): str,
-            vol.Optional(CONF_LIMIT, default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
-            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=current_data.get(CONF_DOUBLESTATIONNUMBER, DEFAULT_CONF_DOUBLESTATIONNUMBER)): str,
-            vol.Optional(CONF_TRANSPORTTYPES, default=current_data.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES)): str,
             vol.Optional(CONF_HIDENAME, default=current_data.get(CONF_HIDENAME, DEFAULT_HIDENAME)): bool,
+            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=current_data.get(CONF_DOUBLESTATIONNUMBER, DEFAULT_CONF_DOUBLESTATIONNUMBER)): str,
             vol.Optional(CONF_TIMEZONE_FROM, default=current_data.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM)): str,
             vol.Optional(CONF_TIMEZONE_TO, default=current_data.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO)): str,
             vol.Optional(CONF_ALERT_FOR, default=current_data.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR)): str,
@@ -114,5 +116,3 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="init",
             data_schema=self.options_schema
         )
-
-
