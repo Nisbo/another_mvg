@@ -50,6 +50,9 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+# Zeitintervall zwischen den Updates
+MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
+
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_GLOBALID): cv.string,
