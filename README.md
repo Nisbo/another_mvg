@@ -1,4 +1,4 @@
-# currently I am making this addon available in HACS (12.08.2024) thx @msp1974
+# Now installation is also available via HACS (13.08.2024) thx @msp1974
 
 # another_mvg
 
