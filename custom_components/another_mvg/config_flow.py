@@ -42,37 +42,34 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
-            # Hier kannst du Validierungslogik hinzufügen
             if not self._is_valid(user_input):
                 errors["base"] = "invalid_input"
             else:
                 return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
 
         data_schema = vol.Schema({
-            vol.Required(CONF_GLOBALID, description={"suggested_value": "", "description": "Globale ID für die Verbindung"}): str,
-            vol.Required(CONF_NAME, description={"suggested_value": "", "description": "Name des Sensors"}): str,
-            vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE, description={"suggested_value": "", "description": "Nur Linien angeben"}): str,
-            vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION, description={"suggested_value": "", "description": "Ziele, die ausgeblendet werden sollen"}): str,
-            vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT, description={"suggested_value": 6, "description": "Anzahl der angezeigten Verbindungen"}): int,
-            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER, description={"suggested_value": "", "description": "Doppelte Stationsnummer verwenden"}): str,
-            vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES, description={"suggested_value": "SBAHN,UBAHN", "description": "Transportarten, die angezeigt werden sollen"}): str,
-            vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2, description={"suggested_value": "", "description": "Zweite globale ID für Verbindungen"}): str,
-            vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME, description={"suggested_value": False, "description": "Namen der Stationen ausblenden"}): bool,
-            vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM, description={"suggested_value": "Europe/Berlin", "description": "Zeitzone für die Abfahrtszeiten"}): str,
-            vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO, description={"suggested_value": "Europe/Berlin", "description": "Zeitzone für die Ankunftszeiten"}): str,
-            vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR, description={"suggested_value": "", "description": "Alarm für bestimmte Verbindungen"}): str,
+            vol.Required(CONF_GLOBALID): str,
+            vol.Required(CONF_NAME): str,
+            vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): str,
+            vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): str,
+            vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): int,
+            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
+            vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES): str,
+            vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): str,
+            vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME): bool,
+            vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): str,
+            vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): str,
+            vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR): str,
         })
 
         return self.async_show_form(
             step_id="user",
             data_schema=data_schema,
-            errors=errors,
-            description={"description": "Bitte geben Sie die erforderlichen Informationen ein, um die Integration zu konfigurieren."}
+            errors=errors
         )
 
     def _is_valid(self, user_input):
         """Validate user input."""
-        # Implementiere hier Validierungslogik
         return True
 
 class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
@@ -88,22 +85,21 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=user_input)
 
         options_schema = vol.Schema({
-            vol.Required(CONF_GLOBALID, description={"suggested_value": "", "description": "Globale ID für die Verbindung"}): str,
-            vol.Required(CONF_NAME, description={"suggested_value": "", "description": "Name des Sensors"}): str,
-            vol.Optional(CONF_ONLYLINE, default=self.config_entry.options.get(CONF_ONLYLINE, DEFAULT_ONLYLINE), description={"suggested_value": "", "description": "Nur Linien angeben"}): str,
-            vol.Optional(CONF_HIDEDESTINATION, default=self.config_entry.options.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION), description={"suggested_value": "", "description": "Ziele, die ausgeblendet werden sollen"}): str,
-            vol.Optional(CONF_LIMIT, default=self.config_entry.options.get(CONF_LIMIT, DEFAULT_LIMIT), description={"suggested_value": 6, "description": "Anzahl der angezeigten Verbindungen"}): int,
-            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=self.config_entry.options.get(CONF_DOUBLESTATIONNUMBER, DEFAULT_CONF_DOUBLESTATIONNUMBER), description={"suggested_value": "", "description": "Doppelte Stationsnummer verwenden"}): str,
-            vol.Optional(CONF_TRANSPORTTYPES, default=self.config_entry.options.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES), description={"suggested_value": "SBAHN,UBAHN", "description": "Transportarten, die angezeigt werden sollen"}): str,
-            vol.Optional(CONF_GLOBALID2, default=self.config_entry.options.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2), description={"suggested_value": "", "description": "Zweite globale ID für Verbindungen"}): str,
-            vol.Optional(CONF_HIDENAME, default=self.config_entry.options.get(CONF_HIDENAME, DEFAULT_HIDENAME), description={"suggested_value": False, "description": "Namen der Stationen ausblenden"}): bool,
-            vol.Optional(CONF_TIMEZONE_FROM, default=self.config_entry.options.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM), description={"suggested_value": "Europe/Berlin", "description": "Zeitzone für die Abfahrtszeiten"}): str,
-            vol.Optional(CONF_TIMEZONE_TO, default=self.config_entry.options.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO), description={"suggested_value": "Europe/Berlin", "description": "Zeitzone für die Ankunftszeiten"}): str,
-            vol.Optional(CONF_ALERT_FOR, default=self.config_entry.options.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR), description={"suggested_value": "", "description": "Alarm für bestimmte Verbindungen"}): str,
+            vol.Required(CONF_GLOBALID): str,
+            vol.Required(CONF_NAME): str,
+            vol.Optional(CONF_ONLYLINE, default=self.config_entry.options.get(CONF_ONLYLINE, DEFAULT_ONLYLINE)): str,
+            vol.Optional(CONF_HIDEDESTINATION, default=self.config_entry.options.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION)): str,
+            vol.Optional(CONF_LIMIT, default=self.config_entry.options.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
+            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=self.config_entry.options.get(CONF_DOUBLESTATIONNUMBER, DEFAULT_CONF_DOUBLESTATIONNUMBER)): str,
+            vol.Optional(CONF_TRANSPORTTYPES, default=self.config_entry.options.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES)): str,
+            vol.Optional(CONF_GLOBALID2, default=self.config_entry.options.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2)): str,
+            vol.Optional(CONF_HIDENAME, default=self.config_entry.options.get(CONF_HIDENAME, DEFAULT_HIDENAME)): bool,
+            vol.Optional(CONF_TIMEZONE_FROM, default=self.config_entry.options.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM)): str,
+            vol.Optional(CONF_TIMEZONE_TO, default=self.config_entry.options.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO)): str,
+            vol.Optional(CONF_ALERT_FOR, default=self.config_entry.options.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR)): str,
         })
 
         return self.async_show_form(
             step_id="init",
-            data_schema=options_schema,
-            description={"description": "Passen Sie die Optionen für Ihre Integration an."}
+            data_schema=options_schema
         )
