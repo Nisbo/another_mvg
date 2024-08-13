@@ -31,7 +31,7 @@
                     "timezone_from": "Like Europe/Berlin or UTC",
                     "timezone_to": "Like Europe/Berlin or UTC",
                     "alert_for": "Read the documetation for this option"
-                },
+                }
             }
         }
     },
@@ -66,7 +66,7 @@
                     "timezone_from": "Like Europe/Berlin or UTC",
                     "timezone_to": "Like Europe/Berlin or UTC",
                     "alert_for": "Read the documetation for this option"
-                },
+                }
             }
         }
     }
