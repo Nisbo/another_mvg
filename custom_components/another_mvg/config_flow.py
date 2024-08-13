@@ -47,7 +47,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
 
-        data_schema = vol.Schema({
+        self.data_schema = vol.Schema({
             vol.Required(CONF_GLOBALID): str,
             vol.Required(CONF_NAME): str,
             vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): str,
@@ -64,7 +64,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=data_schema,
+            data_schema=self.data_schema,
             errors=errors
         )
 
@@ -84,7 +84,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        options_schema = vol.Schema({
+        self.options_schema = vol.Schema({
             vol.Required(CONF_GLOBALID): str,
             vol.Required(CONF_NAME): str,
             vol.Optional(CONF_ONLYLINE, default=self.config_entry.options.get(CONF_ONLYLINE, DEFAULT_ONLYLINE)): str,
@@ -101,5 +101,5 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
 
         return self.async_show_form(
             step_id="init",
-            data_schema=options_schema
+            data_schema=self.options_schema
         )
