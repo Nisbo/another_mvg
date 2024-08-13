@@ -1,9 +1,6 @@
 # currently I am making this addon available in HACS (12.08.2024) thx @msp1974
-So far the installation via HACS is working as a custom repository. I still have to update the manual. Will do this tomorrow (13.08.2024)
 
 # another_mvg
-
-
 
 
 **Why another MVG/MVV integration for Home Assistant?**
@@ -446,6 +443,27 @@ If you want to include it to your departure list, you can use this code:
 
 To update, replace all files with the new files and restart HA.
 Afterwards you have to clear the frontend cache on all devices.
+
+13.08.2024 - Version 1.5.0
+Now with the option to install Another MVG via HACS
+Custom cards will be registered automatically, not longer needed to add them manually
+
+### ⚠️ Breaking Changes
+:red_circle: Due to the fact, that Custom cards will be registered automatically, you have to remove these 2 files from your www folder. :red_circle:
+
+```
+content-card-another-mvg-big.js
+content-card-another-mvg.js
+```
+You also have to remove these 2 cards from
+Settings --> Dashboards --> 3 dots on the top right --> Resources
+```
+/local/content-card-another-mvg.js
+/local/content-card-another-mvg-big.js
+```
+
+⚠️ Don't remove cards starting with */another_mvg/*
+
 
 # Credits
 To all the guys in the Home Assistant forum for the help. 
