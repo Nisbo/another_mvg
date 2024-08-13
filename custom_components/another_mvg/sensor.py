@@ -67,7 +67,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_platform(
+    hass: HomeAssistant,
+    config: ConfigType,
+    add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None,
+) -> None:
     """Set up the sensor platform."""
     _LOGGER.warning(
         "Setting up Another MVG sensor using YAML configuration is deprecated. Please remove the YAML configuration and use the integration through the Home Assistant UI."
@@ -75,9 +80,13 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     
     if discovery_info is None:
         # Konfiguration über YAML
-        async_add_entities([ConnectionInfo(hass, config)])
+        add_entities([ConnectionInfo(hass, config)], True)
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigType,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up Another MVG sensor from a config entry."""
     # Konfiguration über GUI
     async_add_entities([ConnectionInfo(hass, config_entry.data)])
@@ -103,14 +112,6 @@ class DepartureAlarms:
     number: str
     delayInMinutes: int
 
-async def async_setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    """Set up the sensor platform."""
-    add_entities([ConnectionInfo(hass, config)], True)
 
 class ConnectionInfo(SensorEntity):
     """Class for MVG info."""
