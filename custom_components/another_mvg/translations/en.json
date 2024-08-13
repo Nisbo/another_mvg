@@ -31,7 +31,7 @@
                     "timezone_from": "Like Europe/Berlin or UTC",
                     "timezone_to": "Like Europe/Berlin or UTC",
                     "alert_for": "Read the documetation for this option"
-                },
+                }
             }
         }
     },
@@ -53,7 +53,7 @@
                     "timezone_to": "Timezone To",
                     "alert_for": "Alert For"
                 },
-				"data_description": {
+		"data_description": {
                     "globalid": "Global ID",
                     "name": "Name to display in the Card",
                     "onlyline": "If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.",
@@ -66,7 +66,7 @@
                     "timezone_from": "Like Europe/Berlin or UTC",
                     "timezone_to": "Like Europe/Berlin or UTC",
                     "alert_for": "Read the documetation for this option"
-                },
+                }
             }
         }
     }
