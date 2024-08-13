@@ -86,6 +86,10 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             self.hass.config_entries.async_update_entry(
                 self.config_entry, data=user_input
             )
+            
+            # Starte die Sensor-Integration neu, um die neuen Daten zu laden
+            await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+
             return self.async_create_entry(title="", data={})
 
         # Bereite die Standardwerte vor, basierend auf den aktuellen Konfigurationsdaten
@@ -110,4 +114,5 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="init",
             data_schema=self.options_schema
         )
+
 
