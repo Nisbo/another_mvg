@@ -1,0 +1,59 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configure Another MVG Sensor",
+                "data": {
+                    "globalid": {
+                        "name": "Global ID",
+                        "description": "The unique global ID for the connection."
+                    },
+                    "name": {
+                        "name": "Sensor Name",
+                        "description": "The name you want to give to this sensor."
+                    },
+                    "onlyline": {
+                        "name": "Only Lines",
+                        "description": "Specify which lines to include."
+                    },
+                    "hidedestination": {
+                        "name": "Hide Destination",
+                        "description": "Specify destinations to hide from the display."
+                    },
+                    "limit": {
+                        "name": "Limit",
+                        "description": "Number of connections to display."
+                    },
+                    "doublestationnumber": {
+                        "name": "Double Station Number",
+                        "description": "Specify if you want to use double station numbers."
+                    },
+                    "transporttypes": {
+                        "name": "Transport Types",
+                        "description": "Specify which transport types to include (e.g., bus, train)."
+                    },
+                    "globalid2": {
+                        "name": "Second Global ID",
+                        "description": "An additional global ID for connections."
+                    },
+                    "hidename": {
+                        "name": "Hide Name",
+                        "description": "Specify if you want to hide station names."
+                    },
+                    "timezone_from": {
+                        "name": "Timezone From",
+                        "description": "Timezone for departure times."
+                    },
+                    "timezone_to": {
+                        "name": "Timezone To",
+                        "description": "Timezone for arrival times."
+                    },
+                    "alert_for": {
+                        "name": "Alert For",
+                        "description": "Specify alerts for certain connections."
+                    }
+                }
+            }
+        }
+    }
+}
