@@ -34,8 +34,8 @@ More screenshots at the bottom of this document.
 * Category: Integration
 * click on add (bottom right)
 * close the configuration popup (X on the top right)
-* search for another MVG and click on it
-* click on download
+* search for "Another MVG" and click on it
+* click on download (bottom right)
 * Restart HA
 * Configure the configuration.yaml (see guide below)
 * Check configuration.yaml with the check function under Dev-Tools
