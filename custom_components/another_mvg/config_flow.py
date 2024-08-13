@@ -3,7 +3,6 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 from .const import (
     DOMAIN,
-    CONF_NAME,
     CONF_GLOBALID,
     CONF_ONLYLINE,
     CONF_HIDEDESTINATION,
