@@ -82,7 +82,11 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            # Speichere die geänderten Daten
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, data=user_input
+            )
+            return self.async_create_entry(title="", data={})
 
         # Bereite die Standardwerte vor, basierend auf den aktuellen Konfigurationsdaten
         current_data = self.config_entry.data
@@ -106,3 +110,4 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="init",
             data_schema=self.options_schema
         )
+
