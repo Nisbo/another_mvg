@@ -1,4 +1,6 @@
 """another_mvg Frontend"""
+# thx to @msp1974 for providing the layout for this code
+# https://github.com/asantaga/wiserHomeAssistantPlatform/blob/master/custom_components/wiser/frontend/__init__.py
 import logging
 import os
 
