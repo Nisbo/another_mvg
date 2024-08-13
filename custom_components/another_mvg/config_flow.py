@@ -2,6 +2,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.const import CONF_NAME
+from homeassistant.helpers.selector import selector  # Importiere den Selector-Helper
 from .const import (
     DOMAIN,
     CONF_GLOBALID,
@@ -45,15 +46,27 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not self._is_valid(user_input):
                 errors["base"] = "invalid_input"
             else:
+                # Convert selected transport types to a comma-separated string
+                if CONF_TRANSPORTTYPES in user_input:
+                    user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
+                
                 return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
 
-        # CREATION Mask
+        # Define the schema with multi-select for transport types
+        transport_types = DEFAULT_CONF_TRANSPORTTYPES.split(',')
+
         self.data_schema = vol.Schema({
             vol.Required(CONF_NAME): str,
             vol.Required(CONF_GLOBALID): str,
             vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): str,
             vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): int,
-            vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES): str,
+            vol.Optional(CONF_TRANSPORTTYPES, default=transport_types): selector({
+                "select": {
+                    "options": transport_types,
+                    "multiple": True,  # Erlaubt die Auswahl mehrerer Optionen
+                    "custom_value": True  # Erlaubt benutzerdefinierte Eingaben
+                }
+            }),
             vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): str,
             vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): str,
             vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME): bool,
@@ -83,6 +96,10 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
+            # Convert selected transport types to a comma-separated string
+            if CONF_TRANSPORTTYPES in user_input:
+                user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
+
             # Speichere die geänderten Daten
             self.hass.config_entries.async_update_entry(
                 self.config_entry, data=user_input
@@ -95,14 +112,21 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
 
         # Bereite die Standardwerte vor, basierend auf den aktuellen Konfigurationsdaten
         current_data = self.config_entry.data
+        transport_types = DEFAULT_CONF_TRANSPORTTYPES.split(',')
+        selected_transport_types = current_data.get(CONF_TRANSPORTTYPES, '').split(',')
 
-        # EDIT Mask
         self.options_schema = vol.Schema({
             vol.Required(CONF_NAME, default=current_data.get(CONF_NAME)): str,
             vol.Required(CONF_GLOBALID, default=current_data.get(CONF_GLOBALID)): str,
             vol.Optional(CONF_GLOBALID2, default=current_data.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2)): str,
             vol.Optional(CONF_LIMIT, default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
-            vol.Optional(CONF_TRANSPORTTYPES, default=current_data.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES)): str,
+            vol.Optional(CONF_TRANSPORTTYPES, default=selected_transport_types): selector({
+                "select": {
+                    "options": transport_types,
+                    "multiple": True,
+                    "custom_value": True
+                }
+            }),
             vol.Optional(CONF_ONLYLINE, default=current_data.get(CONF_ONLYLINE, DEFAULT_ONLYLINE)): str,
             vol.Optional(CONF_HIDEDESTINATION, default=current_data.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION)): str,
             vol.Optional(CONF_HIDENAME, default=current_data.get(CONF_HIDENAME, DEFAULT_HIDENAME)): bool,
