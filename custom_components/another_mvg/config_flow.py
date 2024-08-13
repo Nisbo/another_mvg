@@ -41,8 +41,11 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
-            # Validierung und Erstellung des Konfigurationseintrags
-            return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
+            # Hier kannst du Validierungslogik hinzufügen
+            if not self._is_valid(user_input):
+                errors["base"] = "invalid_input"
+            else:
+                return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
 
         data_schema = vol.Schema({
             vol.Required(CONF_GLOBALID): str,
@@ -63,6 +66,10 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user", data_schema=data_schema, errors=errors
         )
 
+    def _is_valid(self, user_input):
+        """Validate user input."""
+        # Implementiere hier Validierungslogik
+        return True
 
 class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options flow for Another MVG."""
@@ -77,6 +84,8 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=user_input)
 
         options_schema = vol.Schema({
+            vol.Required(CONF_GLOBALID): str,
+            vol.Required(CONF_NAME): str,
             vol.Optional(CONF_ONLYLINE, default=self.config_entry.options.get(CONF_ONLYLINE, DEFAULT_ONLYLINE)): str,
             vol.Optional(CONF_HIDEDESTINATION, default=self.config_entry.options.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION)): str,
             vol.Optional(CONF_LIMIT, default=self.config_entry.options.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
