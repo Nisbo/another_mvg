@@ -463,15 +463,14 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 ```
 ⚠️ Don't remove cards starting with */another_mvg/*
 
-Manual:
+### Manual Update:
+- To update, replace all files with the new files (like during the installation) and restart HA.
+- Afterwards you have to clear the frontend cache on all devices.
+- There is no need to reconfigure the configuration.yaml
 
-To update, replace all files with the new files (like during the installation) and restart HA.
-Afterwards you have to clear the frontend cache on all devices.
-
-HACS - Change from manual installation to HACS
-
-Remove the old Files and follow the instatuctions from the installation.
-There is no need to reconfigure the configuration.yaml
+### HACS --> Change from manual installation to HACS
+- Remove the old Files and follow the instatuctions from the installation.
+- There is no need to reconfigure the configuration.yaml
 
 # Credits
 To all the guys in the Home Assistant forum for the help. 
