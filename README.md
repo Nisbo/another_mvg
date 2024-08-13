@@ -26,8 +26,32 @@ This is my 1st integration for Home Assistant and also my 1st Python addon, so p
  
 More screenshots at the bottom of this document.
 
-# HACS installation
-to be updated
+# HACS installation (recommended)
+* In Home Assistant go to the HACS integration (you can find the link in the left admin menu)
+* on the top right click on the 3 dots
+* click on "Custom Repositories"
+* Repository: https://github.com/Nisbo/another_mvg
+* Category: Integration
+* click on add (bottom right)
+* close the configuration popup (X on the top right)
+* search for another MVG and click on it
+* click on download
+* Restart HA
+* Configure the configuration.yaml (see guide below)
+* Check configuration.yaml with the check function under Dev-Tools
+* Restart HA again
+* create a manual card with this content:
+```
+type: custom:content-card-another-mvg
+entity: sensor.yourSensor
+```
+* create a manual card with this content, if you want to use the card with the big font as a single card:
+```
+type: custom:content-card-another-mvg-big
+entity: sensor.yourSensor
+```
+* replace ```sensor.yourSensor``` with the name of your sensor. Should be something with **sensor.name** where name, the name from the parameter in the configuration.yaml is.
+* Enjoy
 
 # Manual Installation
 * Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/custom_components) folder (the folder, not only the content of the folder) from the ```custom_components/``` folder to your ```config/custom_components/``` folder.
