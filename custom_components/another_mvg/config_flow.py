@@ -84,19 +84,22 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
+        # Bereite die Standardwerte vor, basierend auf den aktuellen Konfigurationsdaten
+        current_data = self.config_entry.data
+
         self.options_schema = vol.Schema({
-            vol.Required(CONF_GLOBALID): str,
-            vol.Required(CONF_NAME): str,
-            vol.Optional(CONF_ONLYLINE, default=self.config_entry.options.get(CONF_ONLYLINE, DEFAULT_ONLYLINE)): str,
-            vol.Optional(CONF_HIDEDESTINATION, default=self.config_entry.options.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION)): str,
-            vol.Optional(CONF_LIMIT, default=self.config_entry.options.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
-            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=self.config_entry.options.get(CONF_DOUBLESTATIONNUMBER, DEFAULT_CONF_DOUBLESTATIONNUMBER)): str,
-            vol.Optional(CONF_TRANSPORTTYPES, default=self.config_entry.options.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES)): str,
-            vol.Optional(CONF_GLOBALID2, default=self.config_entry.options.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2)): str,
-            vol.Optional(CONF_HIDENAME, default=self.config_entry.options.get(CONF_HIDENAME, DEFAULT_HIDENAME)): bool,
-            vol.Optional(CONF_TIMEZONE_FROM, default=self.config_entry.options.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM)): str,
-            vol.Optional(CONF_TIMEZONE_TO, default=self.config_entry.options.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO)): str,
-            vol.Optional(CONF_ALERT_FOR, default=self.config_entry.options.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR)): str,
+            vol.Required(CONF_NAME, default=current_data.get(CONF_NAME)): str,
+            vol.Required(CONF_GLOBALID, default=current_data.get(CONF_GLOBALID)): str,
+            vol.Optional(CONF_GLOBALID2, default=current_data.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2)): str,
+            vol.Optional(CONF_ONLYLINE, default=current_data.get(CONF_ONLYLINE, DEFAULT_ONLYLINE)): str,
+            vol.Optional(CONF_HIDEDESTINATION, default=current_data.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION)): str,
+            vol.Optional(CONF_LIMIT, default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
+            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=current_data.get(CONF_DOUBLESTATIONNUMBER, DEFAULT_CONF_DOUBLESTATIONNUMBER)): str,
+            vol.Optional(CONF_TRANSPORTTYPES, default=current_data.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES)): str,
+            vol.Optional(CONF_HIDENAME, default=current_data.get(CONF_HIDENAME, DEFAULT_HIDENAME)): bool,
+            vol.Optional(CONF_TIMEZONE_FROM, default=current_data.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM)): str,
+            vol.Optional(CONF_TIMEZONE_TO, default=current_data.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO)): str,
+            vol.Optional(CONF_ALERT_FOR, default=current_data.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR)): str,
         })
 
         return self.async_show_form(
