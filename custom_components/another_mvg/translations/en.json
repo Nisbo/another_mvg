@@ -17,7 +17,21 @@
                     "timezone_from": "Timezone From",
                     "timezone_to": "Timezone To",
                     "alert_for": "Alert For"
-                }
+                },
+				"data_description": {
+                    "globalid": "Global ID",
+                    "name": "Name to display in the Card",
+                    "onlyline": "If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.",
+                    "hidedestination": "If you want to see only some directions / destinations, you have to insert the EXACT names of the unwanted destinations like they are shown in the connection display. (card) The names should be ; separated.",
+                    "limit": "By default you will see 6 departures. If you want to see more or less, you have to configure it. Die API will pull a maximum of 80 departures. If you use "filters" like hidedestination, witch filter out 40 entries, you will only see the remaining 40 as maximum.",
+                    "doublestationnumber": "If you want to create 2 or more cards for the same globalid, you have to use this parameter. (e.g. one for BUS, one for SBAHN, one for TRAM) It can be a number or a letter. Also more numbers or letters are possible. No special chars are allowed and also no space.",
+                    "transporttypes": "Transport Types",
+                    "globalid2": "If you have 2 stations close together (or far far away) like a train station and a bus stop, you can combine both in one card. Keep in mind, that you have to insert all transportations in  transporttypes. The use of this function can lead to problems, because there are 2 API calls in 1 second and it can happen, that the API blocks the 2nd call. If you use it only in one card, it should be no problem. If you use more, the risk is higher that the API blocks the request.",
+                    "hidename": "If you don't want to see the name of the card, enable this option.",
+                    "timezone_from": "Like Europe/Berlin or UTC",
+                    "timezone_to": "Like Europe/Berlin or UTC",
+                    "alert_for": "Read the documetation for this option"
+                },
             }
         }
     },
@@ -38,7 +52,21 @@
                     "timezone_from": "Timezone From",
                     "timezone_to": "Timezone To",
                     "alert_for": "Alert For"
-                }
+                },
+				"data_description": {
+                    "globalid": "Global ID",
+                    "name": "Name to display in the Card",
+                    "onlyline": "If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.",
+                    "hidedestination": "If you want to see only some directions / destinations, you have to insert the EXACT names of the unwanted destinations like they are shown in the connection display. (card) The names should be ; separated.",
+                    "limit": "By default you will see 6 departures. If you want to see more or less, you have to configure it. Die API will pull a maximum of 80 departures. If you use "filters" like hidedestination, witch filter out 40 entries, you will only see the remaining 40 as maximum.",
+                    "doublestationnumber": "If you want to create 2 or more cards for the same globalid, you have to use this parameter. (e.g. one for BUS, one for SBAHN, one for TRAM) It can be a number or a letter. Also more numbers or letters are possible. No special chars are allowed and also no space.",
+                    "transporttypes": "Transport Types",
+                    "globalid2": "If you have 2 stations close together (or far far away) like a train station and a bus stop, you can combine both in one card. Keep in mind, that you have to insert all transportations in  transporttypes. The use of this function can lead to problems, because there are 2 API calls in 1 second and it can happen, that the API blocks the 2nd call. If you use it only in one card, it should be no problem. If you use more, the risk is higher that the API blocks the request.",
+                    "hidename": "If you don't want to see the name of the card, enable this option.",
+                    "timezone_from": "Like Europe/Berlin or UTC",
+                    "timezone_to": "Like Europe/Berlin or UTC",
+                    "alert_for": "Read the documetation for this option"
+                },
             }
         }
     }
