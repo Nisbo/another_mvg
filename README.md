@@ -445,10 +445,10 @@ To update, replace all files with the new files and restart HA.
 Afterwards you have to clear the frontend cache on all devices.
 
 13.08.2024 - Version 1.5.0
-Now with the option to install Another MVG via HACS
-Custom cards will be registered automatically, not longer needed to add them manually
+- Now with the option to install Another MVG via HACS
+- Custom cards will be registered automatically, not longer needed to add them manually
 
-### ⚠️ Breaking Changes
+### ⚠️ Breaking Changes and Update
 :red_circle: Due to the fact, that Custom cards will be registered automatically, you have to remove these 2 files from your www folder. :red_circle:
 
 ```
@@ -461,9 +461,17 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 /local/content-card-another-mvg.js
 /local/content-card-another-mvg-big.js
 ```
-
 ⚠️ Don't remove cards starting with */another_mvg/*
 
+Manual:
+
+To update, replace all files with the new files (like during the installation) and restart HA.
+Afterwards you have to clear the frontend cache on all devices.
+
+HACS - Change from manual installation to HACS
+
+Remove the old Files and follow the instatuctions from the installation.
+There is no need to reconfigure the configuration.yaml
 
 # Credits
 To all the guys in the Home Assistant forum for the help. 
