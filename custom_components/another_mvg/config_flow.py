@@ -1,8 +1,9 @@
+import logging
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.const import CONF_NAME
-from homeassistant.helpers.selector import selector  # Importiere den Selector-Helper
+from homeassistant.helpers.selector import selector
 from .const import (
     DOMAIN,
     CONF_GLOBALID,
@@ -28,6 +29,8 @@ from .const import (
     DEFAULT_ALERT_FOR,
 )
 
+_LOGGER = logging.getLogger(__name__)
+
 class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Another MVG integration."""
 
@@ -41,30 +44,114 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
-        errors = {}
+        _LOGGER.warning("async_step_user called with user_input: %s", user_input)
+
+        if user_input is not None:
+            # Handle the search if user_input is provided
+            return await self.async_step_station_search(user_input)
+
+        # Show the search form if no user input is provided
+        return self.async_show_form(
+            step_id="station_search",
+            data_schema=self._station_search_schema()
+        )
+
+    async def async_step_station_search(self, user_input=None):
+        """Handle the station search step."""
+        _LOGGER.warning("async_step_station_search called with user_input: %s", user_input)
+        
+        if user_input is not None:
+            station_name = user_input.get("station_name")
+            _LOGGER.warning("Searching for station with name: %s", station_name)
+
+            global_id = await self._fetch_globalid(station_name)
+            if global_id:
+                _LOGGER.warning("Found globalId: %s", global_id)
+                return self.async_show_form(
+                    step_id="user_config",
+                    data_schema=self._user_config_schema(global_id)
+                )
+            else:
+                _LOGGER.warning("No globalId found for station name: %s", station_name)
+                return self.async_show_form(
+                    step_id="station_search",
+                    data_schema=self._station_search_schema(),
+                    errors={"base": "station_not_found"}
+                )
+
+        return self.async_show_form(
+            step_id="station_search",
+            data_schema=self._station_search_schema()
+        )
+
+    async def async_step_user_config(self, user_input=None):
+        """Handle the user configuration step after station search."""
+        _LOGGER.warning("async_step_user_config called with user_input: %s", user_input)
+
         if user_input is not None:
             if not self._is_valid(user_input):
-                errors["base"] = "invalid_input"
-            else:
-                # Convert selected transport types to a comma-separated string
-                if CONF_TRANSPORTTYPES in user_input:
-                    user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
-                
-                return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
+                _LOGGER.warning("Invalid user_input: %s", user_input)
+                return self.async_show_form(
+                    step_id="user_config",
+                    data_schema=self._user_config_schema(user_input[CONF_GLOBALID]),
+                    errors={"base": "invalid_input"}
+                )
+            
+            # Convert selected transport types to a comma-separated string
+            if CONF_TRANSPORTTYPES in user_input:
+                user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
+            
+            return self.async_create_entry(
+                title=user_input[CONF_NAME],
+                data=user_input
+            )
 
-        # Define the schema with multi-select for transport types
-        transport_types = DEFAULT_CONF_TRANSPORTTYPES.split(',')
+        # Prepare the schema for user configuration
+        return self.async_show_form(
+            step_id="user_config",
+            data_schema=self._user_config_schema(None)
+        )
 
-        self.data_schema = vol.Schema({
+    def _is_valid(self, user_input):
+        """Validate user input."""
+        return True
+
+    async def _fetch_globalid(self, station_name):
+        """Fetch the globalId for the given station name."""
+        import aiohttp
+
+        _LOGGER.warning("Fetching globalId for station name: %s", station_name)
+        url = f"https://www.mvg.de/api/fib/v2/location?query={station_name}"
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data and isinstance(data, list):
+                        for entry in data:
+                            if entry.get("type") == "STATION":
+                                return entry.get("globalId")
+
+        return None
+
+    def _station_search_schema(self):
+        """Return the schema for the station search form."""
+        return vol.Schema({
+            vol.Required("station_name"): str,
+        })
+
+    def _user_config_schema(self, global_id):
+        """Return the schema for the user configuration form."""
+        return vol.Schema({
             vol.Required(CONF_NAME): str,
-            vol.Required(CONF_GLOBALID): str,
+            vol.Required(CONF_GLOBALID, default=global_id): str,
             vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): str,
             vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): int,
-            vol.Optional(CONF_TRANSPORTTYPES, default=transport_types): selector({
+            vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES.split(',')): selector({
                 "select": {
-                    "options": transport_types,
-                    "multiple": True,  # Erlaubt die Auswahl mehrerer Optionen
-                    "custom_value": True  # Erlaubt benutzerdefinierte Eingaben
+                    "options": DEFAULT_CONF_TRANSPORTTYPES.split(','),
+                    "multiple": True,
+                    "custom_value": True
                 }
             }),
             vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): str,
@@ -75,16 +162,6 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): str,
             vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR): str,
         })
-
-        return self.async_show_form(
-            step_id="user",
-            data_schema=self.data_schema,
-            errors=errors
-        )
-
-    def _is_valid(self, user_input):
-        """Validate user input."""
-        return True
 
 class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options flow for Another MVG."""
@@ -100,17 +177,17 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             if CONF_TRANSPORTTYPES in user_input:
                 user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
 
-            # Speichere die geänderten Daten
+            # Save the updated data
             self.hass.config_entries.async_update_entry(
                 self.config_entry, data=user_input
             )
             
-            # Starte die Sensor-Integration neu, um die neuen Daten zu laden
+            # Reload the integration to apply changes
             await self.hass.config_entries.async_reload(self.config_entry.entry_id)
 
             return self.async_create_entry(title="", data={})
 
-        # Bereite die Standardwerte vor, basierend auf den aktuellen Konfigurationsdaten
+        # Prepare the default values based on current configuration data
         current_data = self.config_entry.data
         transport_types = DEFAULT_CONF_TRANSPORTTYPES.split(',')
         selected_transport_types = current_data.get(CONF_TRANSPORTTYPES, '').split(',')
