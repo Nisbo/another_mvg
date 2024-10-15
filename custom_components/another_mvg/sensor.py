@@ -25,6 +25,7 @@ from .const import (
     CONF_GLOBALID,
     CONF_GLOBALID2,
     CONF_HIDEDESTINATION,
+    CONF_ONLYDESTINATION,
     CONF_HIDENAME,
     CONF_LIMIT,
     CONF_ONLYLINE,
@@ -36,6 +37,7 @@ from .const import (
     MVGException,
     DEFAULT_ONLYLINE,
     DEFAULT_HIDEDESTINATION,
+    DEFAULT_ONLYDESTINATION,
     DEFAULT_LIMIT,
     DEFAULT_CONF_DOUBLESTATIONNUMBER,
     DEFAULT_CONF_TRANSPORTTYPES,
@@ -59,6 +61,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_NAME): cv.string,
         vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): cv.string,
         vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): cv.string,
+        vol.Optional(CONF_ONLYDESTINATION, default=DEFAULT_ONLYDESTINATION): cv.string,
         vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): cv.positive_int,
         vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): cv.string,
         vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES): cv.string,
@@ -124,6 +127,7 @@ class ConnectionInfo(SensorEntity):
         self._onlyline = config[CONF_ONLYLINE]
         self._limit = config[CONF_LIMIT]
         self._hidedestination = config[CONF_HIDEDESTINATION]
+        self._onlydestination = config[CONF_ONLYDESTINATION]
         self._globalid = config[CONF_GLOBALID]
         self._globalid2 = config[CONF_GLOBALID2]
         self._name = config[CONF_NAME]
@@ -194,20 +198,27 @@ class ConnectionInfo(SensorEntity):
             number = departure_alarm.number
             delay_in_minutes = departure_alarm.delayInMinutes
             self._custom_attributes[f'notifyLateMvgConnection{label}_{number}'] = delay_in_minutes
-
+        
     def convert_timestamp_timezone(
         self,
         timestamp: int,
         from_timezone: str,
         to_timezone: str,
         output_format: str = "",
-    ) -> datetime:
-        """Convert epoch to timezone datetime."""
-        dt = datetime.fromtimestamp(timestamp).replace(tzinfo=ZoneInfo(from_timezone))
+    ) -> str:
+        """Convert epoch timestamp to timezone-aware datetime and format it."""
+        # First, create a timezone-aware datetime object from the timestamp and the from_timezone
+        dt = datetime.fromtimestamp(timestamp, tz=ZoneInfo(from_timezone))
+        
+        # Convert to the target timezone
+        dt_converted = dt.astimezone(ZoneInfo(to_timezone))
+        
+        # Return the formatted datetime string if output_format is specified
         if output_format:
-            return dt.replace(tzinfo=ZoneInfo(to_timezone)).strftime(output_format)
-        return dt.replace(tzinfo=ZoneInfo(to_timezone))
-
+            return dt_converted.strftime(output_format)
+        
+        return dt_converted
+        
     def get_departures(self) -> str:
         """Get departure data."""
 
@@ -338,6 +349,13 @@ class ConnectionInfo(SensorEntity):
             if (
                 self._hidedestination != ""
                 and departure["destination"].lower() in self._hidedestination.lower()
+            ):
+                continue
+            
+            # if self._onlydestination is set, check if it is the correct destination
+            if (
+                self._onlydestination != ""
+                and departure["destination"].lower() not in self._onlydestination.lower()
             ):
                 continue
             
