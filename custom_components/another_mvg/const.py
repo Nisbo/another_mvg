@@ -16,6 +16,7 @@ CONF_GLOBALID2 = "globalid2"  # optional but not recommened because of 2 API cal
 CONF_ONLYLINE = "onlyline"  # optional
 CONF_LIMIT = "limit"  # optional --> max 80
 CONF_HIDEDESTINATION = "hidedestination"  # optional
+CONF_ONLYDESTINATION = "onlydestination"  # optional
 CONF_DOUBLESTATIONNUMBER = "doublestationnumber"  # optional --> any String, if you want the globalid more than 1 times
 CONF_TRANSPORTTYPES = "transporttypes"  # SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS (SCHIFF - There is a parameter in the MVG API, but dont know if it will return data, at the moment not supported) BAHN is also possible but not enabled by default
 CONF_HIDENAME = "hidename"  # Hide the name of the card
@@ -24,6 +25,7 @@ CONF_TIMEZONE_TO = "timezone_to"  # like "Europe/Berlin"
 CONF_ALERT_FOR = "alert_for"  # optional
 
 DEFAULT_HIDEDESTINATION = ""
+DEFAULT_ONLYDESTINATION = ""
 DEFAULT_ONLYLINE = ""
 DEFAULT_LIMIT = 6
 DEFAULT_CONF_DOUBLESTATIONNUMBER = ""
