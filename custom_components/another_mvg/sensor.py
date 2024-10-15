@@ -480,3 +480,4 @@ class ConnectionInfo(SensorEntity):
             raise MVGException(
                 f"AnotherMVG: Other problem while connecting to the MVG API for {global_id} - {name}"
             ) from ex
+
