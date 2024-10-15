@@ -10,6 +10,7 @@ from .const import (
     CONF_GLOBALID,
     CONF_ONLYLINE,
     CONF_HIDEDESTINATION,
+    CONF_ONLYDESTINATION,
     CONF_LIMIT,
     CONF_DOUBLESTATIONNUMBER,
     CONF_TRANSPORTTYPES,
@@ -20,6 +21,7 @@ from .const import (
     CONF_ALERT_FOR,
     DEFAULT_ONLYLINE,
     DEFAULT_HIDEDESTINATION,
+    DEFAULT_ONLYDESTINATION,
     DEFAULT_LIMIT,
     DEFAULT_CONF_DOUBLESTATIONNUMBER,
     DEFAULT_CONF_TRANSPORTTYPES,
@@ -48,6 +50,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         _LOGGER.warning("async_step_user called with user_input: %s", user_input)
 
         if user_input is not None:
+            # check if a globalid de:09162:10 is submitted
             # Handle the search if user_input is provided
             return await self.async_step_station_search(user_input)
 
@@ -189,6 +192,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }),
             vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): str,
             vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): str,
+            vol.Optional(CONF_ONLYDESTINATION, default=DEFAULT_ONLYDESTINATION): str,
             vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME): bool,
             vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
             vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): str,
@@ -206,11 +210,18 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
+            
+            # Ensure that empty fields are stored as empty strings
+            for key in [CONF_ONLYLINE, CONF_HIDEDESTINATION, CONF_ONLYDESTINATION, CONF_DOUBLESTATIONNUMBER, 
+                        CONF_TIMEZONE_FROM, CONF_TIMEZONE_TO, CONF_ALERT_FOR, CONF_GLOBALID2]:
+                if key not in user_input:
+                    user_input[key] = ""  # Explicitly set the field to an empty string if it's not in the user_input
+            
             # Convert selected transport types to a comma-separated string
             if CONF_TRANSPORTTYPES in user_input:
                 user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
-
-            # Save the updated data
+            
+            # Save the updated data self.config_entry, data={**self.config_entry.data, **user_input}
             self.hass.config_entries.async_update_entry(
                 self.config_entry, data=user_input
             )
@@ -228,7 +239,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         self.options_schema = vol.Schema({
             vol.Required(CONF_NAME, default=current_data.get(CONF_NAME)): str,
             vol.Required(CONF_GLOBALID, default=current_data.get(CONF_GLOBALID)): str,
-            vol.Optional(CONF_GLOBALID2, default=current_data.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2)): str,
+            vol.Optional(CONF_GLOBALID2, description={"suggested_value": current_data.get(CONF_GLOBALID2, "")}): str,
             vol.Optional(CONF_LIMIT, default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
             vol.Optional(CONF_TRANSPORTTYPES, default=selected_transport_types): selector({
                 "select": {
@@ -237,13 +248,14 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                     "custom_value": True
                 }
             }),
-            vol.Optional(CONF_ONLYLINE, default=current_data.get(CONF_ONLYLINE, DEFAULT_ONLYLINE)): str,
-            vol.Optional(CONF_HIDEDESTINATION, default=current_data.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION)): str,
-            vol.Optional(CONF_HIDENAME, default=current_data.get(CONF_HIDENAME, DEFAULT_HIDENAME)): bool,
-            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=current_data.get(CONF_DOUBLESTATIONNUMBER, DEFAULT_CONF_DOUBLESTATIONNUMBER)): str,
-            vol.Optional(CONF_TIMEZONE_FROM, default=current_data.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM)): str,
-            vol.Optional(CONF_TIMEZONE_TO, default=current_data.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO)): str,
-            vol.Optional(CONF_ALERT_FOR, default=current_data.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR)): str,
+            vol.Optional(CONF_ONLYLINE,            description={"suggested_value": current_data.get(CONF_ONLYLINE, "")}): str,
+            vol.Optional(CONF_HIDEDESTINATION,     description={"suggested_value": current_data.get(CONF_HIDEDESTINATION, "")}): str,
+            vol.Optional(CONF_ONLYDESTINATION,     description={"suggested_value": current_data.get(CONF_ONLYDESTINATION, "")}): str,
+            vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
+            vol.Optional(CONF_DOUBLESTATIONNUMBER, description={"suggested_value": current_data.get(CONF_DOUBLESTATIONNUMBER, "")}): str,
+            vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
+            vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
+            vol.Optional(CONF_ALERT_FOR,           description={"suggested_value": current_data.get(CONF_ALERT_FOR, "")}): str,
         })
 
         return self.async_show_form(
