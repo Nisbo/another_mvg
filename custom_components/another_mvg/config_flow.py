@@ -59,7 +59,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if stations:
                     return self.async_show_form(
                         step_id="user",
-                        data_schema=self._user_config_schema(stations)
+                        data_schema=self._user_config_schema(stations, station_name)
                     )
                 else:
                     errors = {}
@@ -135,7 +135,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("station_name"): str,
         })
 
-    def _user_config_schema(self, stations):
+    def _user_config_schema(self, stations, station_name):
         """Return the schema for the user configuration form with station options."""
         options = [
             {"label": f"{station['name']} - {station['transportTypes']} ({station['globalId']})", "value": station['globalId']}
@@ -143,7 +143,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         ] if stations else []
 
         return vol.Schema({
-            vol.Required(CONF_NAME): str,
+            vol.Required(CONF_NAME, default=station_name): str,
             vol.Required(CONF_GLOBALID): selector({
                 "select": {
                     "options": options
