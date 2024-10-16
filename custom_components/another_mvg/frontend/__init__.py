@@ -23,11 +23,6 @@ class AnotherMvgCardRegistration:
     # install card resources
     async def async_register_another_mvg_path(self):
         # Register custom cards path if not already registered
-        #self.hass.http.register_static_path(
-        #    URL_BASE,
-        #    self.hass.config.path("custom_components/another_mvg/frontend"),
-        #    cache_headers=False,
-        #)
         await self.hass.http.async_register_static_paths([
             StaticPathConfig(
                 URL_BASE,
