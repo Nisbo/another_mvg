@@ -1,3 +1,5 @@
+## v1.5.1 Available to fix the API url (16.10.2024)
+
 ## v1.5.0 Now installation is also available via HACS (13.08.2024) thx @msp1974 (update instructions below)
 
 # another_mvg
