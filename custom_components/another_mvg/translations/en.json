@@ -1,5 +1,8 @@
 {
     "config": {
+        "error": {
+            "station_not_found": "The specified station was not found. Please check the name and try again."
+        },
         "step": {
             "user": {
                 "title": "Configure Another MVG",
@@ -7,8 +10,8 @@
                 "data": {
                     "globalid": "Global ID",
                     "name": "Name",
-                    "onlyline": "Only Line",
-                    "hidedestination": "Hide Destinations",
+                    "onlyline": "Only these Lines",
+                    "hidedestination": "Hide these Destinations",
                     "onlydestination": "Only these Destinations",
                     "limit": "Number of departures",
                     "doublestationnumber": "Double Station Number",
@@ -17,66 +20,34 @@
                     "hidename": "Hide the name of the card",
                     "timezone_from": "Timezone From",
                     "timezone_to": "Timezone To",
-                    "alert_for": "Alert For"
+                    "alert_for": "Alert Attributes For",
+                    "station_name": "Station name"
                 },
                 "data_description": {
                     "globalid": "Select your station / stop from the list above.",
                     "name": "Name to display in the Card",
-                    "onlyline": "If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.",
-                    "hidedestination": "If you want to hide some directions / destinations, you have to insert the EXACT names of the unwanted destinations like they are shown in the connection display. (card) The names should be ; separated.",
-                    "onlydestination": "If you want to see only some directions / destinations, you have to insert the EXACT names of the wanted destinations like they are shown in the connection display. (card) The names should be ; separated.",
-                    "limit": "By default you will see 6 departures. If you want to see more or less, you have to configure it. Die API will pull a maximum of 80 departures. If you use \"filters\" like hidedestination, witch filter out 40 entries, you will only see the remaining 40 as maximum.",
-                    "doublestationnumber": "If you want to create 2 or more cards for the same globalid, you have to use this parameter. (e.g. one for BUS, one for SBAHN, one for TRAM) It can be a number or a letter. Also more numbers or letters are possible. No special chars are allowed and also no space.",
-                    "transporttypes": "Transport Types",
-                    "globalid2": "If you have 2 stations close together (or far far away) like a train station and a bus stop, you can combine both in one card. Keep in mind, that you have to select all transportations in  transporttypes. The use of this function can lead to problems, because there are 2 API calls in 1 second and it can happen, that the API blocks the 2nd call. If you use it only in one card, it should be no problem. If you use more, the risk is higher that the API blocks the request. Here you have to insert the globalid from the 2nd station in the format like de:09162:2 as you can also see in the list for Global ID above. https://www.mvg.de/api/fib/v2/location?query=Pasing Just replace the name in the query. If there is more than one entry, you have to find the correct one. You can also start to create a new stop to get the globalid from the search results.",
+                    "onlyline": "If you want to see only certain lines, like S3, S4, and S20, you can configure them as a comma-separated list.",
+                    "hidedestination": "If you want to hide certain directions/destinations, you must enter the EXACT names of the unwanted destinations as they appear on the connection display (card). The names should be separated by semicolons.",
+                    "onlydestination": "If you want to see only specific directions/destinations, you must enter the EXACT names of the desired destinations as they appear on the connection display (card). The names should be separated by semicolons.",
+                    "limit": "By default, you will see 6 departures. If you want to see more or fewer, you can configure this setting. The API will retrieve a maximum of 80 departures. If you use filters like 'hidedestination' and it filters out 40 entries, you will only see the remaining 40 as the maximum.",
+                    "doublestationnumber": "If you want to create two or more cards for the same globalid (e.g., one for BUS, one for S-BAHN, one for TRAM), you need to use this parameter. It can be a number or a letter, and multiple numbers or letters are also allowed. No special characters or spaces are permitted.",
+                    "transporttypes": "Select the Transport Types you want to see in the card.",
+                    "globalid2": "If you have two stations close together (or far apart), such as a train station and a bus stop, you can combine both in one card. Keep in mind that you must select the transportation types in transporttypes for both stations. Using this function can lead to issues, as there will be two API calls within one second, and it’s possible that the API will block the second call. If you use it for only one card, it should not be a problem, but if you use it for more, the risk increases that the API will block the request. You need to insert the global ID from the second station in a format like de:09162:2, as shown in the Global ID list above. You can find it using the query https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing (just replace the name in the query). If there are multiple entries, you will need to find the correct one. Alternatively, you can start creating a new stop to get the global ID from the search results.",
                     "hidename": "If you don't want to see the name of the card, enable this option.",
-                    "timezone_from": "Like Europe/Berlin or UTC",
-                    "timezone_to": "Like Europe/Berlin or UTC",
-                    "alert_for": "Read the documetation for this option"
-                }
-            },
-            "user_config": {
-                "title": "Configure Another MVG",
-                "description": "Please provide the required information to set up the Another MVG integration.",
-                "data": {
-                    "globalid": "Global ID",
-                    "name": "Name",
-                    "onlyline": "Only Line",
-                    "hidedestination": "Hide Destinations",
-                    "onlydestination": "Only these Destinations",
-                    "limit": "Number of departures",
-                    "doublestationnumber": "Double Station Number",
-                    "transporttypes": "Transport Types",
-                    "globalid2": "Global ID 2",
-                    "hidename": "Hide the name of the card",
-                    "timezone_from": "Timezone From",
-                    "timezone_to": "Timezone To",
-                    "alert_for": "Alert For"
-                },
-                "data_description": {
-                    "globalid": "Select your station / stop from the list above.",
-                    "name": "Name to display in the Card",
-                    "onlyline": "If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.",
-                    "hidedestination": "If you want to hide some directions / destinations, you have to insert the EXACT names of the unwanted destinations like they are shown in the connection display. (card) The names should be ; separated.",
-                    "onlydestination": "If you want to see only some directions / destinations, you have to insert the EXACT names of the wanted destinations like they are shown in the connection display. (card) The names should be ; separated.",
-                    "limit": "By default you will see 6 departures. If you want to see more or less, you have to configure it. Die API will pull a maximum of 80 departures. If you use \"filters\" like hidedestination, witch filter out 40 entries, you will only see the remaining 40 as maximum.",
-                    "doublestationnumber": "If you want to create 2 or more cards for the same globalid, you have to use this parameter. (e.g. one for BUS, one for SBAHN, one for TRAM) It can be a number or a letter. Also more numbers or letters are possible. No special chars are allowed and also no space.",
-                    "transporttypes": "Transport Types",
-                    "globalid2": "If you have 2 stations close together (or far far away) like a train station and a bus stop, you can combine both in one card. Keep in mind, that you have to select all transportations in  transporttypes. The use of this function can lead to problems, because there are 2 API calls in 1 second and it can happen, that the API blocks the 2nd call. If you use it only in one card, it should be no problem. If you use more, the risk is higher that the API blocks the request. Here you have to insert the globalid from the 2nd station in the format like de:09162:2 as you can also see in the list for Global ID above. https://www.mvg.de/api/fib/v2/location?query=Pasing Just replace the name in the query. If there is more than one entry, you have to find the correct one. You can also start to create a new stop to get the globalid from the search results.",
-                    "hidename": "If you don't want to see the name of the card, enable this option.",
-                    "timezone_from": "Like Europe/Berlin or UTC",
-                    "timezone_to": "Like Europe/Berlin or UTC",
-                    "alert_for": "Read the documetation for this option"
+                    "timezone_from": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
+                    "timezone_to": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
+                    "alert_for": "If you want to create additional attributes for certain lines, like S3, S4, and S20, you can configure them as a comma-separated list. For more information, refer to the documentation.",
+                    "station_name": "Enter the name of the station you want to search for."
                 }
             },
             "station_search": {
                 "title": "Search for your station / stop",
-                "description": "Please provide the required information to set up the Another MVG integration.",
+                "description": "Please provide the necessary information to set up the Another MVG integration.",
                 "data": {
-                    "station_name": "Name of the station"
+                    "station_name": "Station name"
                 },
                 "data_description": {
-                    "station_name": "Insert the name of the station you want to search for."
+                    "station_name": "Enter the name of the station you want to search for."
                 }
             }
         }
@@ -88,8 +59,8 @@
                 "data": {
                     "globalid": "Global ID",
                     "name": "Name",
-                    "onlyline": "Only Line",
-                    "hidedestination": "Hide Destinations",
+                    "onlyline": "Only these Lines",
+                    "hidedestination": "Hide these Destinations",
                     "onlydestination": "Only these Destinations",
                     "limit": "Number of departures",
                     "doublestationnumber": "Double Station Number",
@@ -98,22 +69,22 @@
                     "hidename": "Hide the name of the card",
                     "timezone_from": "Timezone From",
                     "timezone_to": "Timezone To",
-                    "alert_for": "Alert For"
+                    "alert_for": "Alert Attributes For"
                 },
-				"data_description": {
-                    "globalid": "The station identifier of the stop/station/location. NOT the name of the station! Here you can find the globalid for your station. https://www.mvg.de/api/fib/v2/location?query=Pasing Just replace the name in the query. If there is more than one entry, you have to find the correct one.",
+                "data_description": {
+                    "globalid": "The station identifier for the stop/station/location. Normally, this entry is created automatically during the initial setup. It is NOT the name of the station! You can find the global ID for your station here: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Just replace the name in the query. If there are multiple entries, you will need to find the correct one.",
                     "name": "Name to display in the Card",
-                    "onlyline": "If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.",
-                    "hidedestination": "If you want to hide some directions / destinations, you have to insert the EXACT names of the unwanted destinations like they are shown in the connection display. (card) The names should be ; separated.",
-                    "onlydestination": "If you want to see only some directions / destinations, you have to insert the EXACT names of the wanted destinations like they are shown in the connection display. (card) The names should be ; separated.",
-                    "limit": "By default you will see 6 departures. If you want to see more or less, you have to configure it. Die API will pull a maximum of 80 departures. If you use \"filters\" like hidedestination, witch filter out 40 entries, you will only see the remaining 40 as maximum.",
-                    "doublestationnumber": "If you want to create 2 or more cards for the same globalid, you have to use this parameter. (e.g. one for BUS, one for SBAHN, one for TRAM) It can be a number or a letter. Also more numbers or letters are possible. No special chars are allowed and also no space.",
-                    "transporttypes": "Transport Types",
-                    "globalid2": "If you have 2 stations close together (or far far away) like a train station and a bus stop, you can combine both in one card. Keep in mind, that you have to insert all transportations in  transporttypes. The use of this function can lead to problems, because there are 2 API calls in 1 second and it can happen, that the API blocks the 2nd call. If you use it only in one card, it should be no problem. If you use more, the risk is higher that the API blocks the request.",
+                    "onlyline": "If you want to see only certain lines, like S3, S4, and S20, you can configure them as a comma-separated list.",
+                    "hidedestination": "If you want to hide certain directions/destinations, you must enter the EXACT names of the unwanted destinations as they appear on the connection display (card). The names should be separated by semicolons.",
+                    "onlydestination": "If you want to see only specific directions/destinations, you must enter the EXACT names of the desired destinations as they appear on the connection display (card). The names should be separated by semicolons.",
+                    "limit": "By default, you will see 6 departures. If you want to see more or fewer, you can configure this setting. The API will retrieve a maximum of 80 departures. If you use filters like 'hidedestination' and it filters out 40 entries, you will only see the remaining 40 as the maximum.",
+                    "doublestationnumber": "If you want to create two or more cards for the same globalid (e.g., one for BUS, one for S-BAHN, one for TRAM), you need to use this parameter. It can be a number or a letter, and multiple numbers or letters are also allowed. No special characters or spaces are permitted.",
+                    "transporttypes": "Select the Transport Types you want to see in the card.",
+                    "globalid2": "If you have two stations close together (or far apart), such as a train station and a bus stop, you can combine both in one card. Keep in mind that you must select the transportation types in transporttypes for both stations. Using this function can lead to issues, as there will be two API calls within one second, and it’s possible that the API will block the second call. If you use it for only one card, it should not be a problem, but if you use it for more, the risk increases that the API will block the request. You need to insert the global ID from the second station in a format like de:09162:2. You can find it using the query https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing (just replace the name in the query). If there are multiple entries, you will need to find the correct one. Alternatively, you can start creating a new stop to get the global ID from the search results.",
                     "hidename": "If you don't want to see the name of the card, enable this option.",
-                    "timezone_from": "Like Europe/Berlin or UTC",
-                    "timezone_to": "Like Europe/Berlin or UTC",
-                    "alert_for": "Read the documetation for this option"
+                    "timezone_from": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
+                    "timezone_to": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
+                    "alert_for": "If you want to create additional attributes for certain lines, like S3, S4, and S20, you can configure them as a comma-separated list. For more information, refer to the documentation."
                 }
             }
         }
