@@ -1,7 +1,7 @@
 {
   "domain": "another_mvg",
   "name": "Another MVG",
-  "version": "1.6.0-BETA-3",
+  "version": "1.6.0-BETA-4",
   "config_flow": true,
   "documentation": "https://github.com/Nisbo/another_mvg",
   "requirements": [],
