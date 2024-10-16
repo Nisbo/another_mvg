@@ -1,7 +1,7 @@
 {
   "domain": "another_mvg",
   "name": "Another MVG",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "documentation": "https://github.com/Nisbo/another_mvg",
   "requirements": [],
   "dependencies": [
