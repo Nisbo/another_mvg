@@ -8,7 +8,8 @@ class MVGException(Exception):
 DOMAIN = "another_mvg"  # name of the integration, dont change
 SCAN_INTERVAL = timedelta(seconds=60)  # updateinterval in seconds
 
-URL = "https://www.mvg.de/api/fib/v2/departure?globalId={}&limit=80&offsetInMinutes=0&transportTypes={}"
+#URL = "https://www.mvg.de/api/fib/v2/departure?globalId={}&limit=80&offsetInMinutes=0&transportTypes={}" # the old API URL
+URL = "https://www.mvg.de/api/bgw-pt/v3/departures?globalId={}&limit=80&offsetInMinutes=0&transportTypes={}"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 
 CONF_GLOBALID = "globalid"  # required
