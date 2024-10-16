@@ -4,6 +4,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers.selector import selector
+from homeassistant.data_entry_flow import section
 from homeassistant.const import CONF_NAME
 from .const import (
     DOMAIN,
@@ -46,93 +47,60 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return AnotherMVGOptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input=None):
-        """Handle the initial step."""
+        """Handle the initial step and configuration."""
         _LOGGER.warning("async_step_user called with user_input: %s", user_input)
 
         if user_input is not None:
-            # check if a globalid de:09162:10 is submitted
-            # Handle the search if user_input is provided
-            return await self.async_step_station_search(user_input)
+            if "station_name" in user_input:
+                # Handle station search
+                station_name = user_input.get("station_name")
+                stations = await self._fetch_stations(station_name)
 
-        # Show the search form if no user input is provided
-        return self.async_show_form(
-            step_id="station_search",
-            data_schema=self._station_search_schema()
-        )
+                if stations:
+                    return self.async_show_form(
+                        step_id="user",
+                        data_schema=self._user_config_schema(stations)
+                    )
+                else:
+                    errors = {}
+                    errors["base"] = "station_not_found"
+                    
+                    return self.async_show_form(
+                        step_id="user",
+                        data_schema=self._station_search_schema(),
+                        errors=errors
+                    )
+            
+            # If the user_input contains configuration, validate and create entry
+            if self._is_valid(user_input):
+                if CONF_TRANSPORTTYPES in user_input:
+                    user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
 
-    async def async_step_user_config(self, user_input=None):
-        """Handle the user configuration step after station search."""
-        _LOGGER.warning("async_step_user_config called with user_input: %s", user_input)
-
-        if user_input is not None:
-            if not self._is_valid(user_input):
-                _LOGGER.warning("Invalid user_input: %s", user_input)
-                return self.async_show_form(
-                    step_id="user_config",
-                    data_schema=self._user_config_schema(user_input),
-                    errors={"base": "invalid_input"}
+                return self.async_create_entry(
+                    title=user_input[CONF_NAME],
+                    data=user_input
                 )
-            
-            # Convert selected transport types to a comma-separated string
-            if CONF_TRANSPORTTYPES in user_input:
-                user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
-            
-            return self.async_create_entry(
-                title=user_input[CONF_NAME],
-                data=user_input
+
+            return self.async_show_form(
+                step_id="user",
+                data_schema=self._user_config_schema(None),
+                errors={"base": "invalid_input"}
             )
 
-        # Prepare the schema for user configuration
+        # Show station search form initially
         return self.async_show_form(
-            step_id="user_config",
-            data_schema=self._user_config_schema(None)
+            step_id="user",
+            data_schema=self._station_search_schema()
         )
 
     def _is_valid(self, user_input):
         """Validate user input."""
         return True
 
-    async def async_step_station_search(self, user_input=None):
-        """Handle the station search step."""
-        _LOGGER.warning("async_step_station_search called with user_input: %s", user_input)
-        
-        if user_input is not None:
-            station_name = user_input.get("station_name")
-            _LOGGER.warning("Searching for station with name: %s", station_name)
-
-            try:
-                stations = await self._fetch_stations(station_name)
-                _LOGGER.warning("Fetched stations: %s", stations)
-
-                if stations:
-                    return self.async_show_form(
-                        step_id="user_config",
-                        data_schema=self._user_config_schema(stations)
-                    )
-                else:
-                    _LOGGER.warning("No valid stations found for station name: %s", station_name)
-                    return self.async_show_form(
-                        step_id="station_search",
-                        data_schema=self._station_search_schema(),
-                        errors={"base": "station_not_found"}
-                    )
-            except Exception as e:
-                _LOGGER.error("Error fetching stations: %s", e)
-                return self.async_show_form(
-                    step_id="station_search",
-                    data_schema=self._station_search_schema(),
-                    errors={"base": "api_error"}
-                )
-
-        return self.async_show_form(
-            step_id="station_search",
-            data_schema=self._station_search_schema()
-        )
-
     async def _fetch_stations(self, station_name):
         """Fetch and filter stations for the given station name."""
         _LOGGER.warning("Fetching stations for station name: %s", station_name)
-        url = f"https://www.mvg.de/api/fib/v2/location?query={station_name}"
+        url = f"https://www.mvg.de/api/bgw-pt/v3/locations?query={station_name}"
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -172,7 +140,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         options = [
             {"label": f"{station['name']} - {station['transportTypes']} ({station['globalId']})", "value": station['globalId']}
             for station in stations
-        ]
+        ] if stations else []
 
         return vol.Schema({
             vol.Required(CONF_NAME): str,
@@ -181,8 +149,6 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "options": options
                 }
             }),
-            vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): str,
-            vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): int,
             vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES.split(',')): selector({
                 "select": {
                     "options": DEFAULT_CONF_TRANSPORTTYPES.split(','),
@@ -190,10 +156,12 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "custom_value": True
                 }
             }),
+            vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): int,
             vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): str,
             vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): str,
             vol.Optional(CONF_ONLYDESTINATION, default=DEFAULT_ONLYDESTINATION): str,
             vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME): bool,
+            vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): str,
             vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
             vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): str,
             vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): str,
@@ -239,8 +207,6 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         self.options_schema = vol.Schema({
             vol.Required(CONF_NAME, default=current_data.get(CONF_NAME)): str,
             vol.Required(CONF_GLOBALID, default=current_data.get(CONF_GLOBALID)): str,
-            vol.Optional(CONF_GLOBALID2, description={"suggested_value": current_data.get(CONF_GLOBALID2, "")}): str,
-            vol.Optional(CONF_LIMIT, default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
             vol.Optional(CONF_TRANSPORTTYPES, default=selected_transport_types): selector({
                 "select": {
                     "options": transport_types,
@@ -248,14 +214,25 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                     "custom_value": True
                 }
             }),
+            vol.Optional(CONF_LIMIT, default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
             vol.Optional(CONF_ONLYLINE,            description={"suggested_value": current_data.get(CONF_ONLYLINE, "")}): str,
             vol.Optional(CONF_HIDEDESTINATION,     description={"suggested_value": current_data.get(CONF_HIDEDESTINATION, "")}): str,
             vol.Optional(CONF_ONLYDESTINATION,     description={"suggested_value": current_data.get(CONF_ONLYDESTINATION, "")}): str,
-            vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
-            vol.Optional(CONF_DOUBLESTATIONNUMBER, description={"suggested_value": current_data.get(CONF_DOUBLESTATIONNUMBER, "")}): str,
-            vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
-            vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
-            vol.Optional(CONF_ALERT_FOR,           description={"suggested_value": current_data.get(CONF_ALERT_FOR, "")}): str,
+            # Items can be grouped by collapsible sections
+            #"advanced_options": section(
+            #    vol.Schema(
+			#	    {
+					    vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
+                        vol.Optional(CONF_GLOBALID2,           description={"suggested_value": current_data.get(CONF_GLOBALID2, "")}): str,
+                        vol.Optional(CONF_DOUBLESTATIONNUMBER, description={"suggested_value": current_data.get(CONF_DOUBLESTATIONNUMBER, "")}): str,
+                        vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
+                        vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
+                        vol.Optional(CONF_ALERT_FOR,           description={"suggested_value": current_data.get(CONF_ALERT_FOR, "")}): str,
+			#		}
+            #    ),
+            #    # Whether or not the section is initially collapsed (default = False)
+            #    {"collapsed": True},
+            #)
         })
 
         return self.async_show_form(
