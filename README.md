@@ -101,6 +101,8 @@ There are a lot of options but normally there is no need to configure all of the
 * Check configuration.yaml with the check function under Dev-Tools
 * Restart HA again
 
+⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend cahce.
+
 # 3. Adding a card to your dashboard
 * create a manual card with this content:
 ```
