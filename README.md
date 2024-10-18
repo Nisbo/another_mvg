@@ -72,6 +72,22 @@ Or use these steps:
 * click on add (bottom right)
 * search for ```nother mvg``` and follow the configuration flow
 
+Search for your stop / station
+
+![grafik](https://github.com/user-attachments/assets/6e45440b-4a4e-478c-80f5-fd8799a8e018)
+
+Select the correct stop from the matches and configure the wanted settings
+
+![grafik](https://github.com/user-attachments/assets/7fe76b64-bc47-440c-8427-d69f15c4ad6b)
+
+![grafik](https://github.com/user-attachments/assets/157027e1-6c64-4001-a9e4-fd694f893752)
+
+![grafik](https://github.com/user-attachments/assets/669dbb66-e78d-449a-87bc-63f5857dcf2e)
+
+![grafik](https://github.com/user-attachments/assets/7d9f31dc-54d0-4258-bd98-c9261c77ff82)
+
+
+
 ⚠️ It may take a minute to create the entity
 
 ## Option 2: via ```configuration.yaml```
