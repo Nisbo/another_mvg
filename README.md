@@ -117,6 +117,10 @@ entity: sensor.yourSensor
 
 ⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend / browser cache.
 
+⚠️ If you get the error state is undefined, wait a minute, there is currently no data available. After this, reload the page.
+
+⚠️ If the card / dashboard  completly not show up, wait a minute till the entity get some data and reload the page.
+
 # 4. Code for your configuration.yaml
 
 ### Add the name of this integration
