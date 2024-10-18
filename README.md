@@ -39,7 +39,7 @@ Usually, I am lazy and use the add-ons and integrations that already exist. Home
 
 | Some | Screenshots |
 |------|------|
-| <img src="https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68" alt="c679ee24-23a4-4ed5-8c15-858794d51f68" width="320"/> <br /> The normal View in a dashboard | <img src="https://github.com/Nisbo/another_mvg/assets/26260572/4a9133e4-4047-4fce-9240-0dbdbdf0e3c2" alt="20240301_152359025_iOS" width="500"/> <br /> On an Alexa Show 15 with external addon |
+| <img src="https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68" alt="c679ee24-23a4-4ed5-8c15-858794d51f68" width="320"/> <br /> The normal View in a dashboard | <img src="https://github.com/Nisbo/another_mvg/assets/26260572/4a9133e4-4047-4fce-9240-0dbdbdf0e3c2" alt="20240301_152359025_iOS" width="500"/> <br /> On an Alexa Show 15 with [MyPage](https://www.amazon.de/XdreaM-MyPage/dp/B09CG879RG) addon |
 | <img src="https://github.com/user-attachments/assets/59798b08-e622-4466-8229-1711bdd73221" alt="59798b08-e622-4466-8229-1711bdd73221" width="400"/> <br /> On an old Fire Tablet with [Wallpanel](https://wallpanel.xyz/) | <img src="https://github.com/user-attachments/assets/ed7e95b9-5dcb-492e-a110-b9cd90e22c6b" alt="ed7e95b9-5dcb-492e-a110-b9cd90e22c6b" width="200"/> <br /> On a [WT32-SC01 Plus](https://www.antratek.de/wt32-sco1-plus) with [OpenHASP](https://www.openhasp.com) Needs additional coding in automations.|
 
 More [Screenshots](#5-screenshots) at the bottom of this document.
