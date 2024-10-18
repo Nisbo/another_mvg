@@ -2,7 +2,16 @@
 
 # another_mvg
 
-[Installation](#1-installation)
+1. [Installation](#1-installation)  
+    1.1. [HACS installation (recommended)](#option-1-hacs-installation-recommended)  
+    1.2. [Manual Installation](#option-2-manual-installation)  
+
+2. [Create a sensor for your stop / station](#2-create-a-sensor-for-your-stop--station)  
+    2.1. [via GUI (recommended)](#option-1-via-gui-recommended)  
+    2.2. [via configuration.yaml](#option-2-via-configurationyaml)  
+
+3. [Adding a card to your dashboard](#3-adding-a-card-to-your-dashboard)
+
 
 **Why another MVG/MVV integration for Home Assistant?**
 
@@ -59,7 +68,7 @@ Or use these steps:
 * Check configuration.yaml with the check function under Dev-Tools
 * Restart HA again
 
-# 3. Adding a card to your dashboard**
+# 3. Adding a card to your dashboard
 * create a manual card with this content:
 ```
 type: custom:content-card-another-mvg
