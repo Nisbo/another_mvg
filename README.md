@@ -496,15 +496,11 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 - There is no need to reconfigure the configuration.yaml
 
 # 7. Credits
-To all the guys in the Home Assistant forum for the help. 
-
-@msp1974 for his code for the card integration
-
-To the MVG for the API. 
-
-To other guys on github, were I was able to learn more about python code and Home Assistant. 
-
-And to my best friend Google. ^^
+* To all the guys in the Home Assistant forum for the help. 
+* @msp1974 for his code for the card integration
+* To the MVG for the API. 
+* To other guys on github, were I was able to learn more about python code and Home Assistant. 
+* And to my best friend Google. ^^
 
 # 8. Disclaimer / Haftungsausschluss
 
