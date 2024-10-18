@@ -1,6 +1,6 @@
 ## v1.6.0 Now with GUI configuration
 
-# another_mvg
+# Another MVG
 
 1. [Installation](#1-installation)  
     1.1. [HACS installation (recommended)](#option-1-hacs-installation-recommended)  
@@ -11,6 +11,8 @@
     2.2. [via configuration.yaml](#option-2-via-configurationyaml)  
 
 3. [Adding a card to your dashboard](#3-adding-a-card-to-your-dashboard)
+
+4. [Code for your configuration.yaml](#4-code-for-your-configurationyaml)
 
 
 **Why another MVG/MVV integration for Home Assistant?**
@@ -83,7 +85,7 @@ entity: sensor.yourSensor
 * Enjoy
 
 
-# Code for your configuration.yaml
+# 4. Code for your configuration.yaml
 
 ### Add the name of this integration
 
