@@ -115,7 +115,7 @@ entity: sensor.yourSensor
 * replace ```sensor.yourSensor``` with the name of your sensor. Should be something with **sensor.name** where name, the name from the parameter in the configuration.yaml is.
 * Enjoy
 
-⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend cahce.
+⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend / browser cache.
 
 # 4. Code for your configuration.yaml
 
