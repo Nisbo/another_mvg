@@ -48,7 +48,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step and configuration."""
-        _LOGGER.warning("async_step_user called with user_input: %s", user_input)
+        #_LOGGER.warning("async_step_user called with user_input: %s", user_input)
 
         if user_input is not None:
             if "station_name" in user_input:
@@ -107,7 +107,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 async with session.get(url) as response:
                     if response.status == 200:
                         data = await response.json()
-                        _LOGGER.warning("API response: %s", data)
+                        #_LOGGER.warning("API response: %s", data)
                         # Filter out only entries with transportTypes
                         filtered_stations = [
                             {
@@ -118,7 +118,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             for entry in data
                             if "transportTypes" in entry and entry["type"] == "STATION"
                         ]
-                        _LOGGER.warning("Filtered stations: %s", filtered_stations)
+                        #_LOGGER.warning("Filtered stations: %s", filtered_stations)
                         return filtered_stations
                     else:
                         _LOGGER.error("API request failed with status: %s", response.status)
@@ -156,16 +156,16 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "custom_value": True
                 }
             }),
-            vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): int,
-            vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): str,
-            vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): str,
-            vol.Optional(CONF_ONLYDESTINATION, default=DEFAULT_ONLYDESTINATION): str,
-            vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME): bool,
-            vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): str,
+            vol.Optional(CONF_LIMIT,               default=DEFAULT_LIMIT): int,
+            vol.Optional(CONF_ONLYLINE,            default=DEFAULT_ONLYLINE): str,
+            vol.Optional(CONF_HIDEDESTINATION,     default=DEFAULT_HIDEDESTINATION): str,
+            vol.Optional(CONF_ONLYDESTINATION,     default=DEFAULT_ONLYDESTINATION): str,
+            vol.Optional(CONF_HIDENAME,            default=DEFAULT_HIDENAME): bool,
+            vol.Optional(CONF_GLOBALID2,           default=DEFAULT_CONF_GLOBALID2): str,
             vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
-            vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): str,
-            vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): str,
-            vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR): str,
+            vol.Optional(CONF_TIMEZONE_FROM,       default=DEFAULT_TIMEZONE_FROM): str,
+            vol.Optional(CONF_TIMEZONE_TO,         default=DEFAULT_TIMEZONE_TO): str,
+            vol.Optional(CONF_ALERT_FOR,           default=DEFAULT_ALERT_FOR): str,
         })
 
 class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
@@ -218,6 +218,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(CONF_ONLYLINE,            description={"suggested_value": current_data.get(CONF_ONLYLINE, "")}): str,
             vol.Optional(CONF_HIDEDESTINATION,     description={"suggested_value": current_data.get(CONF_HIDEDESTINATION, "")}): str,
             vol.Optional(CONF_ONLYDESTINATION,     description={"suggested_value": current_data.get(CONF_ONLYDESTINATION, "")}): str,
+			# not used at the moment because it looks like there is a bug in Home Assistant
             # Items can be grouped by collapsible sections
             #"advanced_options": section(
             #    vol.Schema(
