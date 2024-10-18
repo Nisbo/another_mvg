@@ -78,7 +78,7 @@ Search for your stop / station
 
 Select the correct stop from the matches and configure the wanted settings.
 
-There are a lot of options but normally there is no need to configure all of them. The easiest way is to select the Global ID and click on Create (Erstellen).
+There are a lot of options but normally there is no need to configure all of them. The easiest way is to select the Global ID and click on Apply (Bestätigen).
 
 ![grafik](https://github.com/user-attachments/assets/bee36eb8-7a89-4483-bee6-9bac25c6aa1a)
 
