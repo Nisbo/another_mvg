@@ -76,7 +76,9 @@ Search for your stop / station
 
 ![grafik](https://github.com/user-attachments/assets/6e45440b-4a4e-478c-80f5-fd8799a8e018)
 
-Select the correct stop from the matches and configure the wanted settings
+Select the correct stop from the matches and configure the wanted settings.
+
+There are a lot of options but normally there is no need to configure all of them. The easiest way is to select the Global ID and click on Create (Erstellen).
 
 ![grafik](https://github.com/user-attachments/assets/bee36eb8-7a89-4483-bee6-9bac25c6aa1a)
 
@@ -86,9 +88,8 @@ Select the correct stop from the matches and configure the wanted settings
 
 ![grafik](https://github.com/user-attachments/assets/7d9f31dc-54d0-4258-bd98-c9261c77ff82)
 
-
-
 ⚠️ It may take a minute to create the entity
+
 
 ## Option 2: via ```configuration.yaml```
 * Configure the configuration.yaml (see guide below)
