@@ -205,8 +205,8 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         selected_transport_types = current_data.get(CONF_TRANSPORTTYPES, '').split(',')
 
         self.options_schema = vol.Schema({
-            vol.Required(CONF_NAME, default=current_data.get(CONF_NAME)): str,
-            vol.Required(CONF_GLOBALID, default=current_data.get(CONF_GLOBALID)): str,
+            vol.Required(CONF_NAME,           default=current_data.get(CONF_NAME)): str,
+            vol.Required(CONF_GLOBALID,       default=current_data.get(CONF_GLOBALID)): str,
             vol.Optional(CONF_TRANSPORTTYPES, default=selected_transport_types): selector({
                 "select": {
                     "options": transport_types,
@@ -214,7 +214,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                     "custom_value": True
                 }
             }),
-            vol.Optional(CONF_LIMIT, default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
+            vol.Optional(CONF_LIMIT,               default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
             vol.Optional(CONF_ONLYLINE,            description={"suggested_value": current_data.get(CONF_ONLYLINE, "")}): str,
             vol.Optional(CONF_HIDEDESTINATION,     description={"suggested_value": current_data.get(CONF_HIDEDESTINATION, "")}): str,
             vol.Optional(CONF_ONLYDESTINATION,     description={"suggested_value": current_data.get(CONF_ONLYDESTINATION, "")}): str,
