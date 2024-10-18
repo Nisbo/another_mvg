@@ -23,7 +23,8 @@ Usually, I am lazy and use the add-ons and integrations that already exist. Home
  
 More screenshots at the bottom of this document.
 
-# HACS installation (recommended)
+# 1. Installation
+## Option 1: HACS installation (recommended)
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=another_mvg&owner=Nisbo)
 
 Or use these steps:
@@ -38,36 +39,26 @@ Or use these steps:
 * click on download (bottom right)
 * Restart HA
 
-**Create a sensor via GUI**
+
+## Option 2: Manual Installation
+* Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/custom_components) folder (the folder, not only the content of the folder) from the ```custom_components/``` folder to your ```config/custom_components/``` folder.
+* Restart HA
+
+# 2. Create a sensor for your stop / station
+## Option 1: via GUI (recommended)
 * go to settings
 * go to devices
 * click on add (bottom right)
-* search for ``ànother mvg```
+* search for ```nother mvg``` and follow the configuration flow
 
-**Create a sensor for your stop via configuration.yaml**
+⚠️ It may take a minute to create the entity
+
+## Option 2: via ```configuration.yaml```
 * Configure the configuration.yaml (see guide below)
 * Check configuration.yaml with the check function under Dev-Tools
 * Restart HA again
-* 
-* create a manual card with this content:
-```
-type: custom:content-card-another-mvg
-entity: sensor.yourSensor
-```
-* create a manual card with this content, if you want to use the card with the big font as a single card:
-```
-type: custom:content-card-another-mvg-big
-entity: sensor.yourSensor
-```
-* replace ```sensor.yourSensor``` with the name of your sensor. Should be something with **sensor.name** where name, the name from the parameter in the configuration.yaml is.
-* Enjoy
 
-# Manual Installation
-* Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/custom_components) folder (the folder, not only the content of the folder) from the ```custom_components/``` folder to your ```config/custom_components/``` folder.
-* Restart HA
-* Configure the configuration.yaml (see guide below)
-* Check configuration.yaml with the check function under Dev-Tools
-* Restart HA again
+# 3. Adding a card to your dashboard**
 * create a manual card with this content:
 ```
 type: custom:content-card-another-mvg
