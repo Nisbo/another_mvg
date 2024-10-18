@@ -1,4 +1,4 @@
-## v1.5.0 Now installation is also available via HACS (13.08.2024) thx @msp1974 (update instructions below)
+## v1.6.0 Now with GUI configuration
 
 # another_mvg
 
@@ -8,13 +8,13 @@
 Usually, I am lazy and use the add-ons and integrations that already exist. Home Assistant has plenty of them. While there are already some MVG integrations, some of them don't work or no longer function, and they may lack the features I desire. Since I had already programmed something similar in PHP for IP-Symcon, I have now implemented it in Home Assistant as well.
 
 
-This is my 1st integration for Home Assistant and also my 1st Python addon, so please be kind to me if something is not 100% perfect. ^^
-
 > [!IMPORTANT]
 > **This is an inofficial integration and does NOT belong to the MVG / MVV.**
 > 
 > **The use of the data (API) is for private use only (due to MVG rules, see bottom of this page).**
->
+> 
+> **MVG does not guarantee the availability or maintenance of the interface being used.**
+> 
 > **The integration itself, can be used private and comercial.**
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68)
@@ -24,6 +24,9 @@ This is my 1st integration for Home Assistant and also my 1st Python addon, so p
 More screenshots at the bottom of this document.
 
 # HACS installation (recommended)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=another_mvg&owner=Nisbo)
+
+Or use these steps:
 * In Home Assistant go to the HACS integration (you can find the link in the left admin menu)
 * on the top right click on the 3 dots
 * click on "Custom Repositories"
@@ -34,9 +37,18 @@ More screenshots at the bottom of this document.
 * search for "Another MVG" and click on it
 * click on download (bottom right)
 * Restart HA
+
+**Create a sensor via GUI**
+* go to settings
+* go to devices
+* click on add (bottom right)
+* search for ``ànother mvg```
+
+**Create a sensor for your stop via configuration.yaml**
 * Configure the configuration.yaml (see guide below)
 * Check configuration.yaml with the check function under Dev-Tools
 * Restart HA again
+* 
 * create a manual card with this content:
 ```
 type: custom:content-card-another-mvg
