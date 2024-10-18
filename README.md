@@ -41,6 +41,9 @@ Usually, I am lazy and use the add-ons and integrations that already exist. Home
 
 <img src="https://github.com/Nisbo/another_mvg/assets/26260572/4a9133e4-4047-4fce-9240-0dbdbdf0e3c2" alt="20240301_152359025_iOS" width="500"/>
 
+<img src="https://github.com/user-attachments/assets/59798b08-e622-4466-8229-1711bdd73221" alt="59798b08-e622-4466-8229-1711bdd73221" width="400"/>
+
+<img src="https://github.com/user-attachments/assets/ed7e95b9-5dcb-492e-a110-b9cd90e22c6b" alt="ed7e95b9-5dcb-492e-a110-b9cd90e22c6b" width="200"/>
  
 More screenshots at the bottom of this document.
 
