@@ -101,8 +101,6 @@ There are a lot of options but normally there is no need to configure all of the
 * Check configuration.yaml with the check function under Dev-Tools
 * Restart HA again
 
-⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend cahce.
-
 # 3. Adding a card to your dashboard
 * create a manual card with this content:
 ```
@@ -117,6 +115,7 @@ entity: sensor.yourSensor
 * replace ```sensor.yourSensor``` with the name of your sensor. Should be something with **sensor.name** where name, the name from the parameter in the configuration.yaml is.
 * Enjoy
 
+⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend cahce.
 
 # 4. Code for your configuration.yaml
 
