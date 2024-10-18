@@ -78,7 +78,7 @@ Search for your stop / station
 
 Select the correct stop from the matches and configure the wanted settings
 
-![grafik](https://github.com/user-attachments/assets/7fe76b64-bc47-440c-8427-d69f15c4ad6b)
+![grafik](https://github.com/user-attachments/assets/bee36eb8-7a89-4483-bee6-9bac25c6aa1a)
 
 ![grafik](https://github.com/user-attachments/assets/157027e1-6c64-4001-a9e4-fd694f893752)
 
