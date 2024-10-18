@@ -97,7 +97,7 @@ There are a lot of options but normally there is no need to configure all of the
 
 
 ## Option 2: via ```configuration.yaml```
-* Configure the configuration.yaml (see guide below)
+* Configure the configuration.yaml [(see guide below)](#4-code-for-your-configurationyaml)
 * Check configuration.yaml with the check function under Dev-Tools
 * Restart HA again
 
