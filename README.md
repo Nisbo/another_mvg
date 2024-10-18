@@ -1,4 +1,4 @@
-## v1.6.0 Now with GUI configuration
+## v1.6.0 Now with GUI configuration (German and English)
 
 # Another MVG
 
@@ -10,9 +10,17 @@
     2.1. [via GUI (recommended)](#option-1-via-gui-recommended)  
     2.2. [via configuration.yaml](#option-2-via-configurationyaml)  
 
-3. [Adding a card to your dashboard](#3-adding-a-card-to-your-dashboard)
+3. [Adding a card to your dashboard](#3-adding-a-card-to-your-dashboard)  
 
-4. [Code for your configuration.yaml](#4-code-for-your-configurationyaml)
+4. [Code for your configuration.yaml](#4-code-for-your-configurationyaml)  
+
+5. [Screenshots](#5-screenshots)  
+
+6. [Change log](#6-change-log)  
+
+7. [Credits](#7-credits)  
+
+8. [Disclaimer / Haftungsausschluss](#8-disclaimer--haftungsausschluss)
 
 
 **Why another MVG/MVV integration for Home Assistant?**
@@ -328,8 +336,8 @@ sensor:
     hidename: True
 ```
 
-# Browser View
-
+# 5. Screenshots
+## Browser View
 
 ### Pasing all departures
 
@@ -415,7 +423,7 @@ sensor:
 ```
 
 
-# Mobile App View
+## Mobile App View
 
 | Mobile App View  | Mobile App View |
 | ------------- | ------------- |
@@ -423,7 +431,7 @@ sensor:
 | ![IMG_5433](https://github.com/Nisbo/another_mvg/assets/26260572/fb3b9fd0-7753-43c8-a8e8-902e53114623) | ![IMG_5434](https://github.com/Nisbo/another_mvg/assets/26260572/0ae7381b-a0d0-4995-b241-7ca9c7b3557c) |
 
 
-# Change log
+# 6. Change log
 13.01.2024 - Version 1.1.0
 - better error handling for connection problems
 
@@ -487,7 +495,7 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 - Remove the old Files and follow the instatuctions from the installation.
 - There is no need to reconfigure the configuration.yaml
 
-# Credits
+# 7. Credits
 To all the guys in the Home Assistant forum for the help. 
 
 @msp1974 for his code for the card integration
@@ -498,7 +506,7 @@ To other guys on github, were I was able to learn more about python code and Hom
 
 And to my best friend Google. ^^
 
-# Disclaimer / Haftungsausschluss
+# 8. Disclaimer / Haftungsausschluss
 
 ### Deutsch
 
