@@ -23,7 +23,11 @@
 8. [Disclaimer / Haftungsausschluss](#8-disclaimer--haftungsausschluss)
 
 
-**Why another MVG/MVV integration for Home Assistant?**
+# Quick installation - for those who are familiar with the process.
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=another_mvg&owner=Nisbo)
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
+
+# Why another MVG/MVV integration for Home Assistant?
 
 Usually, I am lazy and use the add-ons and integrations that already exist. Home Assistant has plenty of them. While there are already some MVG integrations, some of them don't work or no longer function, and they may lack the features I desire. Since I had already programmed something similar in PHP for IP-Symcon, I have now implemented it in Home Assistant as well.
 
