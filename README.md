@@ -67,6 +67,7 @@ Or use these steps:
 
 # 2. Create a sensor for your stop / station
 ## Option 1: via GUI (recommended)
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
 * go to settings
 * go to devices
 * click on add (bottom right)
