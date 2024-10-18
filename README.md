@@ -2,6 +2,7 @@
 
 # another_mvg
 
+[Installation](#1-installation)
 
 **Why another MVG/MVV integration for Home Assistant?**
 
