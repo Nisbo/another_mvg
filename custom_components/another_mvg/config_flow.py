@@ -4,7 +4,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers.selector import selector
-from homeassistant.data_entry_flow import section
+from homeassistant import data_entry_flow
 from homeassistant.const import CONF_NAME
 from .const import (
     DOMAIN,
@@ -73,6 +73,42 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             
             # If the user_input contains configuration, validate and create entry
             if self._is_valid(user_input):
+                # check advanced_options and filter_options
+                advanced_options = user_input.get("advanced_options", {})
+                filter_options   = user_input.get("filter_options", {})
+        
+                # and convert the input
+		    	# this is because the section function creates an dictionary and I dont want this
+	    		# I only want an optical "collapsing"
+                if CONF_ALERT_FOR in advanced_options:
+                    user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
+          
+                if CONF_DOUBLESTATIONNUMBER in advanced_options:
+                    user_input[CONF_DOUBLESTATIONNUMBER] = advanced_options[CONF_DOUBLESTATIONNUMBER]
+        
+                if CONF_TIMEZONE_FROM in advanced_options:
+                    user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
+        
+                if CONF_TIMEZONE_TO in advanced_options:
+                    user_input[CONF_TIMEZONE_TO] = advanced_options[CONF_TIMEZONE_TO]
+        
+                if CONF_GLOBALID2 in advanced_options:
+                    user_input[CONF_GLOBALID2] = advanced_options[CONF_GLOBALID2]
+        
+                if CONF_HIDENAME in advanced_options:
+                    user_input[CONF_HIDENAME] = advanced_options[CONF_HIDENAME]
+
+
+                if CONF_ONLYLINE in filter_options:
+                    user_input[CONF_ONLYLINE] = filter_options[CONF_ONLYLINE]
+        
+                if CONF_HIDEDESTINATION in filter_options:
+                    user_input[CONF_HIDEDESTINATION] = filter_options[CONF_HIDEDESTINATION]
+        
+                if CONF_ONLYDESTINATION in filter_options:
+                    user_input[CONF_ONLYDESTINATION] = filter_options[CONF_ONLYDESTINATION]
+
+
                 if CONF_TRANSPORTTYPES in user_input:
                     user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
 
@@ -99,7 +135,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _fetch_stations(self, station_name):
         """Fetch and filter stations for the given station name."""
-        _LOGGER.warning("Fetching stations for station name: %s", station_name)
+        # _LOGGER.warning("Fetching stations for station name: %s", station_name)
         url = f"https://www.mvg.de/api/bgw-pt/v3/locations?query={station_name}"
 
         try:
@@ -157,15 +193,33 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             }),
             vol.Optional(CONF_LIMIT,               default=DEFAULT_LIMIT): int,
-            vol.Optional(CONF_ONLYLINE,            default=DEFAULT_ONLYLINE): str,
-            vol.Optional(CONF_HIDEDESTINATION,     default=DEFAULT_HIDEDESTINATION): str,
-            vol.Optional(CONF_ONLYDESTINATION,     default=DEFAULT_ONLYDESTINATION): str,
-            vol.Optional(CONF_HIDENAME,            default=DEFAULT_HIDENAME): bool,
-            vol.Optional(CONF_GLOBALID2,           default=DEFAULT_CONF_GLOBALID2): str,
-            vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
-            vol.Optional(CONF_TIMEZONE_FROM,       default=DEFAULT_TIMEZONE_FROM): str,
-            vol.Optional(CONF_TIMEZONE_TO,         default=DEFAULT_TIMEZONE_TO): str,
-            vol.Optional(CONF_ALERT_FOR,           default=DEFAULT_ALERT_FOR): str,
+			# Filter
+            vol.Required("filter_options"): data_entry_flow.section(
+                vol.Schema(
+				    {
+                        vol.Optional(CONF_ONLYLINE,            default=DEFAULT_ONLYLINE): str,
+                        vol.Optional(CONF_HIDEDESTINATION,     default=DEFAULT_HIDEDESTINATION): str,
+                        vol.Optional(CONF_ONLYDESTINATION,     default=DEFAULT_ONLYDESTINATION): str,
+					}
+                ),
+                # Whether or not the section is initially collapsed (default = False)
+                {"collapsed": True},
+            ),
+            # Advanced Options
+            vol.Required("advanced_options"): data_entry_flow.section(
+                vol.Schema(
+				    {
+                        vol.Optional(CONF_HIDENAME,            default=DEFAULT_HIDENAME): bool,
+                        vol.Optional(CONF_GLOBALID2,           default=DEFAULT_CONF_GLOBALID2): str,
+                        vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
+                        vol.Optional(CONF_TIMEZONE_FROM,       default=DEFAULT_TIMEZONE_FROM): str,
+                        vol.Optional(CONF_TIMEZONE_TO,         default=DEFAULT_TIMEZONE_TO): str,
+                        vol.Optional(CONF_ALERT_FOR,           default=DEFAULT_ALERT_FOR): str,
+					}
+                ),
+                # Whether or not the section is initially collapsed (default = False)
+                {"collapsed": True},
+            )
         })
 
 class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
@@ -178,7 +232,46 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
-            
+            # Log submitted user_input
+            # for key, value in user_input.items():
+            #    _LOGGER.error(f"Field: {key}, Value: {value}")
+
+            # check advanced_options and filter_options
+            advanced_options = user_input.get("advanced_options", {})
+            filter_options   = user_input.get("filter_options", {})
+        
+            # and convert the input
+			# this is because the section function creates an dictionary and I dont want this
+			# I only want an optical "collapsing"
+            if CONF_ALERT_FOR in advanced_options:
+                user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
+          
+            if CONF_DOUBLESTATIONNUMBER in advanced_options:
+                user_input[CONF_DOUBLESTATIONNUMBER] = advanced_options[CONF_DOUBLESTATIONNUMBER]
+        
+            if CONF_TIMEZONE_FROM in advanced_options:
+                user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
+        
+            if CONF_TIMEZONE_TO in advanced_options:
+                user_input[CONF_TIMEZONE_TO] = advanced_options[CONF_TIMEZONE_TO]
+        
+            if CONF_GLOBALID2 in advanced_options:
+                user_input[CONF_GLOBALID2] = advanced_options[CONF_GLOBALID2]
+        
+            if CONF_HIDENAME in advanced_options:
+                user_input[CONF_HIDENAME] = advanced_options[CONF_HIDENAME]
+
+
+            if CONF_ONLYLINE in filter_options:
+                user_input[CONF_ONLYLINE] = filter_options[CONF_ONLYLINE]
+        
+            if CONF_HIDEDESTINATION in filter_options:
+                user_input[CONF_HIDEDESTINATION] = filter_options[CONF_HIDEDESTINATION]
+        
+            if CONF_ONLYDESTINATION in filter_options:
+                user_input[CONF_ONLYDESTINATION] = filter_options[CONF_ONLYDESTINATION]
+
+
             # Ensure that empty fields are stored as empty strings
             for key in [CONF_ONLYLINE, CONF_HIDEDESTINATION, CONF_ONLYDESTINATION, CONF_DOUBLESTATIONNUMBER, 
                         CONF_TIMEZONE_FROM, CONF_TIMEZONE_TO, CONF_ALERT_FOR, CONF_GLOBALID2]:
@@ -215,25 +308,33 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                 }
             }),
             vol.Optional(CONF_LIMIT,               default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
-            vol.Optional(CONF_ONLYLINE,            description={"suggested_value": current_data.get(CONF_ONLYLINE, "")}): str,
-            vol.Optional(CONF_HIDEDESTINATION,     description={"suggested_value": current_data.get(CONF_HIDEDESTINATION, "")}): str,
-            vol.Optional(CONF_ONLYDESTINATION,     description={"suggested_value": current_data.get(CONF_ONLYDESTINATION, "")}): str,
-			# not used at the moment because it looks like there is a bug in Home Assistant
-            # Items can be grouped by collapsible sections
-            #"advanced_options": section(
-            #    vol.Schema(
-			#	    {
+			# Filter
+            vol.Required("filter_options"): data_entry_flow.section(
+                vol.Schema(
+				    {
+                        vol.Optional(CONF_ONLYLINE,            description={"suggested_value": current_data.get(CONF_ONLYLINE, "")}): str,
+                        vol.Optional(CONF_HIDEDESTINATION,     description={"suggested_value": current_data.get(CONF_HIDEDESTINATION, "")}): str,
+                        vol.Optional(CONF_ONLYDESTINATION,     description={"suggested_value": current_data.get(CONF_ONLYDESTINATION, "")}): str,
+					}
+                ),
+                # Whether or not the section is initially collapsed (default = False)
+                {"collapsed": True},
+            ),
+            # Advanced Options
+            vol.Required("advanced_options"): data_entry_flow.section(
+                vol.Schema(
+				    {
 					    vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
                         vol.Optional(CONF_GLOBALID2,           description={"suggested_value": current_data.get(CONF_GLOBALID2, "")}): str,
                         vol.Optional(CONF_DOUBLESTATIONNUMBER, description={"suggested_value": current_data.get(CONF_DOUBLESTATIONNUMBER, "")}): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
                         vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
                         vol.Optional(CONF_ALERT_FOR,           description={"suggested_value": current_data.get(CONF_ALERT_FOR, "")}): str,
-			#		}
-            #    ),
-            #    # Whether or not the section is initially collapsed (default = False)
-            #    {"collapsed": True},
-            #)
+					}
+                ),
+                # Whether or not the section is initially collapsed (default = False)
+                {"collapsed": True},
+            )
         })
 
         return self.async_show_form(
