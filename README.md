@@ -200,6 +200,15 @@ The names should be ```;``` separated. They can be ```,``` or space sepatared, b
 
 ```   hidedestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
 
+### Only some destinations
+
+```   onlydestination: "Ostbahnhof;Holzkirchen"```
+
+If you want to see only some directions / destinations, you have to insert the EXACT names of the **wanted** destinations like they are shown in the connection display. (card)
+The names should be ```;``` separated. They can be ```,``` or space sepatared, but this can lead to problems if a ```,``` or a space is in the name of the destination.
+
+```   onlydestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
+
 ### Define the number of departures
 
 ```   limit: 15```
@@ -207,7 +216,7 @@ The names should be ```;``` separated. They can be ```,``` or space sepatared, b
 By default you will see 6 departures. If you want to see more or less, you have to configure it.
 Please add **_only a number_ and _no quotes_**.
 Die API will pull a maximum of 80 departures. 
-If you use "filters" like **hidedestination**, witch filter out 40 entries, you will only see the remaining 40 as maximum.
+If you use "filters" like **hidedestination** or **onlydestination**, witch filter out 40 entries, you will only see the remaining 40 as maximum.
 
 ### Hide the name of the card (the row above the yellow row)
 
@@ -532,12 +541,21 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 * Formerly planned and announced as v1.6.0, now released as v2.0.0 due to the **amount** of changes.
 * v2.0.0 includes a complete GUI configuration, following the integration in HACS from the last version.
 * Added language files for English and German.
+* added "Only some destinations"
+
+```   onlydestination: "Ostbahnhof;Holzkirchen"```
+
+If you want to see only some directions / destinations, you have to insert the EXACT names of the **wanted** destinations like they are shown in the connection display. (card)
+The names should be ```;``` separated. They can be ```,``` or space sepatared, but this can lead to problems if a ```,``` or a space is in the name of the destination.
+
+```   onlydestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
 * Improved error handling in the custom card if a sensor is unavailable or deleted.
   * ![grafik](https://github.com/user-attachments/assets/7735b742-8d59-4397-a65c-9b78657763be)
 * Improved data handling of the custom card during startup.
   * ![grafik](https://github.com/user-attachments/assets/deb45a8b-7d5c-48f6-8d1f-b7b09731a8f4)
 * Fixed the deprecation warning.
 * Updated documentation to improve the installation process.
+
 
 
 
