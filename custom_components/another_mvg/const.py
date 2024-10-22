@@ -42,11 +42,11 @@ ANOTHER_MVG_CARDS = [
     {
         "name": "Another MVG Card",
         "filename": "content-card-another-mvg.js",
-        "version": "1.6.0",
+        "version": "2.0.0",
     },
     {
         "name": "Another MVG Big Card",
         "filename": "content-card-another-mvg-big.js",
-        "version": "1.6.0",
+        "version": "2.0.0",
     },
 ]
