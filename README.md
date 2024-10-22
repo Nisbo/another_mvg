@@ -16,11 +16,12 @@
 
 5. [Screenshots](#5-screenshots)  
 
-6. [Change log](#6-change-log)  
+6. [Change log](#6-change-log)
+   [6.1 How to Update / Change from Manual Installation to HASC](#61-how-to-update--change-from-manual-installation-to-hasc)
 
-7. [Credits](#7-credits)  
+8. [Credits](#7-credits)  
 
-8. [Disclaimer / Haftungsausschluss](#8-disclaimer--haftungsausschluss)
+9. [Disclaimer / Haftungsausschluss](#8-disclaimer--haftungsausschluss)
 
 
 # Quick installation - for those who are familiar with the process.
@@ -557,6 +558,36 @@ The names should be ```;``` separated. They can be ```,``` or space sepatared, b
 * Updated documentation to improve the installation process.
 
 
+# 6.1 How to Update / Change from Manual Installation to HASC
+## HACS
+- After you got the update notification from Home Assistant, just click on "Install"
+- restart Home Assistant
+- make sure the frontend cache is cleared
+
+## Manual Update:
+- To update, replace all files with the new files (like during the installation) and restart HA.
+- Afterwards you have to clear the frontend cache on all devices.
+- There is no need to reconfigure the configuration.yaml
+
+## Change from manual installation to HACS
+
+### ⚠️ change from before v1.5.0 (< v1.5.0)
+:red_circle: Due to the fact, that Custom cards will be registered automatically, you have to remove these 2 files from your www folder. :red_circle:
+
+```
+content-card-another-mvg-big.js
+content-card-another-mvg.js
+```
+You also have to remove these 2 cards from
+Settings --> Dashboards --> 3 dots on the top right --> Resources
+```
+/local/content-card-another-mvg.js
+/local/content-card-another-mvg-big.js
+```
+- Remove the old Files and follow the instructions from the installation.
+
+### from v1.5.0 (>= v1.5.0)
+- Remove the old Files and follow the instructions from the installation.
 
 
 # 7. Credits
