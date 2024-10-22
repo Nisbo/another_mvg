@@ -1,4 +1,4 @@
-## v1.6.0 Now with GUI configuration (German and English)
+## v2.0.0 Now with GUI configuration (German and English)
 
 # Another MVG
 
