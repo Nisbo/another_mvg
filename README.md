@@ -72,26 +72,41 @@ Or use these steps:
 # 2. Create a sensor for your stop / station
 ## Option 1: via GUI (recommended)
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
-* go to settings
-* go to devices
-* click on add (bottom right)
+
+Or use these steps:
+* go to ```Settings```
+* go to ```Devices and services```
+* click on ```+ ADD INTEGRATION``` (bottom right)
 * search for ```nother mvg``` and follow the configuration flow
 
-Search for your stop / station
+1. Search for your stop / station
 
-![grafik](https://github.com/user-attachments/assets/6e45440b-4a4e-478c-80f5-fd8799a8e018)
+2. Select the correct stop from the matches and configure the wanted settings.
 
-Select the correct stop from the matches and configure the wanted settings.
+3. There are a lot of options but normally there is no need to configure all of them. The easiest way is to select the Global ID and click on ```SUBMIT``` (```BESTÄTIGEN```).
 
-There are a lot of options but normally there is no need to configure all of them. The easiest way is to select the Global ID and click on Apply (Bestätigen).
+| German | English |
+|------|------|
+| ![grafik](https://github.com/user-attachments/assets/6e45440b-4a4e-478c-80f5-fd8799a8e018) | ![grafik](https://github.com/user-attachments/assets/91910f38-1d63-4850-b482-87a4346b2057) |
+| ![grafik](https://github.com/user-attachments/assets/bde44c38-aea8-4be6-941b-41ee9483854d) | ![grafik](https://github.com/user-attachments/assets/aeefdba7-e4a9-4478-ad2c-6c11818abe67) |
+| Filter für Linien und Ziele | Filter for lines and destinations |
+| ![grafik](https://github.com/user-attachments/assets/996042c3-a337-4c9d-8b3e-7ecc68e10735) | ![grafik](https://github.com/user-attachments/assets/4146f6c0-b68a-4a0d-9bd3-3200932d0f0c) |
+| Erweiterte Einstellungen | Advanced options  |
+| ![grafik](https://github.com/user-attachments/assets/bab782bf-e68a-445f-8a90-7c4877a659c8) | ![grafik](https://github.com/user-attachments/assets/aaa530fc-2043-49d9-be2d-ff24585e6c06) |
 
-![grafik](https://github.com/user-attachments/assets/bee36eb8-7a89-4483-bee6-9bac25c6aa1a)
 
-![grafik](https://github.com/user-attachments/assets/157027e1-6c64-4001-a9e4-fd694f893752)
 
-![grafik](https://github.com/user-attachments/assets/669dbb66-e78d-449a-87bc-63f5857dcf2e)
 
-![grafik](https://github.com/user-attachments/assets/7d9f31dc-54d0-4258-bd98-c9261c77ff82)
+ 
+
+
+
+
+
+
+
+
+
 
 ⚠️ It may take a minute to create the entity
 
