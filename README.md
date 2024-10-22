@@ -17,7 +17,7 @@
 5. [Screenshots](#5-screenshots)  
 
 6. [Change log](#6-change-log)  
-    6.1. [How to Update / Change from Manual Installation to HASC](#61-how-to-update--change-from-manual-installation-to-hasc)
+    6.1. [How to Update / Change from Manual Installation to HACS](#61-how-to-update--change-from-manual-installation-to-hacs)
 
 8. [Credits](#7-credits)  
 
@@ -531,7 +531,7 @@ The names should be ```;``` separated. They can be ```,``` or space sepatared, b
 * Updated documentation to improve the installation process.
 
 
-# 6.1 How to Update / Change from Manual Installation to HASC
+# 6.1 How to Update / Change from Manual Installation to HACS
 ## Update via HACS:
 - After you got the update notification from Home Assistant, just click on "Install"
 - restart Home Assistant
