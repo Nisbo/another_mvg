@@ -5,7 +5,6 @@ class ContentAnotherMVGbig extends HTMLElement {
     // Initialize the content if it's not there yet.
     if (!this.content) {
       const card    = document.createElement('ha-card');
-      //card.header = "Another MVG Card";
       this.content  = document.createElement('div');
       const style   = document.createElement('style');
 
@@ -44,7 +43,6 @@ class ContentAnotherMVGbig extends HTMLElement {
           border-radius: 0 0 10px 0;
         }
 
-
         table tr td:last-child {
           white-space: nowrap;
         }
@@ -79,13 +77,13 @@ class ContentAnotherMVGbig extends HTMLElement {
 		  height:50px;
         }
         
-		/* Table Content - Departure Lines */
-		.departureline {
+	/* Table Content - Departure Lines */
+	.departureline {
           height:65px;
-		  font-size:3.9em;
-		  vertical-align: middle;
-		  color: #FFFFFF;
-		}
+	  font-size:3.9em;
+	  vertical-align: middle;
+	  color: #FFFFFF;
+	}
 
         /* Name of the card - from name parameter */
         .amvg-cardname {
