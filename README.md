@@ -149,7 +149,7 @@ Here you can find the globalid for your station.
 > ```https://www.mvg.de/api/bgw-pt/v3/locations?query=pasing```
 > Just replace the name in the query. If there is more than one entry, you have to find the correct one. I recommend to open the link on your PC/Notebook.
 
-[https://www.mvg.de/api/fib/v2/location?query=Pasing](https://www.mvg.de/api/bgw-pt/v3/locations?query=pasing)
+https://www.mvg.de/api/bgw-pt/v3/locations?query=pasing
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/ec7bfb9b-48a0-45bc-a50d-16d960433caa)
 
