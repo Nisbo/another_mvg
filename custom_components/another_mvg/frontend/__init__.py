@@ -10,7 +10,6 @@ from ..const import URL_BASE, ANOTHER_MVG_CARDS
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class AnotherMvgCardRegistration:
     def __init__(self, hass):
         self.hass = hass
@@ -37,7 +36,7 @@ class AnotherMvgCardRegistration:
                 await self.async_register_another_mvg_cards()
             else:
                 _LOGGER.debug(
-                    "Unable to install another_mvg card resources because Lovelace resources not yet loaded.  Trying again in 5 seconds."
+                    "Unable to install another_mvg card resources because Lovelace resources not yet loaded. Trying again in 5 seconds."
                 )
                 async_call_later(self.hass, 5, check_lovelace_resources_loaded)
 
