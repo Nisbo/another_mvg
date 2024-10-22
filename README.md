@@ -528,6 +528,16 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 - Remove the old Files and follow the instatuctions from the installation.
 - There is no need to reconfigure the configuration.yaml
 
+## XX.10.2024 - Version 2.0.0
+* Former planned and announced as v1.6.0 now released as v2.0.0 due to the ammount of changes.
+* v2.0.0 includes, after the integration in HACS in the last version, now a complete GUI configuration.
+* Improved the error handling of the custom card if a sensor is not available or deleted.
+* ![grafik](https://github.com/user-attachments/assets/7735b742-8d59-4397-a65c-9b78657763be)
+* Improved the data handling of the custom card during startup
+* ![grafik](https://github.com/user-attachments/assets/deb45a8b-7d5c-48f6-8d1f-b7b09731a8f4)
+* Fixed the deprecation warning
+
+
 # 7. Credits
 * To all the guys in the Home Assistant forum for the help. 
 * @msp1974 for his code for the card integration
