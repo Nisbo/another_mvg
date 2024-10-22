@@ -475,10 +475,10 @@ sensor:
 
 
 # 6. Change log
-13.01.2024 - Version 1.1.0
+## 13.01.2024 - Version 1.1.0
 - better error handling for connection problems
 
-29.01.2024 - Version 1.2.0
+## 29.01.2024 - Version 1.2.0
 - added timezone options, default is "Europe/Berlin" if your system is running with UTC settings, you can use UTC in ```timezone_from```. If you want to display a different timezone, you can define it in ```timezone_to```
 - ```
     timezone_from : "UTC"
@@ -486,7 +486,7 @@ sensor:
   ``` 
 - minor fixes
 
-01.03.2024 - Version 1.3.0
+## 01.03.2024 - Version 1.3.0
 - added an option ```alert_for: "S3,S4,S20"``` to set attributes for your sensor if the next 3 departures of defined lines are late or cancelled .... or in time. (Ref to "Alert Settings")
 - there is a 2nd lovalace card for single card use. Means with big font so that you can put it on a screen or on an Amazon Show 15 (with the silk browser and the kiosk mode HA addon via Media Function from HA)
 - ![20240301_152359025_iOS](https://github.com/Nisbo/another_mvg/assets/26260572/4a9133e4-4047-4fce-9240-0dbdbdf0e3c2)
@@ -494,10 +494,7 @@ sensor:
 - improved error handling, additionally there will be an indicator on the card (Stop Name - nicht aktuell) if the data is outdated (older than 1 minute)
 - fixed a bug where the sensor was updated with wrong data (thx to @msp1974 )
 
-To update, replace all files with the new files, add the new resource mentioned above and restart HA.
-Afterwards you have to clear the frontend cache on all devices.
-
-28.05.2024 - Version 1.4.0
+## 28.05.2024 - Version 1.4.0
 - improved error handling
 - improved error reporting in the system log
 - workaround for missing track 2a (not provided by the API) in Ebersberg. It assumes that if there is no platform provided by the API that the departure is from track 2a (Gleis 2a).
@@ -507,36 +504,12 @@ If you want to include it to your departure list, you can use this code:
 
 ```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS,BAHN"```
 
-To update, replace all files with the new files and restart HA.
-Afterwards you have to clear the frontend cache on all devices.
-
 ## 13.08.2024 - Version 1.5.0
 - Now with the option to install Another MVG via HACS
 - Custom cards will be registered automatically, not longer needed to add them manually
 
-### ⚠️ Breaking Changes and Update
-:red_circle: Due to the fact, that Custom cards will be registered automatically, you have to remove these 2 files from your www folder. :red_circle:
-
-```
-content-card-another-mvg-big.js
-content-card-another-mvg.js
-```
-You also have to remove these 2 cards from
-Settings --> Dashboards --> 3 dots on the top right --> Resources
-```
-/local/content-card-another-mvg.js
-/local/content-card-another-mvg-big.js
-```
-⚠️ Don't remove cards starting with */another_mvg/*
-
-### Manual Update:
-- To update, replace all files with the new files (like during the installation) and restart HA.
-- Afterwards you have to clear the frontend cache on all devices.
-- There is no need to reconfigure the configuration.yaml
-
-### HACS --> Change from manual installation to HACS
-- Remove the old Files and follow the instatuctions from the installation.
-- There is no need to reconfigure the configuration.yaml
+## XX.10.2024 - Version 1.5.1
+- Updated the API address
 
 ## XX.10.2024 - Version 2.0.0
 * Formerly planned and announced as v1.6.0, now released as v2.0.0 due to the **amount** of changes.
@@ -583,12 +556,12 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 /local/content-card-another-mvg.js
 /local/content-card-another-mvg-big.js
 ```
-- Remove the old Files and follow the instructions from the installation.
+- Remove the old Files and follow the instructions from the HACS installation part.
 
 ### from v1.5.0 (>= v1.5.0)
 - Remove the old Files (and remove the entries from the configuration.yaml)
 - Restart HACS
-- follow the instructions from the HACS installation.
+- follow the instructions from the HACS installation part.
 ⚠️ you can also comment (put a # in front of each another_mvg related line) the settings in your configuration.yaml and uncomment it after the installation for the case that you want to stay with yaml configuration.
 
 
