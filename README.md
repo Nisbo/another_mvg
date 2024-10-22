@@ -27,6 +27,12 @@
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=another_mvg&owner=Nisbo)
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
 
+* create a manual card with this content:
+```
+type: custom:content-card-another-mvg
+entity: sensor.yourSensor
+```
+
 # Why another MVG/MVV integration for Home Assistant?
 
 Usually, I am lazy and use the add-ons and integrations that already exist. Home Assistant has plenty of them. While there are already some MVG integrations, some of them don't work or no longer function, and they may lack the features I desire. Since I had already programmed something similar in PHP for IP-Symcon, I have now implemented it in Home Assistant as well.
@@ -93,19 +99,6 @@ Or use these steps:
 | ![grafik](https://github.com/user-attachments/assets/996042c3-a337-4c9d-8b3e-7ecc68e10735) | ![grafik](https://github.com/user-attachments/assets/4146f6c0-b68a-4a0d-9bd3-3200932d0f0c) |
 | Erweiterte Einstellungen | Advanced options  |
 | ![grafik](https://github.com/user-attachments/assets/bab782bf-e68a-445f-8a90-7c4877a659c8) | ![grafik](https://github.com/user-attachments/assets/aaa530fc-2043-49d9-be2d-ff24585e6c06) |
-
-
-
-
- 
-
-
-
-
-
-
-
-
 
 
 ⚠️ It may take a minute to create the entity
