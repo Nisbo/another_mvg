@@ -529,13 +529,16 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 - There is no need to reconfigure the configuration.yaml
 
 ## XX.10.2024 - Version 2.0.0
-* Former planned and announced as v1.6.0 now released as v2.0.0 due to the ammount of changes.
-* v2.0.0 includes, after the integration in HACS in the last version, now a complete GUI configuration.
-* Improved the error handling of the custom card if a sensor is not available or deleted.
-* ![grafik](https://github.com/user-attachments/assets/7735b742-8d59-4397-a65c-9b78657763be)
-* Improved the data handling of the custom card during startup
-* ![grafik](https://github.com/user-attachments/assets/deb45a8b-7d5c-48f6-8d1f-b7b09731a8f4)
-* Fixed the deprecation warning
+* Formerly planned and announced as v1.6.0, now released as v2.0.0 due to the **amount** of changes.
+* v2.0.0 includes a complete GUI configuration, following the integration in HACS from the last version.
+* Added language files for English and German.
+* Improved error handling in the custom card if a sensor is unavailable or deleted.
+  * ![grafik](https://github.com/user-attachments/assets/7735b742-8d59-4397-a65c-9b78657763be)
+* Improved data handling of the custom card during startup.
+  * ![grafik](https://github.com/user-attachments/assets/deb45a8b-7d5c-48f6-8d1f-b7b09731a8f4)
+* Fixed the deprecation warning.
+* Updated documentation to improve the installation process.
+
 
 
 # 7. Credits
