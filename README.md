@@ -80,10 +80,10 @@ Or use these steps:
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
 
 Or use these steps:
-* go to ```Settings```
-* go to ```Devices and services```
-* click on ```+ ADD INTEGRATION``` (bottom right)
-* search for ```nother mvg``` and follow the configuration flow
+* go to ```Settings``` (```Einstellungen```)
+* go to ```Devices and services``` (```Geräte und Dienste```)
+* click on ```+ ADD INTEGRATION``` (```INTEGRATION HINZUFÜGEN```)
+* search for ```another mvg``` and follow the configuration flow
 
 1. Search for your stop / station
 
