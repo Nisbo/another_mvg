@@ -508,10 +508,10 @@ If you want to include it to your departure list, you can use this code:
 - Now with the option to install Another MVG via HACS
 - Custom cards will be registered automatically, not longer needed to add them manually
 
-## XX.10.2024 - Version 1.5.1
+## 16.10.2024 - Version 1.5.1
 - Updated the API address
 
-## XX.10.2024 - Version 2.0.0
+## XX.10.2024 - Version 2.0.0 (current version)
 * Formerly planned and announced as v1.6.0, now released as v2.0.0 due to the **amount** of changes.
 * v2.0.0 includes a complete GUI configuration, following the integration in HACS from the last version.
 * Added language files for English and German.
