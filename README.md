@@ -559,20 +559,19 @@ The names should be ```;``` separated. They can be ```,``` or space sepatared, b
 
 
 # 6.1 How to Update / Change from Manual Installation to HASC
-## HACS
+## Update via HACS:
 - After you got the update notification from Home Assistant, just click on "Install"
 - restart Home Assistant
 - make sure the frontend cache is cleared
 
 ## Manual Update:
-- To update, replace all files with the new files (like during the installation) and restart HA.
+- Replace all files with the new files (like during the installation) and restart HA.
 - Afterwards you have to clear the frontend cache on all devices.
-- There is no need to reconfigure the configuration.yaml
 
-## Change from manual installation to HACS
+## Change from manual installation to HACS installation
 
 ### ⚠️ change from before v1.5.0 (< v1.5.0)
-:red_circle: Due to the fact, that Custom cards will be registered automatically, you have to remove these 2 files from your www folder. :red_circle:
+:red_circle: Due to the fact, that Custom cards will be registered (since v1.5.0) automatically, you have to remove these 2 files from your www folder. :red_circle:
 
 ```
 content-card-another-mvg-big.js
@@ -587,7 +586,10 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 - Remove the old Files and follow the instructions from the installation.
 
 ### from v1.5.0 (>= v1.5.0)
-- Remove the old Files and follow the instructions from the installation.
+- Remove the old Files (and remove the entries from the configuration.yaml)
+- Restart HACS
+- follow the instructions from the HACS installation.
+⚠️ you can also comment (put a # in front of each another_mvg related line) the settings in your configuration.yaml and uncomment it after the installation for the case that you want to stay with yaml configuration.
 
 
 # 7. Credits
