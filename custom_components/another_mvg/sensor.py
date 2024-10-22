@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import logging
 import time
-
 import requests
 from requests import HTTPError, Timeout
 import voluptuous as vol
@@ -117,7 +116,6 @@ class DepartureAlarms:
     label: str
     number: str
     delayInMinutes: int
-
 
 class ConnectionInfo(SensorEntity):
     """Class for MVG info."""
