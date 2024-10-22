@@ -5,7 +5,6 @@ class ContentAnotherMVG extends HTMLElement {
     // Initialize the content if it's not there yet.
     if (!this.content) {
       const card    = document.createElement('ha-card');
-      //card.header = "Another MVG Card";
       this.content  = document.createElement('div');
       const style   = document.createElement('style');
 
