@@ -5,7 +5,6 @@ class ContentAnotherMVGbig extends HTMLElement {
     // Initialize the content if it's not there yet.
     if (!this.content) {
       const card    = document.createElement('ha-card');
-      //card.header = "Another MVG Card";
       this.content  = document.createElement('div');
       const style   = document.createElement('style');
 
@@ -44,7 +43,6 @@ class ContentAnotherMVGbig extends HTMLElement {
           border-radius: 0 0 10px 0;
         }
 
-
         table tr td:last-child {
           white-space: nowrap;
         }
@@ -79,13 +77,13 @@ class ContentAnotherMVGbig extends HTMLElement {
 		  height:50px;
         }
         
-		/* Table Content - Departure Lines */
-		.departureline {
+	/* Table Content - Departure Lines */
+	.departureline {
           height:65px;
-		  font-size:3.9em;
-		  vertical-align: middle;
-		  color: #FFFFFF;
-		}
+	  font-size:3.9em;
+	  vertical-align: middle;
+	  color: #FFFFFF;
+	}
 
         /* Name of the card - from name parameter */
         .amvg-cardname {
@@ -151,33 +149,48 @@ class ContentAnotherMVGbig extends HTMLElement {
     const state    = hass.states[entityId];
     const stateStr = state ? state.state : "unavailable";
 
-    let html = `<table><tr><td colspan="4" class="amvg-cardname">${state.attributes.config.name}</td></tr>
-                          <tr>
-                            <td class="amvg-headline">Linie</td>
-                            <td class="amvg-headline">Ziel</td>
-                            <td class="amvg-headline">Gleis</td>
-                            <td class="amvg-headline">Abfahrt</td>
-                          </tr>
-      `;
-    this.data = state.attributes.departures;
-    this.data.forEach((departure) => {
-      html += `       <tr>`;
-      html += `          <td class="departureline"><span class="line ${departure.transport_type} ${departure.label}" > ${departure.label}</span></td>`;
-      html += `          <td class="departureline">${departure.destination}</td>`;
-      html += `          <td class="departureline">${departure.track}</td>`;
-      let delay = ``;
-      if (departure.cancelled) {
-        delay = `<span class="cancelled">Entfällt</span>`;
-      } else if(departure.delay > 0) {
-        delay = `<span class="delay"> +${departure.delay}</span> <span class="expected">(${departure.expected_departure})</span>`;
-      }
-      html += `          <td class="departureline">${departure.planned_departure} ${delay ? delay: ""}</td>`;
-      html += `       </tr>`;
+    /* state undefined */
+    if (!state || state === "undefined") {
+	   var html = "<b><u>Another MVG:</u></b><br>The entity <b>" + entityId + "</b> is undefined!<br>Maybe only a typo ?<br>Or did you delete the stop ?";
+	   this.content.innerHTML = html;
+    } else {
+		let html = `<table><tr><td colspan="4" class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}</td></tr>
+							  <tr>
+								<td class="amvg-headline">Linie</td>
+								<td class="amvg-headline">Ziel</td>
+								<td class="amvg-headline">Gleis</td>
+								<td class="amvg-headline">Abfahrt</td>
+							  </tr>
+		  `;
 
-    });
-    html += `</table>`;
+		this.data = state.attributes.departures;
+		if (!this.data || this.data === "undefined") {
+			  html += `<tr>`;
+			  html += `<td class="departureline">XX</td>`;
+			  html += `<td class="departureline">Addon is loading.</td>`;
+			  html += `<td class="departureline">-</td>`;
+			  html += `<td class="departureline">-</td>`;
+			  html += `</tr>`;
+		} else {
+			this.data.forEach((departure) => {
+			  html += `       <tr>`;
+			  html += `          <td class="departureline"><span class="line ${departure.transport_type} ${departure.label}" > ${departure.label}</span></td>`;
+			  html += `          <td class="departureline">${departure.destination}</td>`;
+			  html += `          <td class="departureline">${departure.track}</td>`;
+			  let delay = ``;
+			  if (departure.cancelled) {
+				delay = `<span class="cancelled">Entfällt</span>`;
+			  } else if(departure.delay > 0) {
+				delay = `<span class="delay"> +${departure.delay}</span> <span class="expected">(${departure.expected_departure})</span>`;
+			  }
+			  html += `          <td class="departureline">${departure.planned_departure} ${delay ? delay: ""}</td>`;
+			  html += `       </tr>`;
+			});
+		}
+		html += `</table>`;
 
-    this.content.innerHTML = html;
+		this.content.innerHTML = html;
+	}
   }
 
   // The user supplied configuration. Throw an exception and Home Assistant

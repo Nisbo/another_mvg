@@ -3,13 +3,12 @@
 # https://github.com/asantaga/wiserHomeAssistantPlatform/blob/master/custom_components/wiser/frontend/__init__.py
 import logging
 import os
-
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.helpers.event import async_call_later
 
 from ..const import URL_BASE, ANOTHER_MVG_CARDS
 
 _LOGGER = logging.getLogger(__name__)
-
 
 class AnotherMvgCardRegistration:
     def __init__(self, hass):
@@ -23,11 +22,13 @@ class AnotherMvgCardRegistration:
     # install card resources
     async def async_register_another_mvg_path(self):
         # Register custom cards path if not already registered
-        self.hass.http.register_static_path(
-            URL_BASE,
-            self.hass.config.path("custom_components/another_mvg/frontend"),
-            cache_headers=False,
-        )
+        await self.hass.http.async_register_static_paths([
+            StaticPathConfig(
+                URL_BASE,
+                self.hass.config.path("custom_components/another_mvg/frontend"),
+                False
+            )
+        ])
 
     async def async_wait_for_lovelace_resources(self) -> None:
         async def check_lovelace_resources_loaded(now):
@@ -35,7 +36,7 @@ class AnotherMvgCardRegistration:
                 await self.async_register_another_mvg_cards()
             else:
                 _LOGGER.debug(
-                    "Unable to install another_mvg card resources because Lovelace resources not yet loaded.  Trying again in 5 seconds."
+                    "Unable to install another_mvg card resources because Lovelace resources not yet loaded. Trying again in 5 seconds."
                 )
                 async_call_later(self.hass, 5, check_lovelace_resources_loaded)
 

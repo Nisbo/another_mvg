@@ -1,31 +1,65 @@
-## v1.5.1 Available to fix the API url (16.10.2024)
+## v2.0.0 Now with GUI configuration (German and English)
 
-## v1.5.0 Now installation is also available via HACS (13.08.2024) thx @msp1974 (update instructions below)
+# Another MVG
 
-# another_mvg
+1. [Installation](#1-installation)  
+    1.1. [HACS installation (recommended)](#option-1-hacs-installation-recommended)  
+    1.2. [Manual Installation](#option-2-manual-installation)  
+
+2. [Create a sensor for your stop / station](#2-create-a-sensor-for-your-stop--station)  
+    2.1. [via GUI (recommended)](#option-1-via-gui-recommended)  
+    2.2. [via configuration.yaml](#option-2-via-configurationyaml)  
+
+3. [Adding a card to your dashboard](#3-adding-a-card-to-your-dashboard)  
+
+4. [Code for your configuration.yaml](#4-code-for-your-configurationyaml)  
+
+5. [Screenshots](#5-screenshots)  
+
+6. [Change log](#6-change-log)  
+    6.1. [How to Update / Change from Manual Installation to HACS](#61-how-to-update--change-from-manual-installation-to-hacs)
+
+8. [Credits](#7-credits)  
+
+9. [Disclaimer / Haftungsausschluss](#8-disclaimer--haftungsausschluss)
 
 
-**Why another MVG/MVV integration for Home Assistant?**
+# Quick installation - for those who are familiar with the process.
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=another_mvg&owner=Nisbo)
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
+
+* create a manual card with this content:
+```
+type: custom:content-card-another-mvg
+entity: sensor.yourSensor
+```
+
+# Why another MVG/MVV integration for Home Assistant?
 
 Usually, I am lazy and use the add-ons and integrations that already exist. Home Assistant has plenty of them. While there are already some MVG integrations, some of them don't work or no longer function, and they may lack the features I desire. Since I had already programmed something similar in PHP for IP-Symcon, I have now implemented it in Home Assistant as well.
 
 
-This is my 1st integration for Home Assistant and also my 1st Python addon, so please be kind to me if something is not 100% perfect. ^^
-
 > [!IMPORTANT]
 > **This is an inofficial integration and does NOT belong to the MVG / MVV.**
 > 
-> **The use of the data (API) is for private use only (due to MVG rules, see bottom of this page).**
->
+> **The use of the data (API) is for private non commercial use only (due to MVG rules, see bottom of this page).**
+> 
+> **MVG does not guarantee the availability or maintenance of the interface being used.**
+> 
 > **The integration itself, can be used private and comercial.**
 
-![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68)
+| Some | Screenshots |
+|------|------|
+| <img src="https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68" alt="c679ee24-23a4-4ed5-8c15-858794d51f68" width="320"/> <br /> The normal View in a dashboard | <img src="https://github.com/Nisbo/another_mvg/assets/26260572/4a9133e4-4047-4fce-9240-0dbdbdf0e3c2" alt="20240301_152359025_iOS" width="500"/> <br /> On an Alexa Show 15 with [MyPage](https://www.amazon.de/XdreaM-MyPage/dp/B09CG879RG) addon |
+| <img src="https://github.com/user-attachments/assets/59798b08-e622-4466-8229-1711bdd73221" alt="59798b08-e622-4466-8229-1711bdd73221" width="400"/> <br /> On an old Fire Tablet with [Wallpanel](https://wallpanel.xyz/) | <img src="https://github.com/user-attachments/assets/ed7e95b9-5dcb-492e-a110-b9cd90e22c6b" alt="ed7e95b9-5dcb-492e-a110-b9cd90e22c6b" width="200"/> <br /> On a [WT32-SC01 Plus](https://www.antratek.de/wt32-sco1-plus) with [OpenHASP](https://www.openhasp.com) Needs additional coding in automations.|
 
- ![20240301_152359025_iOS](https://github.com/Nisbo/another_mvg/assets/26260572/4a9133e4-4047-4fce-9240-0dbdbdf0e3c2)
- 
-More screenshots at the bottom of this document.
+More [Screenshots](#5-screenshots) at the bottom of this document.
 
-# HACS installation (recommended)
+# 1. Installation
+## Option 1: HACS installation (recommended)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=another_mvg&owner=Nisbo)
+
+Or use these steps:
 * In Home Assistant go to the HACS integration (you can find the link in the left admin menu)
 * on the top right click on the 3 dots
 * click on "Custom Repositories"
@@ -36,28 +70,47 @@ More screenshots at the bottom of this document.
 * search for "Another MVG" and click on it
 * click on download (bottom right)
 * Restart HA
-* Configure the configuration.yaml (see guide below)
-* Check configuration.yaml with the check function under Dev-Tools
-* Restart HA again
-* create a manual card with this content:
-```
-type: custom:content-card-another-mvg
-entity: sensor.yourSensor
-```
-* create a manual card with this content, if you want to use the card with the big font as a single card:
-```
-type: custom:content-card-another-mvg-big
-entity: sensor.yourSensor
-```
-* replace ```sensor.yourSensor``` with the name of your sensor. Should be something with **sensor.name** where name, the name from the parameter in the configuration.yaml is.
-* Enjoy
 
-# Manual Installation
+
+## Option 2: Manual Installation
 * Copy the [another_mvg](https://github.com/Nisbo/another_mvg/tree/main/custom_components) folder (the folder, not only the content of the folder) from the ```custom_components/``` folder to your ```config/custom_components/``` folder.
 * Restart HA
-* Configure the configuration.yaml (see guide below)
+
+# 2. Create a sensor for your stop / station
+## Option 1: via GUI (recommended)
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
+
+Or use these steps:
+* go to ```Settings``` (```Einstellungen```)
+* go to ```Devices and services``` (```Geräte und Dienste```)
+* click on ```+ ADD INTEGRATION``` (```INTEGRATION HINZUFÜGEN```)
+* search for ```another mvg``` and follow the configuration flow
+
+1. Search for your stop / station
+
+2. Select the correct stop from the matches and configure the wanted settings.
+
+3. There are a lot of options but normally there is no need to configure all of them. The easiest way is to select the Global ID and click on ```SUBMIT``` (```BESTÄTIGEN```).
+
+| German | English |
+|------|------|
+| ![grafik](https://github.com/user-attachments/assets/6e45440b-4a4e-478c-80f5-fd8799a8e018) | ![grafik](https://github.com/user-attachments/assets/91910f38-1d63-4850-b482-87a4346b2057) |
+| ![grafik](https://github.com/user-attachments/assets/bde44c38-aea8-4be6-941b-41ee9483854d) | ![grafik](https://github.com/user-attachments/assets/aeefdba7-e4a9-4478-ad2c-6c11818abe67) |
+| Filter für Linien und Ziele | Filter for lines and destinations |
+| ![grafik](https://github.com/user-attachments/assets/996042c3-a337-4c9d-8b3e-7ecc68e10735) | ![grafik](https://github.com/user-attachments/assets/4146f6c0-b68a-4a0d-9bd3-3200932d0f0c) |
+| Erweiterte Einstellungen | Advanced options  |
+| ![grafik](https://github.com/user-attachments/assets/bab782bf-e68a-445f-8a90-7c4877a659c8) | ![grafik](https://github.com/user-attachments/assets/aaa530fc-2043-49d9-be2d-ff24585e6c06) |
+
+
+⚠️ It may take a minute to create the entity
+
+
+## Option 2: via ```configuration.yaml```
+* Configure the configuration.yaml [(see guide below)](#4-code-for-your-configurationyaml)
 * Check configuration.yaml with the check function under Dev-Tools
 * Restart HA again
+
+# 3. Adding a card to your dashboard
 * create a manual card with this content:
 ```
 type: custom:content-card-another-mvg
@@ -71,8 +124,10 @@ entity: sensor.yourSensor
 * replace ```sensor.yourSensor``` with the name of your sensor. Should be something with **sensor.name** where name, the name from the parameter in the configuration.yaml is.
 * Enjoy
 
+⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend / browser cache.
 
-# Code for your configuration.yaml
+
+# 4. Code for your configuration.yaml
 
 ### Add the name of this integration
 
@@ -92,10 +147,10 @@ to the **sensor:** part in your configuration.
 > The station identifier of the stop/station/location. I decided to use the identifier, instead of names, because it is more clear (for the API) and leads to less problems.
 The only problem you have, is to find the identifier (globalid) by your own.
 Here you can find the globalid for your station.
-> ```https://www.mvg.de/api/fib/v2/location?query=Pasing```
+> ```https://www.mvg.de/api/bgw-pt/v3/locations?query=pasing```
 > Just replace the name in the query. If there is more than one entry, you have to find the correct one. I recommend to open the link on your PC/Notebook.
 
-https://www.mvg.de/api/fib/v2/location?query=Pasing
+https://www.mvg.de/api/bgw-pt/v3/locations?query=pasing
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/ec7bfb9b-48a0-45bc-a50d-16d960433caa)
 
@@ -146,6 +201,15 @@ The names should be ```;``` separated. They can be ```,``` or space sepatared, b
 
 ```   hidedestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
 
+### Only some destinations
+
+```   onlydestination: "Ostbahnhof;Holzkirchen"```
+
+If you want to see only some directions / destinations, you have to insert the EXACT names of the **wanted** destinations like they are shown in the connection display. (card)
+The names should be ```;``` separated. They can be ```,``` or space sepatared, but this can lead to problems if a ```,``` or a space is in the name of the destination.
+
+```   onlydestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
+
 ### Define the number of departures
 
 ```   limit: 15```
@@ -153,7 +217,7 @@ The names should be ```;``` separated. They can be ```,``` or space sepatared, b
 By default you will see 6 departures. If you want to see more or less, you have to configure it.
 Please add **_only a number_ and _no quotes_**.
 Die API will pull a maximum of 80 departures. 
-If you use "filters" like **hidedestination**, witch filter out 40 entries, you will only see the remaining 40 as maximum.
+If you use "filters" like **hidedestination** or **onlydestination**, witch filter out 40 entries, you will only see the remaining 40 as maximum.
 
 ### Hide the name of the card (the row above the yellow row)
 
@@ -315,8 +379,8 @@ sensor:
     hidename: True
 ```
 
-# Browser View
-
+# 5. Screenshots
+## Browser View
 
 ### Pasing all departures
 
@@ -402,7 +466,7 @@ sensor:
 ```
 
 
-# Mobile App View
+## Mobile App View
 
 | Mobile App View  | Mobile App View |
 | ------------- | ------------- |
@@ -410,11 +474,11 @@ sensor:
 | ![IMG_5433](https://github.com/Nisbo/another_mvg/assets/26260572/fb3b9fd0-7753-43c8-a8e8-902e53114623) | ![IMG_5434](https://github.com/Nisbo/another_mvg/assets/26260572/0ae7381b-a0d0-4995-b241-7ca9c7b3557c) |
 
 
-# Change log
-13.01.2024 - Version 1.1.0
+# 6. Change log
+## 13.01.2024 - Version 1.1.0
 - better error handling for connection problems
 
-29.01.2024 - Version 1.2.0
+## 29.01.2024 - Version 1.2.0
 - added timezone options, default is "Europe/Berlin" if your system is running with UTC settings, you can use UTC in ```timezone_from```. If you want to display a different timezone, you can define it in ```timezone_to```
 - ```
     timezone_from : "UTC"
@@ -422,7 +486,7 @@ sensor:
   ``` 
 - minor fixes
 
-01.03.2024 - Version 1.3.0
+## 01.03.2024 - Version 1.3.0
 - added an option ```alert_for: "S3,S4,S20"``` to set attributes for your sensor if the next 3 departures of defined lines are late or cancelled .... or in time. (Ref to "Alert Settings")
 - there is a 2nd lovalace card for single card use. Means with big font so that you can put it on a screen or on an Amazon Show 15 (with the silk browser and the kiosk mode HA addon via Media Function from HA)
 - ![20240301_152359025_iOS](https://github.com/Nisbo/another_mvg/assets/26260572/4a9133e4-4047-4fce-9240-0dbdbdf0e3c2)
@@ -430,10 +494,7 @@ sensor:
 - improved error handling, additionally there will be an indicator on the card (Stop Name - nicht aktuell) if the data is outdated (older than 1 minute)
 - fixed a bug where the sensor was updated with wrong data (thx to @msp1974 )
 
-To update, replace all files with the new files, add the new resource mentioned above and restart HA.
-Afterwards you have to clear the frontend cache on all devices.
-
-28.05.2024 - Version 1.4.0
+## 28.05.2024 - Version 1.4.0
 - improved error handling
 - improved error reporting in the system log
 - workaround for missing track 2a (not provided by the API) in Ebersberg. It assumes that if there is no platform provided by the API that the departure is from track 2a (Gleis 2a).
@@ -443,15 +504,47 @@ If you want to include it to your departure list, you can use this code:
 
 ```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS,BAHN"```
 
-To update, replace all files with the new files and restart HA.
-Afterwards you have to clear the frontend cache on all devices.
-
 ## 13.08.2024 - Version 1.5.0
 - Now with the option to install Another MVG via HACS
 - Custom cards will be registered automatically, not longer needed to add them manually
 
-### ⚠️ Breaking Changes and Update
-:red_circle: Due to the fact, that Custom cards will be registered automatically, you have to remove these 2 files from your www folder. :red_circle:
+## 16.10.2024 - Version 1.5.1
+- Updated the API address
+
+## 22.10.2024 - Version 2.0.0 (current version)
+* Formerly planned and announced as v1.6.0, now released as v2.0.0 due to the **amount** of changes.
+* v2.0.0 includes a complete GUI configuration, following the integration in HACS from the last version.
+* Added language files for English and German.
+* added "Only some destinations"
+
+```   onlydestination: "Ostbahnhof;Holzkirchen"```
+
+If you want to see only some directions / destinations, you have to insert the EXACT names of the **wanted** destinations like they are shown in the connection display. (card)
+The names should be ```;``` separated. They can be ```,``` or space sepatared, but this can lead to problems if a ```,``` or a space is in the name of the destination.
+
+```   onlydestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
+* Improved error handling in the custom card if a sensor is unavailable or deleted.
+  * ![grafik](https://github.com/user-attachments/assets/7735b742-8d59-4397-a65c-9b78657763be)
+* Improved data handling of the custom card during startup.
+  * ![grafik](https://github.com/user-attachments/assets/deb45a8b-7d5c-48f6-8d1f-b7b09731a8f4)
+* Fixed the deprecation warning.
+* Updated documentation to improve the installation process.
+
+
+# 6.1 How to Update / Change from Manual Installation to HACS
+## Update via HACS:
+- After you got the update notification from Home Assistant, just click on "Install"
+- restart Home Assistant
+- make sure the frontend cache is cleared
+
+## Manual Update:
+- Replace all files with the new files (like during the installation) and restart HA.
+- Afterwards you have to clear the frontend cache on all devices.
+
+## Change from manual installation to HACS installation
+
+### ⚠️ change from before v1.5.0 (< v1.5.0)
+:red_circle: Due to the fact, that Custom cards will be registered (since v1.5.0) automatically, you have to remove these 2 files from your www folder. :red_circle:
 
 ```
 content-card-another-mvg-big.js
@@ -463,29 +556,23 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 /local/content-card-another-mvg.js
 /local/content-card-another-mvg-big.js
 ```
-⚠️ Don't remove cards starting with */another_mvg/*
+- Remove the old Files and follow the instructions from the HACS installation part.
 
-### Manual Update:
-- To update, replace all files with the new files (like during the installation) and restart HA.
-- Afterwards you have to clear the frontend cache on all devices.
-- There is no need to reconfigure the configuration.yaml
+### from v1.5.0 (>= v1.5.0)
+- Remove the old Files (and remove the entries from the configuration.yaml)
+- Restart HACS
+- follow the instructions from the HACS installation part.
+⚠️ you can also comment (put a # in front of each another_mvg related line) the settings in your configuration.yaml and uncomment it after the installation for the case that you want to stay with yaml configuration.
 
-### HACS --> Change from manual installation to HACS
-- Remove the old Files and follow the instatuctions from the installation.
-- There is no need to reconfigure the configuration.yaml
 
-# Credits
-To all the guys in the Home Assistant forum for the help. 
+# 7. Credits
+* To all the guys in the Home Assistant forum for the help. 
+* @msp1974 for his code for the card integration
+* To the MVG for the API. 
+* To other guys on github, were I was able to learn more about python code and Home Assistant. 
+* And to my best friend Google. ^^
 
-@msp1974 for his code for the card integration
-
-To the MVG for the API. 
-
-To other guys on github, were I was able to learn more about python code and Home Assistant. 
-
-And to my best friend Google. ^^
-
-# Disclaimer / Haftungsausschluss
+# 8. Disclaimer / Haftungsausschluss
 
 ### Deutsch
 

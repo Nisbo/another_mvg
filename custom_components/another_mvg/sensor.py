@@ -3,21 +3,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 import logging
 import time
-from zoneinfo import ZoneInfo
-
 import requests
 from requests import HTTPError, Timeout
 import voluptuous as vol
-
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.util import Throttle
 
 from .const import (
     CONF_ALERT_FOR,
@@ -25,6 +24,7 @@ from .const import (
     CONF_GLOBALID,
     CONF_GLOBALID2,
     CONF_HIDEDESTINATION,
+    CONF_ONLYDESTINATION,
     CONF_HIDENAME,
     CONF_LIMIT,
     CONF_ONLYLINE,
@@ -34,22 +34,25 @@ from .const import (
     URL,
     USER_AGENT,
     MVGException,
+    DEFAULT_ONLYLINE,
+    DEFAULT_HIDEDESTINATION,
+    DEFAULT_ONLYDESTINATION,
+    DEFAULT_LIMIT,
+    DEFAULT_CONF_DOUBLESTATIONNUMBER,
+    DEFAULT_CONF_TRANSPORTTYPES,
+    DEFAULT_CONF_GLOBALID2,
+    DEFAULT_HIDENAME,
+    DEFAULT_TIMEZONE_FROM,
+    DEFAULT_TIMEZONE_TO,
+    DEFAULT_ALERT_FOR,
 )
 
 # integration imports end
 
-DEFAULT_HIDEDESTINATION = ""
-DEFAULT_ONLYLINE = ""
-DEFAULT_LIMIT = 6
-DEFAULT_CONF_DOUBLESTATIONNUMBER = ""
-DEFAULT_CONF_TRANSPORTTYPES = "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS"
-DEFAULT_CONF_GLOBALID2 = ""
-DEFAULT_TIMEZONE_FROM = "Europe/Berlin"  # or UTC
-DEFAULT_TIMEZONE_TO = "Europe/Berlin"
-DEFAULT_HIDENAME = False
-DEFAULT_ALERT_FOR = ""
-
 _LOGGER = logging.getLogger(__name__)
+
+# Zeitintervall zwischen den Updates
+MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -57,6 +60,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_NAME): cv.string,
         vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): cv.string,
         vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): cv.string,
+        vol.Optional(CONF_ONLYDESTINATION, default=DEFAULT_ONLYDESTINATION): cv.string,
         vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): cv.positive_int,
         vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): cv.string,
         vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES): cv.string,
@@ -68,6 +72,30 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
+async def async_setup_platform(
+    hass: HomeAssistant,
+    config: ConfigType,
+    add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None,
+) -> None:
+    """Set up the sensor platform."""
+    _LOGGER.warning(
+        "Setting up Another MVG sensor using YAML configuration is deprecated. Please remove the YAML configuration and use the integration through the Home Assistant UI."
+    )
+    
+    if discovery_info is None:
+        # Konfiguration über YAML
+        add_entities([ConnectionInfo(hass, config)], True)
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigType,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up Another MVG sensor from a config entry."""
+    # Konfiguration über GUI
+    async_add_entities([ConnectionInfo(hass, config_entry.data)])
+    
 @dataclass
 class Departure:
     """Class to hold departure data."""
@@ -89,15 +117,6 @@ class DepartureAlarms:
     number: str
     delayInMinutes: int
 
-async def async_setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    """Set up the sensor platform."""
-    add_entities([ConnectionInfo(hass, config)], True)
-
 class ConnectionInfo(SensorEntity):
     """Class for MVG info."""
 
@@ -106,6 +125,7 @@ class ConnectionInfo(SensorEntity):
         self._onlyline = config[CONF_ONLYLINE]
         self._limit = config[CONF_LIMIT]
         self._hidedestination = config[CONF_HIDEDESTINATION]
+        self._onlydestination = config[CONF_ONLYDESTINATION]
         self._globalid = config[CONF_GLOBALID]
         self._globalid2 = config[CONF_GLOBALID2]
         self._name = config[CONF_NAME]
@@ -176,20 +196,27 @@ class ConnectionInfo(SensorEntity):
             number = departure_alarm.number
             delay_in_minutes = departure_alarm.delayInMinutes
             self._custom_attributes[f'notifyLateMvgConnection{label}_{number}'] = delay_in_minutes
-
+        
     def convert_timestamp_timezone(
         self,
         timestamp: int,
         from_timezone: str,
         to_timezone: str,
         output_format: str = "",
-    ) -> datetime:
-        """Convert epoch to timezone datetime."""
-        dt = datetime.fromtimestamp(timestamp).replace(tzinfo=ZoneInfo(from_timezone))
+    ) -> str:
+        """Convert epoch timestamp to timezone-aware datetime and format it."""
+        # First, create a timezone-aware datetime object from the timestamp and the from_timezone
+        dt = datetime.fromtimestamp(timestamp, tz=ZoneInfo(from_timezone))
+        
+        # Convert to the target timezone
+        dt_converted = dt.astimezone(ZoneInfo(to_timezone))
+        
+        # Return the formatted datetime string if output_format is specified
         if output_format:
-            return dt.replace(tzinfo=ZoneInfo(to_timezone)).strftime(output_format)
-        return dt.replace(tzinfo=ZoneInfo(to_timezone))
-
+            return dt_converted.strftime(output_format)
+        
+        return dt_converted
+        
     def get_departures(self) -> str:
         """Get departure data."""
 
@@ -323,6 +350,13 @@ class ConnectionInfo(SensorEntity):
             ):
                 continue
             
+            # if self._onlydestination is set, check if it is the correct destination
+            if (
+                self._onlydestination != ""
+                and departure["destination"].lower() not in self._onlydestination.lower()
+            ):
+                continue
+            
             # Format platform
             if departure["transportType"] in ["BUS", "REGIONAL_BUS"]:
                 track = "Bus"
@@ -444,3 +478,4 @@ class ConnectionInfo(SensorEntity):
             raise MVGException(
                 f"AnotherMVG: Other problem while connecting to the MVG API for {global_id} - {name}"
             ) from ex
+
