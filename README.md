@@ -41,7 +41,7 @@ Usually, I am lazy and use the add-ons and integrations that already exist. Home
 > [!IMPORTANT]
 > **This is an inofficial integration and does NOT belong to the MVG / MVV.**
 > 
-> **The use of the data (API) is for private use only (due to MVG rules, see bottom of this page).**
+> **The use of the data (API) is for private non commercial use only (due to MVG rules, see bottom of this page).**
 > 
 > **MVG does not guarantee the availability or maintenance of the interface being used.**
 > 
