@@ -17,7 +17,7 @@
 5. [Screenshots](#5-screenshots)  
 
 6. [Change log](#6-change-log)
-   [6.1 How to Update / Change from Manual Installation to HASC](#61-how-to-update--change-from-manual-installation-to-hasc)
+   6.1. [How to Update / Change from Manual Installation to HASC](#61-how-to-update--change-from-manual-installation-to-hasc)
 
 8. [Credits](#7-credits)  
 
