@@ -9,7 +9,8 @@
                     "advanced_options": {
                        "name": "Erweiterte Einstellungen",
                        "data": {
-                          "hidename": "Den Namen der Karte ausblenden",
+                          "hidename": "Den Namen der Karte (inkl. Uhr) ausblenden",
+			  "show_clock": "Uhr oben rechts anzeigen",
                           "globalid2": "Global ID 2",
                           "doublestationnumber": "Doppelte Stationsnummer",
                           "timezone_from": "Zeitzone von",
@@ -93,7 +94,8 @@
                     "advanced_options": {
                        "name": "Erweiterte Einstellungen",
                        "data": {
-                          "hidename": "Den Namen der Karte ausblenden",
+                          "hidename": "Den Namen der Karte (inkl. Uhr) ausblenden",
+			  "show_clock": "Uhr oben rechts anzeigen",
                           "globalid2": "Global ID 2",
                           "doublestationnumber": "Doppelte Stationsnummer",
                           "timezone_from": "Zeitzone von",
