@@ -154,7 +154,14 @@ class ContentAnotherMVGbig extends HTMLElement {
 	   var html = "<b><u>Another MVG:</u></b><br>The entity <b>" + entityId + "</b> is undefined!<br>Maybe only a typo ?<br>Or did you delete the stop ?";
 	   this.content.innerHTML = html;
     } else {
-		let html = `<table><tr><td colspan="4" class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}</td></tr>
+		// Function, to show the current time
+		function getCurrentTime() {
+			const now = new Date();
+			return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			//return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // only for testing, there is no update every second
+		}
+
+		let html = `<table><tr><td colspan="4" class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right; margin-right: 5px;">${state.attributes.config.show_clock ? ` ${getCurrentTime()} ` : ""}</span></td></tr>
 							  <tr>
 								<td class="amvg-headline">Linie</td>
 								<td class="amvg-headline">Ziel</td>
