@@ -22,10 +22,12 @@ class ContentAnotherMVGbig extends HTMLElement {
           border-radius: 10px;
         }
 
-        table td {
-          padding: 2px;
-          vertical-align: top;
-        }
+		table td {
+		  padding: 2px;
+		  vertical-align: top; /* or middle */
+		  word-wrap: break-word;
+		  line-height: normal;
+		}
 
         table tr:first-child td:first-child {
           border-radius: 9px 0 0 0;
@@ -48,7 +50,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         }
 
         table tr td:first-child {
-          vertical-align: middle;
+          vertical-align: top;  /* or middle */
         }
 
         table tr:last-child td {
@@ -77,13 +79,15 @@ class ContentAnotherMVGbig extends HTMLElement {
 		  height:50px;
         }
         
-	/* Table Content - Departure Lines */
-	.departureline {
-          height:65px;
-	  font-size:3.9em;
-	  vertical-align: middle;
-	  color: #FFFFFF;
-	}
+		/* Table Content - Departure Lines */
+		.departureline {
+		  height: auto;
+		  font-size: 3.9em;
+		  vertical-align: top;
+		  color: #FFFFFF;
+		  word-wrap: break-word;
+		  white-space: normal;
+		}
 
         /* Name of the card - from name parameter */
         .amvg-cardname {
