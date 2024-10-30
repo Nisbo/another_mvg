@@ -31,6 +31,7 @@ from .const import (
     CONF_TIMEZONE_FROM,
     CONF_TIMEZONE_TO,
     CONF_TRANSPORTTYPES,
+    CONF_SHOW_CLOCK,
     URL,
     USER_AGENT,
     MVGException,
@@ -45,6 +46,7 @@ from .const import (
     DEFAULT_TIMEZONE_FROM,
     DEFAULT_TIMEZONE_TO,
     DEFAULT_ALERT_FOR,
+    DEFAULT_SHOW_CLOCK,
 )
 
 # integration imports end
@@ -69,6 +71,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): cv.string,
         vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): cv.string,
         vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR): cv.string,
+        vol.Optional(CONF_SHOW_CLOCK, default=DEFAULT_SHOW_CLOCK): cv.boolean,
     }
 )
 
@@ -133,11 +136,12 @@ class ConnectionInfo(SensorEntity):
         self._doublestationnumber = config[CONF_DOUBLESTATIONNUMBER]
         self._transporttypes = config[CONF_TRANSPORTTYPES]
         self._hidename = config[CONF_HIDENAME]
+        self._show_clock = config.get(CONF_SHOW_CLOCK, DEFAULT_SHOW_CLOCK)
         self._timezoneFrom = config[CONF_TIMEZONE_FROM]
         self._timezoneTo = config[CONF_TIMEZONE_TO]
         self._alert_for = config[CONF_ALERT_FOR]
         self._custom_attributes = {
-            "config": {"name": self._name, "hide_name": self._hidename}
+            "config": {"name": self._name, "hide_name": self._hidename, "show_clock": self._show_clock}
         }
         self._lateConnections = ""
         self._dataOutdated = ""
