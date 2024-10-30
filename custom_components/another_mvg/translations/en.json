@@ -9,7 +9,8 @@
                     "advanced_options": {
                        "name": "Advanced Options",
                        "data": {
-                          "hidename": "Hide the name of the card",
+                          "hidename": "Hide the name of the card (incl. clock)",
+			  "show_clock": "Show a clock on the top right",
                           "globalid2": "Global ID 2",
                           "doublestationnumber": "Double Station Number",
                           "timezone_from": "Timezone From",
@@ -93,7 +94,8 @@
                     "advanced_options": {
                        "name": "Advanced Options",
                        "data": {
-                          "hidename": "Hide the name of the card",
+                          "hidename": "Hide the name of the card (incl. clock)",
+			  "show_clock": "Show a clock on the top right",
                           "globalid2": "Global ID 2",
                           "doublestationnumber": "Double Station Number",
                           "timezone_from": "Timezone From",
