@@ -20,6 +20,7 @@ from .const import (
     CONF_TIMEZONE_FROM,
     CONF_TIMEZONE_TO,
     CONF_ALERT_FOR,
+    CONF_SHOW_CLOCK,
     DEFAULT_ONLYLINE,
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
@@ -31,6 +32,7 @@ from .const import (
     DEFAULT_TIMEZONE_FROM,
     DEFAULT_TIMEZONE_TO,
     DEFAULT_ALERT_FOR,
+    DEFAULT_SHOW_CLOCK,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -78,8 +80,11 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 filter_options   = user_input.get("filter_options", {})
         
                 # and convert the input
-		    	# this is because the section function creates an dictionary and I dont want this
-	    		# I only want an optical "collapsing"
+                # this is because the section function creates an dictionary and I dont want this
+                # I only want an optical "collapsing"
+                if CONF_SHOW_CLOCK in advanced_options:
+                    user_input[CONF_SHOW_CLOCK] = advanced_options[CONF_SHOW_CLOCK]
+                    
                 if CONF_ALERT_FOR in advanced_options:
                     user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
           
@@ -209,6 +214,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("advanced_options"): data_entry_flow.section(
                 vol.Schema(
 				    {
+                        vol.Optional(CONF_SHOW_CLOCK,          default=DEFAULT_SHOW_CLOCK): bool,
                         vol.Optional(CONF_HIDENAME,            default=DEFAULT_HIDENAME): bool,
                         vol.Optional(CONF_GLOBALID2,           default=DEFAULT_CONF_GLOBALID2): str,
                         vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
@@ -243,6 +249,9 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             # and convert the input
 			# this is because the section function creates an dictionary and I dont want this
 			# I only want an optical "collapsing"
+            if CONF_SHOW_CLOCK in advanced_options:
+                user_input[CONF_SHOW_CLOCK] = advanced_options[CONF_SHOW_CLOCK]
+                
             if CONF_ALERT_FOR in advanced_options:
                 user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
           
@@ -311,11 +320,11 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
 			# Filter
             vol.Required("filter_options"): data_entry_flow.section(
                 vol.Schema(
-				    {
+                    {
                         vol.Optional(CONF_ONLYLINE,            description={"suggested_value": current_data.get(CONF_ONLYLINE, "")}): str,
                         vol.Optional(CONF_HIDEDESTINATION,     description={"suggested_value": current_data.get(CONF_HIDEDESTINATION, "")}): str,
                         vol.Optional(CONF_ONLYDESTINATION,     description={"suggested_value": current_data.get(CONF_ONLYDESTINATION, "")}): str,
-					}
+                    }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
                 {"collapsed": True},
@@ -323,14 +332,15 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             # Advanced Options
             vol.Required("advanced_options"): data_entry_flow.section(
                 vol.Schema(
-				    {
-					    vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
+                    {
+                        vol.Optional(CONF_SHOW_CLOCK,          description={"suggested_value": current_data.get(CONF_SHOW_CLOCK, "")}): bool,
+                        vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
                         vol.Optional(CONF_GLOBALID2,           description={"suggested_value": current_data.get(CONF_GLOBALID2, "")}): str,
                         vol.Optional(CONF_DOUBLESTATIONNUMBER, description={"suggested_value": current_data.get(CONF_DOUBLESTATIONNUMBER, "")}): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
                         vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
                         vol.Optional(CONF_ALERT_FOR,           description={"suggested_value": current_data.get(CONF_ALERT_FOR, "")}): str,
-					}
+                    }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
                 {"collapsed": True},
