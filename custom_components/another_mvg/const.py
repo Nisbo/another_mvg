@@ -24,6 +24,7 @@ CONF_HIDENAME = "hidename"  # Hide the name of the card
 CONF_TIMEZONE_FROM = "timezone_from"  # like "Europe/Berlin" or "UTC" if your system is running with UTC settings
 CONF_TIMEZONE_TO = "timezone_to"  # like "Europe/Berlin"
 CONF_ALERT_FOR = "alert_for"  # optional
+CONF_SHOW_CLOCK = "show_clock" # optional
 
 DEFAULT_HIDEDESTINATION = ""
 DEFAULT_ONLYDESTINATION = ""
@@ -36,17 +37,18 @@ DEFAULT_TIMEZONE_FROM = "Europe/Berlin"  # or UTC
 DEFAULT_TIMEZONE_TO = "Europe/Berlin"
 DEFAULT_HIDENAME = False
 DEFAULT_ALERT_FOR = ""
+DEFAULT_SHOW_CLOCK = False
 
 URL_BASE = "/another_mvg"
 ANOTHER_MVG_CARDS = [
     {
         "name": "Another MVG Card",
         "filename": "content-card-another-mvg.js",
-        "version": "2.0.0",
+        "version": "2.1.0-BETA",
     },
     {
         "name": "Another MVG Big Card",
         "filename": "content-card-another-mvg-big.js",
-        "version": "2.0.0",
+        "version": "2.1.0-BETA",
     },
 ]
