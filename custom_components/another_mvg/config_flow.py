@@ -208,7 +208,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 						 "value": "1"},
                         {"label": "16:27 +2", 
 						 "value": "2"},
-                        {"label": "16:27", 
+                        {"label": "16:29", 
 						 "value": "3"}
                     ], mode = SelectSelectorMode.DROPDOWN,
                 )
@@ -341,7 +341,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
 						 "value": "1"},
                         {"label": "16:27 +2", 
 						 "value": "2"},
-                        {"label": "16:27", 
+                        {"label": "16:29", 
 						 "value": "3"}
                     ], mode = SelectSelectorMode.DROPDOWN,
                 )
