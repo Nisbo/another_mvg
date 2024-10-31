@@ -3,7 +3,7 @@ import aiohttp
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.helpers.selector import selector
+from homeassistant.helpers.selector import selector, SelectSelector, SelectSelectorConfig, SelectSelectorMode
 from homeassistant import data_entry_flow
 from homeassistant.const import CONF_NAME
 from .const import (
@@ -21,6 +21,7 @@ from .const import (
     CONF_TIMEZONE_TO,
     CONF_ALERT_FOR,
     CONF_SHOW_CLOCK,
+    CONF_DEPARTURE_FORMAT,
     DEFAULT_ONLYLINE,
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
@@ -33,6 +34,7 @@ from .const import (
     DEFAULT_TIMEZONE_TO,
     DEFAULT_ALERT_FOR,
     DEFAULT_SHOW_CLOCK,
+    DEFAULT_DEPARTURE_FORMAT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -198,6 +200,20 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             }),
             vol.Optional(CONF_LIMIT,               default=DEFAULT_LIMIT): int,
+
+			vol.Required(CONF_DEPARTURE_FORMAT, default=DEFAULT_DEPARTURE_FORMAT): SelectSelector(
+                SelectSelectorConfig(
+                    options = [
+                        {"label": "16:27 +2 (16:29)", 
+						 "value": "1"},
+                        {"label": "16:27 +2", 
+						 "value": "2"},
+                        {"label": "16:27", 
+						 "value": "3"}
+                    ], mode = SelectSelectorMode.DROPDOWN,
+                )
+            ),
+
 			# Filter
             vol.Required("filter_options"): data_entry_flow.section(
                 vol.Schema(
@@ -317,6 +333,20 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                 }
             }),
             vol.Optional(CONF_LIMIT,               default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
+
+            vol.Required(CONF_DEPARTURE_FORMAT, default=current_data.get(CONF_DEPARTURE_FORMAT, "1")): SelectSelector(
+                SelectSelectorConfig(
+                    options = [
+                        {"label": "16:27 +2 (16:29)", 
+						 "value": "1"},
+                        {"label": "16:27 +2", 
+						 "value": "2"},
+                        {"label": "16:27", 
+						 "value": "3"}
+                    ], mode = SelectSelectorMode.DROPDOWN,
+                )
+            ),
+
 			# Filter
             vol.Required("filter_options"): data_entry_flow.section(
                 vol.Schema(
