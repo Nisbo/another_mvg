@@ -45,33 +45,17 @@
                 "data": {
                     "globalid": "Global ID",
                     "name": "Name",
-                    "onlyline": "Nur diese Linien",
-                    "hidedestination": "Diese Ziele ausblenden",
-                    "onlydestination": "Nur diese Ziele",
                     "limit": "Anzahl der Abfahrten",
-                    "doublestationnumber": "Doppelte Stationsnummer",
+                    "departure_format": "Formatierung der Abfahrtzeit",
                     "transporttypes": "Transportarten",
-                    "globalid2": "Global ID 2",
-                    "hidename": "Den Namen der Karte ausblenden",
-                    "timezone_from": "Zeitzone von",
-                    "timezone_to": "Zeitzone nach",
-                    "alert_for": "Alarmattribute für",
                     "station_name": "Stationsname"
                 },
                 "data_description": {
                     "globalid": "Wählen Sie Ihre Station / Haltestelle aus der obigen Liste aus.",
                     "name": "Name, der in der Karte angezeigt werden soll",
-                    "onlyline": "Wenn Sie nur bestimmte Linien wie S3, S4 und S20 sehen möchten, können Sie sie als kommagetrennte Liste konfigurieren.",
-                    "hidedestination": "Wenn Sie bestimmte Richtungen/Ziele ausblenden möchten, müssen Sie die GENAUEN Namen der unerwünschten Ziele eingeben, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch Semikolons getrennt sein.",
-                    "onlydestination": "Wenn Sie nur bestimmte Richtungen/Ziele sehen möchten, müssen Sie die GENAUEN Namen der gewünschten Ziele eingeben, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch Semikolons getrennt sein.",
                     "limit": "Standardmäßig sehen Sie 6 Abfahrten. Wenn Sie mehr oder weniger sehen möchten, können Sie diese Einstellung konfigurieren. Die API ruft maximal 80 Abfahrten ab. Wenn Sie Filter wie 'hidedestination' verwenden und 40 Einträge herausgefiltert werden, sehen Sie maximal die verbleibenden 40.",
-                    "doublestationnumber": "Wenn Sie zwei oder mehr Karten für dieselbe Global ID erstellen möchten (z. B. eine für BUS, eine für S-BAHN, eine für TRAM), müssen Sie diesen Parameter verwenden. Es kann eine Zahl oder ein Buchstabe sein, und auch mehrere Zahlen oder Buchstaben sind erlaubt. Es sind keine Sonderzeichen oder Leerzeichen zulässig.",
+                    "departure_format": "In dem Beispiel ist 16:27 die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist die aktuelle Abfahrtszeit. Sollte nur die aktuelle Abfahrtszeit (Option 3) angezeigt werden, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt.",
                     "transporttypes": "Wählen Sie die Transportarten aus, die Sie in der Karte sehen möchten.",
-                    "globalid2": "Wenn Sie zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, können Sie beide in einer Karte kombinieren. Beachten Sie, dass Sie die Transportarten in transporttypes für beide Stationen auswählen müssen. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe geben wird, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Sie es nur für eine Karte verwenden, sollte es kein Problem sein, aber wenn Sie es für mehr verwenden, steigt das Risiko, dass die API die Anfrage blockiert. Sie müssen die Global ID der zweiten Station im Format de:09162:2 eingeben, wie sie in der Liste der Global IDs oben gezeigt wird. Sie können sie mit der Abfrage https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing finden (ersetzen Sie einfach den Namen in der Abfrage). Wenn es mehrere Einträge gibt, müssen Sie den richtigen finden. Alternativ können Sie beginnen, eine neue Haltestelle zu erstellen, um die Global ID aus den Suchergebnissen zu erhalten.",
-                    "hidename": "Wenn Sie den Namen der Karte nicht sehen möchten, aktivieren Sie diese Option.",
-                    "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                    "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                    "alert_for": "Wenn Sie zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchten, können Sie sie als kommagetrennte Liste konfigurieren. Weitere Informationen finden Sie in der Dokumentation. Für mehr Informationen schauen Sie bitte in die Dokumentation.",
                     "station_name": "Geben Sie den Namen der Station ein, nach der Sie suchen möchten."
                 }
             },
@@ -129,32 +113,16 @@
                 "data": {
                     "globalid": "Global ID",
                     "name": "Name",
-                    "onlyline": "Nur diese Linien",
-                    "hidedestination": "Diese Ziele ausblenden",
-                    "onlydestination": "Nur diese Ziele",
                     "limit": "Anzahl der Abfahrten",
-                    "doublestationnumber": "Doppelte Stationsnummer",
-                    "transporttypes": "Transportarten",
-                    "globalid2": "Global ID 2",
-                    "hidename": "Den Namen der Karte ausblenden",
-                    "timezone_from": "Zeitzone von",
-                    "timezone_to": "Zeitzone nach",
-                    "alert_for": "Alarmattribute für"
+                    "departure_format": "Formatierung der Abfahrtzeit",
+                    "transporttypes": "Transportarten"
                 },
                 "data_description": {
                     "globalid": "Die Stationskennung für die Haltestelle/Station/Ort. Normalerweise wird dieser Eintrag während der Erstkonfiguration automatisch erstellt. Es ist NICHT der Name der Station! Hier finden Sie die Global ID für Ihre Station: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie einfach den Namen in der Abfrage. Wenn es mehrere Einträge gibt, müssen Sie den richtigen finden.",
                     "name": "Name, der in der Karte angezeigt werden soll",
-                    "onlyline": "Wenn Sie nur bestimmte Linien sehen möchten, wie S3, S4 und S20, können Sie sie als kommagetrennte Liste konfigurieren.",
-                    "hidedestination": "Wenn Sie bestimmte Richtungen/Ziele ausblenden möchten, müssen Sie die GENAUEN Namen der unerwünschten Ziele eingeben, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch Semikolons getrennt sein.",
-                    "onlydestination": "Wenn Sie nur bestimmte Richtungen/Ziele sehen möchten, müssen Sie die GENAUEN Namen der gewünschten Ziele eingeben, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch Semikolons getrennt sein.",
                     "limit": "Standardmäßig sehen Sie 6 Abfahrten. Wenn Sie mehr oder weniger sehen möchten, können Sie diese Einstellung konfigurieren. Die API ruft maximal 80 Abfahrten ab. Wenn Sie Filter wie 'hidedestination' verwenden und 40 Einträge herausgefiltert werden, sehen Sie maximal die verbleibenden 40.",
-                    "doublestationnumber": "Wenn Sie zwei oder mehr Karten für dieselbe Global ID erstellen möchten (z. B. eine für BUS, eine für S-BAHN, eine für TRAM), müssen Sie diesen Parameter verwenden. Es kann eine Zahl oder ein Buchstabe sein, und auch mehrere Zahlen oder Buchstaben sind erlaubt. Es sind keine Sonderzeichen oder Leerzeichen zulässig.",
-                    "transporttypes": "Wählen Sie die Transportarten aus, die Sie in der Karte sehen möchten.",
-                    "globalid2": "Wenn Sie zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, können Sie beide in einer Karte kombinieren. Beachten Sie, dass Sie die Transportarten in transporttypes für beide Stationen auswählen müssen. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe geben wird, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Sie es nur für eine Karte verwenden, sollte es kein Problem sein, aber wenn Sie es für mehr verwenden, steigt das Risiko, dass die API die Anfrage blockiert. Sie müssen die Global ID der zweiten Station im Format de:09162:2 eingeben. Sie können sie mit der Abfrage https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing finden (ersetzen Sie einfach den Namen in der Abfrage). Wenn es mehrere Einträge gibt, müssen Sie den richtigen finden. Alternativ können Sie beginnen, eine neue Haltestelle zu erstellen, um die Global ID aus den Suchergebnissen zu erhalten.",
-                    "hidename": "Wenn Sie den Namen der Karte nicht sehen möchten, aktivieren Sie diese Option.",
-                    "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                    "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                    "alert_for": "Wenn Sie zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchten, können Sie sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schauen Sie bitte in die Dokumentation."
+                    "departure_format": "In dem Beispiel ist 16:27 die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist die aktuelle Abfahrtszeit. Sollte nur die aktuelle Abfahrtszeit (Option 3) angezeigt werden, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt.",
+                    "transporttypes": "Wählen Sie die Transportarten aus, die Sie in der Karte sehen möchten."
                 }
             }
         }
