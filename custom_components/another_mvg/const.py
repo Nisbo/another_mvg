@@ -25,6 +25,7 @@ CONF_TIMEZONE_FROM = "timezone_from"  # like "Europe/Berlin" or "UTC" if your sy
 CONF_TIMEZONE_TO = "timezone_to"  # like "Europe/Berlin"
 CONF_ALERT_FOR = "alert_for"  # optional
 CONF_SHOW_CLOCK = "show_clock" # optional
+CONF_DEPARTURE_FORMAT = "departure_format" # required
 
 DEFAULT_HIDEDESTINATION = ""
 DEFAULT_ONLYDESTINATION = ""
@@ -38,17 +39,18 @@ DEFAULT_TIMEZONE_TO = "Europe/Berlin"
 DEFAULT_HIDENAME = False
 DEFAULT_ALERT_FOR = ""
 DEFAULT_SHOW_CLOCK = False
+DEFAULT_DEPARTURE_FORMAT = 1
 
 URL_BASE = "/another_mvg"
 ANOTHER_MVG_CARDS = [
     {
         "name": "Another MVG Card",
         "filename": "content-card-another-mvg.js",
-        "version": "2.1.0-BETA",
+        "version": "2.1.0-BETA-2",
     },
     {
         "name": "Another MVG Big Card",
         "filename": "content-card-another-mvg-big.js",
-        "version": "2.1.0-BETA",
+        "version": "2.1.0-BETA-2",
     },
 ]
