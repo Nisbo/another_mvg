@@ -152,6 +152,10 @@ class ContentAnotherMVGbig extends HTMLElement {
     const entityId = this.config.entity;
     const state    = hass.states[entityId];
     const stateStr = state ? state.state : "unavailable";
+	const departureFormat = state && state.attributes && state.attributes.config && 
+    ["1", "2", "3"].includes(state.attributes.config.departure_format ?? "") 
+    ? state.attributes.config.departure_format 
+    : "1";
 
     /* state undefined */
     if (!state || state === "undefined") {
@@ -184,18 +188,45 @@ class ContentAnotherMVGbig extends HTMLElement {
 			  html += `</tr>`;
 		} else {
 			this.data.forEach((departure) => {
-			  html += `       <tr>`;
-			  html += `          <td class="departureline"><span class="line ${departure.transport_type} ${departure.label}" > ${departure.label}</span></td>`;
-			  html += `          <td class="departureline">${departure.destination}</td>`;
-			  html += `          <td class="departureline">${departure.track}</td>`;
-			  let delay = ``;
-			  if (departure.cancelled) {
-				delay = `<span class="cancelled">Entfällt</span>`;
-			  } else if(departure.delay > 0) {
-				delay = `<span class="delay"> +${departure.delay}</span> <span class="expected">(${departure.expected_departure})</span>`;
+			  html += `<tr>`;
+			  html += `<td class="departureline"><span class="line ${departure.transport_type} ${departure.label}">${departure.label}</span></td>`;
+			  html += `<td class="departureline">${departure.destination}</td>`;
+			  html += `<td class="departureline">${departure.track}</td>`;
+			  
+			  let timeDisplay = "";
+			  
+			  if (departureFormat === "1") {
+				timeDisplay = departure.planned_departure;
+
+				if (departure.cancelled) {
+				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+				} else if (departure.delay > 0) {
+				  timeDisplay += ` <span class="delay">+${departure.delay}</span> (${departure.expected_departure})`;
+				}
+				
+			  } else if (departureFormat === "2") {
+				timeDisplay = departure.planned_departure;
+
+				if (departure.cancelled) {
+				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+				} else if (departure.delay > 0) {
+				  timeDisplay += ` <span class="delay">+${departure.delay}</span>`;
+				}
+				
+			  } else if (departureFormat === "3") {
+				if (departure.delay > 0) {
+				  timeDisplay = `<span class="delay">${departure.expected_departure}</span>`;
+				} else {
+				  timeDisplay = departure.expected_departure;
+				}
+
+				if (departure.cancelled) {
+				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+				}
 			  }
-			  html += `          <td class="departureline">${departure.planned_departure} ${delay ? delay: ""}</td>`;
-			  html += `       </tr>`;
+
+			  html += `<td class="departureline">${timeDisplay}</td>`;
+			  html += `</tr>`;
 			});
 		}
 		html += `</table>`;
