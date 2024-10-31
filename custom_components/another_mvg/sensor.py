@@ -62,7 +62,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_GLOBALID): cv.string,
         vol.Required(CONF_NAME): cv.string,
-        vol.Required(CONF_DEPARTURE_FORMAT, default=DEFAULT_DEPARTURE_FORMAT): cv.positive_int,
+        vol.Optional(CONF_DEPARTURE_FORMAT, default=DEFAULT_DEPARTURE_FORMAT): cv.string,
         vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): cv.string,
         vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): cv.string,
         vol.Optional(CONF_ONLYDESTINATION, default=DEFAULT_ONLYDESTINATION): cv.string,
