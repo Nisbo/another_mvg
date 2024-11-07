@@ -74,6 +74,15 @@
     "options": {
         "step": {
             "init": {
+                "title": "Edit and Search",
+                "description": "Choose whether to edit the entry or search for a station (Global ID) for this entry. The additional station is optional and integrates its departure times into the same card/display.",
+                "menu_options": {
+                    "edit": "Edit entry",
+                    "globalid1search": "Station (Global ID 1) - search and save",
+                    "globalid2search": "Additional station (Global ID 2) - search and save"
+                }
+            },
+            "edit": {
 	    	"sections": {
                     "advanced_options": {
                        "name": "Advanced Options",
@@ -124,7 +133,47 @@
                     "departure_format": "In the example, 16:27 is the scheduled departure time, the train has a delay of 2 minutes, and 16:29 is the current departure time. If only the current departure time (Option 3) is displayed, the time will be shown in red if there is a delay.",
                     "transporttypes": "Select the Transport Types you want to see in the card."
                 }
-            }
+            },
+	    "globalid2search": {
+		"title": "Search for your Station / Stop for Global ID2",
+		"description": "Here you can search for the Global ID2.",
+		"data": {
+		    "station_name": "Station Name"
+		},
+		"data_description": {
+		    "station_name": "Enter the name of the station you want to search for."
+		}
+	    },
+	    "globalid1search": {
+		"title": "Search for your Station / Stop for Global ID1",
+		"description": "Here you can search for the Global ID1.",
+		"data": {
+		    "station_name": "Station Name"
+		},
+		"data_description": {
+		    "station_name": "Enter the name of the station you want to search for."
+		}
+	    },
+	    "globalid1save": {
+		"title": "Select your Station / Stop for Global ID1",
+		"description": "Found Stations / Stops.",
+		"data": {
+		    "globalid": "Global ID 1"
+		},
+		"data_description": {
+		    "globalid": "Select your station / stop from the list above."
+		}
+	    },
+	    "globalid2save": {
+		"title": "Select your Station / Stop for Global ID2",
+		"description": "Found Stations / Stops.",
+		"data": {
+		    "globalid2": "Global ID 2"
+		},
+		"data_description": {
+		    "globalid2": "Select your station / stop from the list above."
+		}
+	    }
         }
     }
 }
