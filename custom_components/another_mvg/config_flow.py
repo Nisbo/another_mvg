@@ -1,10 +1,15 @@
 import logging
 import aiohttp
 import voluptuous as vol
+import uuid
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.core import HomeAssistant
 from homeassistant.core import callback
 from homeassistant.helpers.selector import selector, SelectSelector, SelectSelectorConfig, SelectSelectorMode
 from homeassistant import data_entry_flow
+from typing import Any
 from homeassistant.const import CONF_NAME
 from .const import (
     DOMAIN,
@@ -13,7 +18,7 @@ from .const import (
     CONF_HIDEDESTINATION,
     CONF_ONLYDESTINATION,
     CONF_LIMIT,
-    CONF_DOUBLESTATIONNUMBER,
+    CONF_DOUBLESTATIONNUMBER, # this is deprecated, however we have to keep it in the code for the yaml import / convert to GUI
     CONF_TRANSPORTTYPES,
     CONF_GLOBALID2,
     CONF_HIDENAME,
@@ -26,7 +31,6 @@ from .const import (
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
     DEFAULT_LIMIT,
-    DEFAULT_CONF_DOUBLESTATIONNUMBER,
     DEFAULT_CONF_TRANSPORTTYPES,
     DEFAULT_CONF_GLOBALID2,
     DEFAULT_HIDENAME,
@@ -49,6 +53,29 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(config_entry):
         """Get the options flow."""
         return AnotherMVGOptionsFlowHandler(config_entry)
+
+    async def async_step_import(self, import_data: dict[str, Any]) -> ConfigFlowResult:
+        """Import entry from configuration.yaml."""
+        return await self.async_step_user(
+            {
+                CONF_GLOBALID: import_data.get(CONF_GLOBALID),
+                CONF_NAME: import_data.get(CONF_NAME),
+                CONF_ONLYLINE: import_data.get(CONF_ONLYLINE, DEFAULT_ONLYLINE),
+                CONF_HIDEDESTINATION: import_data.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION),
+                CONF_ONLYDESTINATION: import_data.get(CONF_ONLYDESTINATION, DEFAULT_ONLYDESTINATION),
+                CONF_LIMIT: import_data.get(CONF_LIMIT, DEFAULT_LIMIT),
+                CONF_DOUBLESTATIONNUMBER: import_data.get(CONF_DOUBLESTATIONNUMBER, ""),
+                CONF_TRANSPORTTYPES: import_data.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES).split(','),
+                CONF_GLOBALID2: import_data.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2),
+                CONF_HIDENAME: import_data.get(CONF_HIDENAME, DEFAULT_HIDENAME),
+                CONF_TIMEZONE_FROM: import_data.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM),
+                CONF_TIMEZONE_TO: import_data.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO),
+                CONF_ALERT_FOR: import_data.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR),
+                CONF_SHOW_CLOCK: import_data.get(CONF_SHOW_CLOCK, DEFAULT_SHOW_CLOCK),
+                CONF_DEPARTURE_FORMAT: import_data.get(CONF_DEPARTURE_FORMAT, DEFAULT_DEPARTURE_FORMAT),
+            }
+        )
+
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step and configuration."""
@@ -80,7 +107,9 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # check advanced_options and filter_options
                 advanced_options = user_input.get("advanced_options", {})
                 filter_options   = user_input.get("filter_options", {})
-        
+                unique_id = str(uuid.uuid4())  # Generate unique_id
+                _LOGGER.warning("AnotherMVG: UUID prepared: %s", unique_id)
+
                 # and convert the input
                 # this is because the section function creates an dictionary and I dont want this
                 # I only want an optical "collapsing"
@@ -90,9 +119,6 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if CONF_ALERT_FOR in advanced_options:
                     user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
           
-                if CONF_DOUBLESTATIONNUMBER in advanced_options:
-                    user_input[CONF_DOUBLESTATIONNUMBER] = advanced_options[CONF_DOUBLESTATIONNUMBER]
-        
                 if CONF_TIMEZONE_FROM in advanced_options:
                     user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
         
@@ -118,6 +144,15 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 if CONF_TRANSPORTTYPES in user_input:
                     user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
+
+                # if the request is from the YAML import, 
+                # means there is a CONF_DOUBLESTATIONNUMBER,
+                # use the old unique_id format to keep the old relations and avoid double import from YAML
+                if CONF_DOUBLESTATIONNUMBER in user_input:
+                    unique_id = user_input[CONF_GLOBALID].replace(":", "") + user_input[CONF_DOUBLESTATIONNUMBER]
+                    _LOGGER.warning("AnotherMVG: Old UUID used: %s", unique_id)
+
+                await self.async_set_unique_id(unique_id)
 
                 return self.async_create_entry(
                     title=user_input[CONF_NAME],
@@ -233,7 +268,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         vol.Optional(CONF_SHOW_CLOCK,          default=DEFAULT_SHOW_CLOCK): bool,
                         vol.Optional(CONF_HIDENAME,            default=DEFAULT_HIDENAME): bool,
                         vol.Optional(CONF_GLOBALID2,           default=DEFAULT_CONF_GLOBALID2): str,
-                        vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
+                        #vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       default=DEFAULT_TIMEZONE_FROM): str,
                         vol.Optional(CONF_TIMEZONE_TO,         default=DEFAULT_TIMEZONE_TO): str,
                         vol.Optional(CONF_ALERT_FOR,           default=DEFAULT_ALERT_FOR): str,
@@ -247,11 +282,163 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options flow for Another MVG."""
 
-    def __init__(self, config_entry):
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize Another MVG options flow."""
         self.config_entry = config_entry
+        self.options = dict(config_entry.options)
 
     async def async_step_init(self, user_input=None):
+        """Display an options menu"""
+        return self.async_show_menu(
+            step_id="init",
+            menu_options=["edit", "globalid1search", "globalid2search"],
+        )
+
+    async def async_step_globalid1search(self, user_input=None):
+        if user_input is not None:
+            if "station_name" in user_input:
+                # Handle station search
+                station_name = user_input.get("station_name")
+                stations = await self._fetch_stations(station_name)
+
+                if stations:
+                    return self.async_show_form(
+                        step_id="globalid1save",
+                        data_schema=self._search_schema_globalid1(stations, station_name)
+                    )
+                else:
+                    errors = {}
+                    errors["base"] = "station_not_found"
+                    
+                    return self.async_show_form(
+                        step_id="globalid1search",
+                        data_schema=self._station_search_schema(),
+                        errors=errors
+                    )
+
+        return self.async_show_form(step_id="globalid1search", data_schema=self._station_search_schema())
+
+    async def async_step_globalid2search(self, user_input=None):
+        if user_input is not None:
+            if "station_name" in user_input:
+                # Handle station search
+                station_name = user_input.get("station_name")
+                stations = await self._fetch_stations(station_name)
+
+                if stations:
+                    return self.async_show_form(
+                        step_id="globalid2save",
+                        data_schema=self._search_schema_globalid2(stations, station_name)
+                    )
+                else:
+                    errors = {}
+                    errors["base"] = "station_not_found"
+                    
+                    return self.async_show_form(
+                        step_id="globalid2search",
+                        data_schema=self._station_search_schema(),
+                        errors=errors
+                    )
+
+        return self.async_show_form(step_id="globalid2search", data_schema=self._station_search_schema())
+
+    async def async_step_globalid2save(self, user_input=None):
+        if user_input is not None:
+            existing_data = self.config_entry.data
+            updated_data  = {**existing_data, **user_input}
+
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, data=updated_data
+            )
+            
+            await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+
+            return self.async_create_entry(title="", data={})
+
+    async def async_step_globalid1save(self, user_input=None):
+        if user_input is not None:
+            existing_data = self.config_entry.data
+            updated_data  = {**existing_data, **user_input}
+
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, data=updated_data
+            )
+            
+            await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+
+            return self.async_create_entry(title="", data={})
+
+    def _search_schema_globalid1(self, stations, station_name):
+        """Return the schema for the user configuration form with station options."""
+        options = [
+            {"label": f"{station['name']} - {station['transportTypes']} ({station['globalId']})", "value": station['globalId']}
+            for station in stations
+        ] if stations else []
+
+        return vol.Schema({
+            vol.Required(CONF_GLOBALID): selector({
+                "select": {
+                    "options": options
+                }
+            })
+        })
+
+    def _search_schema_globalid2(self, stations, station_name):
+        """Return the schema for the user configuration form with station options."""
+        options = [
+            {"label": f"{station['name']} - {station['transportTypes']} ({station['globalId']})", "value": station['globalId']}
+            for station in stations
+        ] if stations else []
+
+        return vol.Schema({
+            vol.Required(CONF_GLOBALID2): selector({
+                "select": {
+                    "options": options
+                }
+            })
+        })
+
+
+    async def _fetch_stations(self, station_name):
+        """Fetch and filter stations for the given station name."""
+        # _LOGGER.warning("Fetching stations for station name: %s", station_name)
+        url = f"https://www.mvg.de/api/bgw-pt/v3/locations?query={station_name}"
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        #_LOGGER.warning("API response: %s", data)
+                        # Filter out only entries with transportTypes
+                        filtered_stations = [
+                            {
+                                "name": entry["name"],
+                                "transportTypes": ', '.join(entry["transportTypes"]),
+                                "globalId": entry["globalId"]
+                            }
+                            for entry in data
+                            if "transportTypes" in entry and entry["type"] == "STATION"
+                        ]
+                        #_LOGGER.warning("Filtered stations: %s", filtered_stations)
+                        return filtered_stations
+                    else:
+                        _LOGGER.error("API request failed with status: %s", response.status)
+        except aiohttp.ClientError as e:
+            _LOGGER.error("HTTP request error: %s", e)
+        except Exception as e:
+            _LOGGER.error("Error processing API response: %s", e)
+
+        return []
+
+    def _station_search_schema(self):
+        """Return the schema for the station search form."""
+        return vol.Schema({
+            vol.Required("station_name"): str,
+        })
+
+
+    async def async_step_edit(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
             # Log submitted user_input
@@ -271,8 +458,8 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             if CONF_ALERT_FOR in advanced_options:
                 user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
           
-            if CONF_DOUBLESTATIONNUMBER in advanced_options:
-                user_input[CONF_DOUBLESTATIONNUMBER] = advanced_options[CONF_DOUBLESTATIONNUMBER]
+            #if CONF_DOUBLESTATIONNUMBER in advanced_options:
+            #    user_input[CONF_DOUBLESTATIONNUMBER] = advanced_options[CONF_DOUBLESTATIONNUMBER]
         
             if CONF_TIMEZONE_FROM in advanced_options:
                 user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
@@ -297,8 +484,8 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                 user_input[CONF_ONLYDESTINATION] = filter_options[CONF_ONLYDESTINATION]
 
 
-            # Ensure that empty fields are stored as empty strings
-            for key in [CONF_ONLYLINE, CONF_HIDEDESTINATION, CONF_ONLYDESTINATION, CONF_DOUBLESTATIONNUMBER, 
+            # Ensure that empty fields are stored as empty strings CONF_DOUBLESTATIONNUMBER
+            for key in [CONF_ONLYLINE, CONF_HIDEDESTINATION, CONF_ONLYDESTINATION, 
                         CONF_TIMEZONE_FROM, CONF_TIMEZONE_TO, CONF_ALERT_FOR, CONF_GLOBALID2]:
                 if key not in user_input:
                     user_input[key] = ""  # Explicitly set the field to an empty string if it's not in the user_input
@@ -366,7 +553,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Optional(CONF_SHOW_CLOCK,          description={"suggested_value": current_data.get(CONF_SHOW_CLOCK, "")}): bool,
                         vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
                         vol.Optional(CONF_GLOBALID2,           description={"suggested_value": current_data.get(CONF_GLOBALID2, "")}): str,
-                        vol.Optional(CONF_DOUBLESTATIONNUMBER, description={"suggested_value": current_data.get(CONF_DOUBLESTATIONNUMBER, "")}): str,
+                        #vol.Optional(CONF_DOUBLESTATIONNUMBER, description={"suggested_value": current_data.get(CONF_DOUBLESTATIONNUMBER, "")}): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
                         vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
                         vol.Optional(CONF_ALERT_FOR,           description={"suggested_value": current_data.get(CONF_ALERT_FOR, "")}): str,
@@ -378,6 +565,6 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         })
 
         return self.async_show_form(
-            step_id="init",
+            step_id="edit",
             data_schema=self.options_schema
         )
