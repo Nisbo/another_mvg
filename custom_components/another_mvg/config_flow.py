@@ -108,7 +108,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 advanced_options = user_input.get("advanced_options", {})
                 filter_options   = user_input.get("filter_options", {})
                 unique_id = str(uuid.uuid4())  # Generate unique_id
-                _LOGGER.warning("AnotherMVG: UUID prepared: %s", unique_id)
+                #_LOGGER.warning("AnotherMVG: UUID prepared: %s", unique_id)
 
                 # and convert the input
                 # this is because the section function creates an dictionary and I dont want this
@@ -268,7 +268,6 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         vol.Optional(CONF_SHOW_CLOCK,          default=DEFAULT_SHOW_CLOCK): bool,
                         vol.Optional(CONF_HIDENAME,            default=DEFAULT_HIDENAME): bool,
                         vol.Optional(CONF_GLOBALID2,           default=DEFAULT_CONF_GLOBALID2): str,
-                        #vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       default=DEFAULT_TIMEZONE_FROM): str,
                         vol.Optional(CONF_TIMEZONE_TO,         default=DEFAULT_TIMEZONE_TO): str,
                         vol.Optional(CONF_ALERT_FOR,           default=DEFAULT_ALERT_FOR): str,
@@ -458,9 +457,6 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             if CONF_ALERT_FOR in advanced_options:
                 user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
           
-            #if CONF_DOUBLESTATIONNUMBER in advanced_options:
-            #    user_input[CONF_DOUBLESTATIONNUMBER] = advanced_options[CONF_DOUBLESTATIONNUMBER]
-        
             if CONF_TIMEZONE_FROM in advanced_options:
                 user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
         
@@ -484,7 +480,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                 user_input[CONF_ONLYDESTINATION] = filter_options[CONF_ONLYDESTINATION]
 
 
-            # Ensure that empty fields are stored as empty strings CONF_DOUBLESTATIONNUMBER
+            # Ensure that empty fields are stored as empty strings
             for key in [CONF_ONLYLINE, CONF_HIDEDESTINATION, CONF_ONLYDESTINATION, 
                         CONF_TIMEZONE_FROM, CONF_TIMEZONE_TO, CONF_ALERT_FOR, CONF_GLOBALID2]:
                 if key not in user_input:
@@ -494,7 +490,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             if CONF_TRANSPORTTYPES in user_input:
                 user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
             
-            # Save the updated data self.config_entry, data={**self.config_entry.data, **user_input}
+            # Save the updated data
             self.hass.config_entries.async_update_entry(
                 self.config_entry, data=user_input
             )
@@ -519,8 +515,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                     "custom_value": True
                 }
             }),
-            vol.Optional(CONF_LIMIT,               default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
-
+            vol.Optional(CONF_LIMIT,            default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
             vol.Required(CONF_DEPARTURE_FORMAT, default=current_data.get(CONF_DEPARTURE_FORMAT, "1")): SelectSelector(
                 SelectSelectorConfig(
                     options = [
@@ -553,7 +548,6 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Optional(CONF_SHOW_CLOCK,          description={"suggested_value": current_data.get(CONF_SHOW_CLOCK, "")}): bool,
                         vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
                         vol.Optional(CONF_GLOBALID2,           description={"suggested_value": current_data.get(CONF_GLOBALID2, "")}): str,
-                        #vol.Optional(CONF_DOUBLESTATIONNUMBER, description={"suggested_value": current_data.get(CONF_DOUBLESTATIONNUMBER, "")}): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
                         vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
                         vol.Optional(CONF_ALERT_FOR,           description={"suggested_value": current_data.get(CONF_ALERT_FOR, "")}): str,
