@@ -109,6 +109,13 @@ class ContentAnotherMVG extends HTMLElement {
           background-color: #4682B4;
         }
 
+        /* BAHN */
+        span.BAHN {
+          background-color: #FFFFFF;
+		  color: #E30613;
+		  border: 1px solid #E30613;
+        }
+
         /* SBAHN */
         span.SBAHN {
           border-radius:1000px;
