@@ -79,22 +79,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-""" This option is not used anymore """
-#async def async_setup_platformNotUsed(
-#    hass: HomeAssistant,
-#    config: ConfigType,
-#    add_entities: AddEntitiesCallback,
-#    discovery_info: DiscoveryInfoType | None = None,
-#) -> None:
-#    """Set up the sensor platform using YAML configuration."""
-#    _LOGGER.warning(
-#        "Setting up Another MVG sensor using YAML configuration is deprecated. "
-#        "Please remove the YAML configuration and use the integration through the Home Assistant UI."
-#    )
-#    
-#    # YAML-Konfiguration hinzufügen
-#    add_entities([ConnectionInfo(hass, config)], True)
-
 """Configuration via YAML --> deprecated --> convert everything to GUI"""
 async def async_setup_platform(
     hass: HomeAssistant,
