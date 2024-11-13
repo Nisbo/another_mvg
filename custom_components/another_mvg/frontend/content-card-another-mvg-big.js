@@ -132,6 +132,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         span.S2  {background-color: #76B82A;}
         span.S3  {background-color: #951B81;}
         span.S4  {background-color: #E30613;}
+		span.S5  {background-color: #005E82;}
         span.S6  {background-color: #00975F;}
         span.S7  {background-color: #943126;}
         span.S8  {background-color: #000000; color: #FFFFFF;}
