@@ -52,4 +52,9 @@ ANOTHER_MVG_CARDS = [
         "filename": "content-card-another-mvg-big.js",
         "version": "2.1.0-BETA-3",
     },
+    {
+        "name": "Another MVG LiveMap Card",
+        "filename": "content-card-another-mvg-livemap.js",
+        "version": "2.1.0-BETA-3",
+    },
 ]
