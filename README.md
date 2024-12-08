@@ -8,7 +8,7 @@
 
 2. [Create a sensor for your stop / station](#2-create-a-sensor-for-your-stop--station)  
     2.1. [via GUI (recommended)](#option-1-via-gui-recommended)  
-    2.2. [via configuration.yaml](#option-2-via-configurationyaml)  
+    2.2. [via configuration.yaml](#option-2-via-configurationyaml) (deprecated) 
 
 3. [Adding a card to your dashboard](#3-adding-a-card-to-your-dashboard)  
 
@@ -127,7 +127,12 @@ entity: sensor.yourSensor
 ⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend / browser cache.
 
 
-# 4. Code for your configuration.yaml
+# 4. Code for your configuration.yaml (deprecated)
+
+⚠️ Currently its still working, but it will be removed in one of the next versions.
+All sensors from the configuration.yaml will be migrated automatically. 
+If you see the sensors in the GUI you can remove the code from the configuration.yaml.
+There will be no more updates on this section in the documentation.
 
 ### Add the name of this integration
 
