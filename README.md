@@ -8,11 +8,12 @@
 
 2. [Create a sensor for your stop / station](#2-create-a-sensor-for-your-stop--station)  
     2.1. [via GUI (recommended)](#option-1-via-gui-recommended)  
-    2.2. [via configuration.yaml](#option-2-via-configurationyaml) (deprecated) 
+    2.2. [via configuration.yaml](#option-2-via-configurationyaml-deprecated) (deprecated)  
 
 3. [Adding a card to your dashboard](#3-adding-a-card-to-your-dashboard)  
+    3.1. [Add the map to your dashboard](#31-add-the-map-to-your-dashboard)
 
-4. [Code for your configuration.yaml](#4-code-for-your-configurationyaml)  
+4. [Code for your configuration.yaml](#4-code-for-your-configurationyaml-deprecated) (deprecated)  
 
 5. [Screenshots](#5-screenshots)  
 
@@ -130,7 +131,7 @@ entity: sensor.yourSensor
 
 
 
-- Add the map to your dashboard
+### 3.1 Add the map to your dashboard
 
 ![grafik](https://github.com/user-attachments/assets/138f06bc-dc74-4dc6-b0ee-fbdc49af74e7)
 
