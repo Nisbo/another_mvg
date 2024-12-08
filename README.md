@@ -29,6 +29,8 @@
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=another_mvg&owner=Nisbo)
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
 
+* go to ```Settings``` --> ```Devices and services``` --> add integration ```another mvg``` and follow the configuration flow
+
 * create a manual card with this content:
 ```
 type: custom:content-card-another-mvg
