@@ -105,7 +105,7 @@ Or use these steps:
 ⚠️ It may take a minute to create the entity
 
 
-## Option 2: via ```configuration.yaml```
+## Option 2: via ```configuration.yaml``` (deprecated)
 * Configure the configuration.yaml [(see guide below)](#4-code-for-your-configurationyaml)
 * Check configuration.yaml with the check function under Dev-Tools
 * Restart HA again
