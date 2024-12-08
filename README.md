@@ -127,6 +127,36 @@ entity: sensor.yourSensor
 ⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend / browser cache.
 
 
+
+
+
+- Add the map to your dashboard
+
+![grafik](https://github.com/user-attachments/assets/138f06bc-dc74-4dc6-b0ee-fbdc49af74e7)
+
+The card can be added and configured directly through the map selector, like other cards. 
+Simply go to your dashboard, click on "Add Card", search for "Another MVG", and select the card from the results.
+
+![grafik](https://github.com/user-attachments/assets/aac03dfb-9358-4787-a1f8-0923aeb1db1a)
+
+![grafik](https://github.com/user-attachments/assets/da13be9f-e8cf-461d-a907-7841b89bbc8a)
+
+That’s all. In the standard configuration, it shows the complete map. 
+If you want to zoom in, follow the instructions in the description. 
+This editor is currently only available in German because I have no clue how to add language support to the card. 
+If there is a real need, I can create an additional card for English users.
+
+If, for some reason, you are not able to find the card, try clearing your frontend and browser cache, or try configuring the card on your own.
+
+```
+type: custom:content-card-another-mvg-livemap
+mode: schematic
+x: "2750800"
+y: "1560005"
+zoom: "4.8"
+``` 
+
+
 # 4. Code for your configuration.yaml (deprecated)
 
 ⚠️ Currently its still working, but it will be removed in one of the next versions.
