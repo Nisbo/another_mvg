@@ -1,4 +1,4 @@
-## v2.0.0 Now with GUI configuration (German and English)
+## v2.1.0 YAML configuration deprecated - will be converted automatically to a "GUI-Sensor"
 
 # Another MVG
 
