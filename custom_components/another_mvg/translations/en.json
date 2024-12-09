@@ -11,6 +11,7 @@
                        "data": {
                           "hidename": "Hide the name of the card (incl. clock)",
 			  "show_clock": "Show a clock on the top right",
+                          "increased_limit": "Increased Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Timezone From",
                           "timezone_to": "Timezone To",
@@ -18,6 +19,7 @@
                        },
                        "data_description": {
                           "hidename": "If you don't want to see the name of the card, enable this option.",
+                          "increased_limit": "This option is intended to correct missing entries after midnight if many filters are used. Use this option only if fewer entries than desired are displayed in the evening. Adjust slowly in steps of 10, as this option can lead to unnecessary additional API requests.",
                           "globalid2": "If you have two stations close to each other (or far apart), such as a train station and a bus stop, you can combine them into a single card. Note that you must select the transportation types for both stations. Using this feature may lead to issues, as it triggers two API calls within one second, and it’s possible that the API may block the second call. If you use this option for only one card, it should not be a problem, but using it for more cards increases the risk of the API blocking the request. If you do not know the Global ID 2, you can later select it under **'CONFIGURE'** using the option **'Additional Station (Global ID 2) - search and save'**. Alternatively, you can find the Global ID for your station here: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Simply replace the name in the query. You need to enter the Global ID in the format **de:09162:2**.",
                           "timezone_from": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "timezone_to": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
@@ -87,6 +89,7 @@
                        "data": {
                           "hidename": "Hide the name of the card (incl. clock)",
 			  "show_clock": "Show a clock on the top right",
+                          "increased_limit": "Increased Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Timezone From",
                           "timezone_to": "Timezone To",
@@ -94,6 +97,7 @@
                        },
                        "data_description": {
                           "hidename": "If you don't want to see the name of the card, enable this option.",
+                          "increased_limit": "This option is intended to correct missing entries after midnight if many filters are used. Use this option only if fewer entries than desired are displayed in the evening. Adjust slowly in steps of 10, as this option can lead to unnecessary additional API requests.",
                           "globalid2": "If you have two stations close to each other (or far apart), such as a train station and a bus stop, you can combine them into a single card. Note that you must select the transportation modes for both stations. Using this feature may lead to issues, as it triggers two API calls within one second, and it’s possible that the API may block the second call. If you use this option for only one card, it should not be a problem, but using it for more cards increases the risk of the API blocking the request. If you wish to change the Global ID 2 and do not know the ID, close this input form and select the option **'Additional Station (Global ID 2) - search and save'** under **'CONFIGURE'**. Alternatively, you can find the Global ID for your station here: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Simply replace the name in the query. You need to enter the Global ID in the format **de:09162:2**.",
                           "timezone_from": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "timezone_to": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
