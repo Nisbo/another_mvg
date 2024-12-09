@@ -35,6 +35,7 @@ from .const import (
     CONF_TRANSPORTTYPES,
     CONF_SHOW_CLOCK,
     CONF_DEPARTURE_FORMAT,
+    CONF_INCREASED_LIMIT,
     URL,
     USER_AGENT,
     MVGException,
@@ -50,6 +51,7 @@ from .const import (
     DEFAULT_ALERT_FOR,
     DEFAULT_SHOW_CLOCK,
     DEFAULT_DEPARTURE_FORMAT,
+    DEFAULT_INCREASED_LIMIT,
 )
 
 # integration imports end
@@ -76,6 +78,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): cv.string,
         vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR): cv.string,
         vol.Optional(CONF_SHOW_CLOCK, default=DEFAULT_SHOW_CLOCK): cv.boolean,
+        vol.Optional(CONF_INCREASED_LIMIT, default=DEFAULT_INCREASED_LIMIT): cv.positive_int,
     }
 )
 
@@ -191,6 +194,8 @@ class ConnectionInfo(SensorEntity):
         self._alert_for = config_data.get(CONF_ALERT_FOR)
         self._lateConnections = ""
         self._dataOutdated = ""
+        self._offsetInMinutes = 0
+        self._increased_limit = config_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT)
         self._custom_attributes = {
             "config": {
                 "name": self._name, 
@@ -302,8 +307,14 @@ class ConnectionInfo(SensorEntity):
         # 1st API call for globalid1
         try:
             data = self.get_api_for_globalid(
-                self._name, self._globalid, self._transporttypes
+                self._name, self._globalid, self._offsetInMinutes, self._transporttypes
             )
+
+            # If data is empty, check if there are results for the next day
+            if not data or len(data) < (self._limit + self._increased_limit): 
+                data = self.fetch_additional_data_for_next_day(data, self._name, self._globalid, self._transporttypes)
+
+
         except MVGException as ex:
             # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
             # because returning an ex leads to an error: Unable to serialize to JSON. Bad data found
@@ -333,8 +344,13 @@ class ConnectionInfo(SensorEntity):
             time.sleep(1)
             try:
                 data2 = self.get_api_for_globalid(
-                    self._name, self._globalid2, self._transporttypes
+                    self._name, self._globalid2, self._offsetInMinutes, self._transporttypes
                 )
+
+                # If data2 is empty, check if there are results for the next day
+                if not data2 or len(data2) < (self._limit + self._increased_limit):  # Überprüft, ob die Liste leer ist
+                    data2 = self.fetch_additional_data_for_next_day(data2, self._name, self._globalid2, self._transporttypes)
+
             except MVGException as ex:
                 # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
                 # because returning an ex leads to an error: Unable to serialize to JSON. Bad data found
@@ -386,6 +402,36 @@ class ConnectionInfo(SensorEntity):
         
         self._dataOutdated = ""
         return self.pre_process_output(sorted_data)
+
+
+
+
+    def fetch_additional_data_for_next_day(self, data, name, globalid, transporttypes):
+        # wait 1 second because of 509 error
+        time.sleep(1)
+
+        # calculate minutes till midnight
+        now = datetime.now()
+        midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        seconds_to_midnight = (midnight - now).total_seconds()
+        minutes_to_midnight = int((seconds_to_midnight + 59) // 60)  # Rundet auf die nächste volle Minute
+
+        _LOGGER.warning(
+            "AnotherMVG: There were no (or not enough) results for this day, trying to get results for the next day. Current time is %s. Minutes to midnight: %s",
+            now.strftime("%H:%M:%S"),
+            minutes_to_midnight,
+        )
+
+        # get additional data from API
+        additional_data = self.get_api_for_globalid(name, globalid, minutes_to_midnight, transporttypes)
+
+        # merge it
+        if additional_data:
+            data.extend(additional_data)
+
+        return data
+
+
 
     def pre_process_output(self, data: dict) -> dict:
         """Preformat necessary values into list of Departure."""
@@ -497,10 +543,10 @@ class ConnectionInfo(SensorEntity):
         return departures
 
     def get_api_for_globalid(
-        self, name: str, global_id: str, transport_types: str
+        self, name: str, global_id: str, offsetInMinutes: int, transport_types: str
     ) -> dict:
         """Get departure data from api."""
-        url = URL.format(global_id, transport_types)
+        url = URL.format(global_id, offsetInMinutes, transport_types)
         headers = {}
         headers["User-Agent"] = USER_AGENT
 
