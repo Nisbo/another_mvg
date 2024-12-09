@@ -8,8 +8,7 @@ class MVGException(Exception):
 DOMAIN = "another_mvg"  # name of the integration, dont change
 SCAN_INTERVAL = timedelta(seconds=60)  # updateinterval in seconds
 
-#URL = "https://www.mvg.de/api/fib/v2/departure?globalId={}&limit=80&offsetInMinutes=0&transportTypes={}" # the old API URL
-URL = "https://www.mvg.de/api/bgw-pt/v3/departures?globalId={}&limit=80&offsetInMinutes=0&transportTypes={}"
+URL = "https://www.mvg.de/api/bgw-pt/v3/departures?globalId={}&limit=80&offsetInMinutes={}&transportTypes={}"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 
 CONF_GLOBALID = "globalid"  # required
@@ -26,6 +25,7 @@ CONF_TIMEZONE_TO = "timezone_to"  # like "Europe/Berlin"
 CONF_ALERT_FOR = "alert_for"  # optional
 CONF_SHOW_CLOCK = "show_clock" # optional
 CONF_DEPARTURE_FORMAT = "departure_format" # required
+CONF_INCREASED_LIMIT = "increased_limit" # optional
 
 DEFAULT_HIDEDESTINATION = ""
 DEFAULT_ONLYDESTINATION = ""
@@ -39,22 +39,23 @@ DEFAULT_HIDENAME = False
 DEFAULT_ALERT_FOR = ""
 DEFAULT_SHOW_CLOCK = False
 DEFAULT_DEPARTURE_FORMAT = "1"
+DEFAULT_INCREASED_LIMIT = 0
 
 URL_BASE = "/another_mvg"
 ANOTHER_MVG_CARDS = [
     {
         "name": "Another MVG Card",
         "filename": "content-card-another-mvg.js",
-        "version": "2.1.0-BETA-4",
+        "version": "2.1.0-BETA-5",
     },
     {
         "name": "Another MVG Big Card",
         "filename": "content-card-another-mvg-big.js",
-        "version": "2.1.0-BETA-4",
+        "version": "2.1.0-BETA-5",
     },
     {
         "name": "Another MVG LiveMap Card",
         "filename": "content-card-another-mvg-livemap.js",
-        "version": "2.1.0-BETA-4",
+        "version": "2.1.0-BETA-5",
     },
 ]
