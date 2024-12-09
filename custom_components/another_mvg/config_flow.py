@@ -27,6 +27,7 @@ from .const import (
     CONF_ALERT_FOR,
     CONF_SHOW_CLOCK,
     CONF_DEPARTURE_FORMAT,
+    CONF_INCREASED_LIMIT,
     DEFAULT_ONLYLINE,
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
@@ -39,6 +40,7 @@ from .const import (
     DEFAULT_ALERT_FOR,
     DEFAULT_SHOW_CLOCK,
     DEFAULT_DEPARTURE_FORMAT,
+    DEFAULT_INCREASED_LIMIT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -68,6 +70,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_TRANSPORTTYPES: import_data.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES).split(','),
                 CONF_GLOBALID2: import_data.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2),
                 CONF_HIDENAME: import_data.get(CONF_HIDENAME, DEFAULT_HIDENAME),
+                CONF_INCREASED_LIMIT: import_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT),
                 CONF_TIMEZONE_FROM: import_data.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM),
                 CONF_TIMEZONE_TO: import_data.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO),
                 CONF_ALERT_FOR: import_data.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR),
@@ -130,6 +133,9 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
                 if CONF_HIDENAME in advanced_options:
                     user_input[CONF_HIDENAME] = advanced_options[CONF_HIDENAME]
+
+                if CONF_INCREASED_LIMIT in advanced_options:
+                    user_input[CONF_INCREASED_LIMIT] = advanced_options[CONF_INCREASED_LIMIT]
 
 
                 if CONF_ONLYLINE in filter_options:
@@ -267,6 +273,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 				    {
                         vol.Optional(CONF_SHOW_CLOCK,          default=DEFAULT_SHOW_CLOCK): bool,
                         vol.Optional(CONF_HIDENAME,            default=DEFAULT_HIDENAME): bool,
+                        vol.Optional(CONF_INCREASED_LIMIT,     default=DEFAULT_INCREASED_LIMIT): int,
                         vol.Optional(CONF_GLOBALID2,           default=DEFAULT_CONF_GLOBALID2): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       default=DEFAULT_TIMEZONE_FROM): str,
                         vol.Optional(CONF_TIMEZONE_TO,         default=DEFAULT_TIMEZONE_TO): str,
@@ -469,6 +476,9 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             if CONF_HIDENAME in advanced_options:
                 user_input[CONF_HIDENAME] = advanced_options[CONF_HIDENAME]
 
+            if CONF_INCREASED_LIMIT in advanced_options:
+                user_input[CONF_INCREASED_LIMIT] = advanced_options[CONF_INCREASED_LIMIT]
+
 
             if CONF_ONLYLINE in filter_options:
                 user_input[CONF_ONLYLINE] = filter_options[CONF_ONLYLINE]
@@ -547,6 +557,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                     {
                         vol.Optional(CONF_SHOW_CLOCK,          description={"suggested_value": current_data.get(CONF_SHOW_CLOCK, "")}): bool,
                         vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
+                        vol.Optional(CONF_INCREASED_LIMIT,     description={"suggested_value": current_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT)}): int,
                         vol.Optional(CONF_GLOBALID2,           description={"suggested_value": current_data.get(CONF_GLOBALID2, "")}): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
                         vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
