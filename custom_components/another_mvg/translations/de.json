@@ -11,6 +11,7 @@
                        "data": {
                           "hidename": "Den Namen der Karte (inkl. Uhr) ausblenden",
 			  "show_clock": "Uhr oben rechts anzeigen",
+			  "increased_limit": "Erweitertes Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Zeitzone von",
                           "timezone_to": "Zeitzone nach",
@@ -18,6 +19,7 @@
                        },
                        "data_description": {
                           "hidename": "Wenn Sie den Namen der Karte nicht sehen möchten, aktivieren Sie diese Option.",
+                          "increased_limit": "Diese Option dient dazu, fehlende Einträge nach Mitternacht zu korrigieren, falls viele Filter verwendet werden. Nutzen Sie diese Option nur, wenn abends weniger Einträge als gewünscht angezeigt werden. Tasten Sie sich langsam in 10er-Schritten vor, da diese Option zu unnötigen zusätzlichen API-Abfragen führen kann.",
                           "globalid2": "Wenn Sie zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, können Sie beide in einer Karte kombinieren. Beachten Sie, dass Sie die Transportarten für beide Stationen auswählen müssen. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe gibt, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Sie diese Option nur für eine Karte verwenden, sollte es kein Problem sein, aber wenn Sie es für mehr verwenden, steigt das Risiko, dass die API die Anfrage blockiert. Wenn Sie die Global ID 2 nicht kennen, können Sie diese später unter **'KONFIGURIEREN'** über die Option **'Zusätzliche Station (Global ID 2) - suchen und speichern'** auswählen. Alternativ können Sie die Global ID für Ihre Station auch hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie dafür einfach den Namen in der Abfrage. Sie müssen die Global ID im Format **de:09162:2** eingeben.",
                           "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
                           "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
@@ -87,6 +89,7 @@
                        "data": {
                           "hidename": "Den Namen der Karte (inkl. Uhr) ausblenden",
 			  "show_clock": "Uhr oben rechts anzeigen",
+			  "increased_limit": "Erweitertes Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Zeitzone von",
                           "timezone_to": "Zeitzone nach",
@@ -94,6 +97,7 @@
                        },
                        "data_description": {
                           "hidename": "Wenn Sie den Namen der Karte nicht sehen möchten, aktivieren Sie diese Option.",
+                          "increased_limit": "Diese Option dient dazu, fehlende Einträge nach Mitternacht zu korrigieren, falls viele Filter verwendet werden. Nutzen Sie diese Option nur, wenn abends weniger Einträge als gewünscht angezeigt werden. Tasten Sie sich langsam in 10er-Schritten vor, da diese Option zu unnötigen zusätzlichen API-Abfragen führen kann.",
                           "globalid2": "Wenn Sie zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, können Sie beide in einer Karte kombinieren. Beachten Sie, dass Sie die Transportarten für beide Stationen auswählen müssen. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe gibt, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Sie diese Option nur für eine Karte verwenden, sollte es kein Problem sein, aber wenn Sie es für mehr verwenden, steigt das Risiko, dass die API die Anfrage blockiert. Wenn Sie die Global ID 2 ändern möchten und die ID nicht kennen, schließen Sie diese Eingabemaske und wählen Sie unter **'KONFIGURIEREN'** die Option **'Zusätzliche Station (Global ID 2) - suchen und speichern'** aus. Alternativ können Sie die Global ID für Ihre Station auch hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie dafür einfach den Namen in der Abfrage. Sie müssen die Global ID im Format **de:09162:2** eingeben.", 
                           "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
                           "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
