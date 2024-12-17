@@ -290,7 +290,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize Another MVG options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
         self.options = dict(config_entry.options)
 
     async def async_step_init(self, user_input=None):
@@ -350,27 +350,27 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_globalid2save(self, user_input=None):
         if user_input is not None:
-            existing_data = self.config_entry.data
+            existing_data = self._config_entry.data
             updated_data  = {**existing_data, **user_input}
 
             self.hass.config_entries.async_update_entry(
-                self.config_entry, data=updated_data
+                self._config_entry, data=updated_data
             )
             
-            await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+            await self.hass.config_entries.async_reload(self._config_entry.entry_id)
 
             return self.async_create_entry(title="", data={})
 
     async def async_step_globalid1save(self, user_input=None):
         if user_input is not None:
-            existing_data = self.config_entry.data
+            existing_data = self._config_entry.data
             updated_data  = {**existing_data, **user_input}
 
             self.hass.config_entries.async_update_entry(
-                self.config_entry, data=updated_data
+                self._config_entry, data=updated_data
             )
             
-            await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+            await self.hass.config_entries.async_reload(self._config_entry.entry_id)
 
             return self.async_create_entry(title="", data={})
 
@@ -502,16 +502,16 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             
             # Save the updated data
             self.hass.config_entries.async_update_entry(
-                self.config_entry, data=user_input
+                self._config_entry, data=user_input
             )
             
             # Reload the integration to apply changes
-            await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+            await self.hass.config_entries.async_reload(self._config_entry.entry_id)
 
             return self.async_create_entry(title="", data={})
 
         # Prepare the default values based on current configuration data
-        current_data = self.config_entry.data
+        current_data = self._config_entry.data
         transport_types = DEFAULT_CONF_TRANSPORTTYPES.split(',')
         selected_transport_types = current_data.get(CONF_TRANSPORTTYPES, '').split(',')
 
