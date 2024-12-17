@@ -416,11 +416,22 @@ class ConnectionInfo(SensorEntity):
         seconds_to_midnight = (midnight - now).total_seconds()
         minutes_to_midnight = int((seconds_to_midnight + 59) // 60)  # Rundet auf die nächste volle Minute
 
-        _LOGGER.warning(
-            "AnotherMVG: There were no (or not enough) results for this day, trying to get results for the next day. Current time is %s. Minutes to midnight: %s",
-            now.strftime("%H:%M:%S"),
-            minutes_to_midnight,
-        )
+        if data is None:
+            _LOGGER.debug(
+                "AnotherMVG: For %s, no data was returned for this day. Current time is %s. Minutes to midnight: %s",
+                name,
+                now.strftime("%H:%M:%S"),
+                minutes_to_midnight,
+            )
+            data = []  # Initialise `data` as empty list
+        else:
+            _LOGGER.debug(
+                "AnotherMVG: For %s there were only %s results for this day, trying to get results for the next day. Current time is %s. Minutes to midnight: %s",
+                name,
+                len(data),
+                now.strftime("%H:%M:%S"),
+                minutes_to_midnight,
+            )
 
         # get additional data from API
         additional_data = self.get_api_for_globalid(name, globalid, minutes_to_midnight, transporttypes)
