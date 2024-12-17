@@ -17,8 +17,10 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.util import Throttle
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 
 from .const import (
+    DOMAIN,
     CONF_ALERT_FOR,
     CONF_DOUBLESTATIONNUMBER,
     CONF_GLOBALID,
@@ -31,6 +33,9 @@ from .const import (
     CONF_TIMEZONE_FROM,
     CONF_TIMEZONE_TO,
     CONF_TRANSPORTTYPES,
+    CONF_SHOW_CLOCK,
+    CONF_DEPARTURE_FORMAT,
+    CONF_INCREASED_LIMIT,
     URL,
     USER_AGENT,
     MVGException,
@@ -38,64 +43,97 @@ from .const import (
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
     DEFAULT_LIMIT,
-    DEFAULT_CONF_DOUBLESTATIONNUMBER,
     DEFAULT_CONF_TRANSPORTTYPES,
     DEFAULT_CONF_GLOBALID2,
     DEFAULT_HIDENAME,
     DEFAULT_TIMEZONE_FROM,
     DEFAULT_TIMEZONE_TO,
     DEFAULT_ALERT_FOR,
+    DEFAULT_SHOW_CLOCK,
+    DEFAULT_DEPARTURE_FORMAT,
+    DEFAULT_INCREASED_LIMIT,
 )
 
 # integration imports end
 
 _LOGGER = logging.getLogger(__name__)
 
-# Zeitintervall zwischen den Updates
+# time intervall between the updates
 MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_GLOBALID): cv.string,
         vol.Required(CONF_NAME): cv.string,
+        vol.Optional(CONF_DEPARTURE_FORMAT, default=DEFAULT_DEPARTURE_FORMAT): cv.string,
         vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): cv.string,
         vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): cv.string,
         vol.Optional(CONF_ONLYDESTINATION, default=DEFAULT_ONLYDESTINATION): cv.string,
         vol.Optional(CONF_LIMIT, default=DEFAULT_LIMIT): cv.positive_int,
-        vol.Optional(CONF_DOUBLESTATIONNUMBER, default=DEFAULT_CONF_DOUBLESTATIONNUMBER): cv.string,
+        vol.Optional(CONF_DOUBLESTATIONNUMBER, default=""): cv.string,
         vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES): cv.string,
         vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): cv.string,
         vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME): cv.boolean,
         vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): cv.string,
         vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): cv.string,
         vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR): cv.string,
+        vol.Optional(CONF_SHOW_CLOCK, default=DEFAULT_SHOW_CLOCK): cv.boolean,
+        vol.Optional(CONF_INCREASED_LIMIT, default=DEFAULT_INCREASED_LIMIT): cv.positive_int,
     }
 )
 
+"""Configuration via YAML --> deprecated --> convert everything to GUI"""
 async def async_setup_platform(
     hass: HomeAssistant,
     config: ConfigType,
     add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
-    """Set up the sensor platform."""
     _LOGGER.warning(
-        "Setting up Another MVG sensor using YAML configuration is deprecated. Please remove the YAML configuration and use the integration through the Home Assistant UI."
+        "Setting up Another MVG sensor using YAML configuration is deprecated and has been removed. "
+        "The configuration has been migrated to a config entry. Please remove the YAML configuration and use the integration through the Home Assistant UI."
     )
-    
-    if discovery_info is None:
-        # Konfiguration über YAML
-        add_entities([ConnectionInfo(hass, config)], True)
 
+    # Check if no config entry exists and if configuration.yaml config exists, trigger the import flow.
+    found_entry = None
+    unique_id_2_check = config.get(CONF_GLOBALID).replace(":", "") + config.get(CONF_DOUBLESTATIONNUMBER)
+
+    gui_entries = hass.config_entries.async_entries(DOMAIN)
+    #_LOGGER.warning("AnotherMVG: Found GUI-Entities: %d", len(gui_entries))
+
+    for entry in gui_entries:
+        #_LOGGER.warning("AnotherMVG: GUI Entity: %s", entry)
+        if entry.unique_id == unique_id_2_check:
+            found_entry = entry
+            _LOGGER.warning("AnotherMVG: Found already configured GUI-Sensor: %s - skip the import.", entry.title)
+            break
+
+            #_LOGGER.warning("AnotherMVG: Found other GUI-Sensor: %s - do nothing", entry.title)
+
+    if found_entry is None:
+        _LOGGER.warning("AnotherMVG: The YAML Sensor: %s was converted to a GUI Sensor.", config.get(CONF_NAME))
+        await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_IMPORT}, data=config)
+    else:
+        _LOGGER.warning("AnotherMVG: nothing left to convert from YAML to GUI, please remove the related YAML code from your configuration.yaml")
+
+
+"""Configuration via GUI"""
+"""Set up Another MVG sensor from a config entry."""   
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigType,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Another MVG sensor from a config entry."""
-    # Konfiguration über GUI
-    async_add_entities([ConnectionInfo(hass, config_entry.data)])
+    """Check if there is an unique_id and if not create an unique_id with the old unique_id format to keep the old relations"""
+    """From 2.1.0 BETA-3 a new UUID format is used for unique_id and this unique_id will be set during the configuration flow via GUI."""
+    """Due to this also CONF_DOUBLESTATIONNUMBER and DEFAULT_CONF_DOUBLESTATIONNUMBER were be removed from the schema, however we have to keep it in the code for compatibility reasons."""
+    if not config_entry.unique_id:
+        unique_id = config_entry.data[CONF_GLOBALID].replace(":", "") + config_entry.data[CONF_DOUBLESTATIONNUMBER]
+        hass.config_entries.async_update_entry(config_entry, unique_id=unique_id)
     
+    async_add_entities([ConnectionInfo(hass, config_entry)])
+
+
 @dataclass
 class Departure:
     """Class to hold departure data."""
@@ -120,27 +158,54 @@ class DepartureAlarms:
 class ConnectionInfo(SensorEntity):
     """Class for MVG info."""
 
-    def __init__(self, hass: HomeAssistant, config: dict) -> None:
-        """Initialise."""
-        self._onlyline = config[CONF_ONLYLINE]
-        self._limit = config[CONF_LIMIT]
-        self._hidedestination = config[CONF_HIDEDESTINATION]
-        self._onlydestination = config[CONF_ONLYDESTINATION]
-        self._globalid = config[CONF_GLOBALID]
-        self._globalid2 = config[CONF_GLOBALID2]
-        self._name = config[CONF_NAME]
+    def __init__(self, hass: HomeAssistant, config) -> None:
+        """Initialize the MVG sensor."""
         self._hass = hass
-        self._doublestationnumber = config[CONF_DOUBLESTATIONNUMBER]
-        self._transporttypes = config[CONF_TRANSPORTTYPES]
-        self._hidename = config[CONF_HIDENAME]
-        self._timezoneFrom = config[CONF_TIMEZONE_FROM]
-        self._timezoneTo = config[CONF_TIMEZONE_TO]
-        self._alert_for = config[CONF_ALERT_FOR]
-        self._custom_attributes = {
-            "config": {"name": self._name, "hide_name": self._hidename}
-        }
+
+        # check if `config` a `config_entry` or a `dict` is
+        if hasattr(config, 'data'):
+            # GUI-Configuration
+            config_data = config.data
+            self._unique_id = config.unique_id
+        else:
+            # YAML-Configuration --> this is deprecated and will be removed soon
+            config_data = config
+            self._unique_id = config_data[CONF_GLOBALID].replace(":", "") + config_data[CONF_DOUBLESTATIONNUMBER]
+
+        # Log-Configuration (for Debugging)
+        #_LOGGER.warning("Config Entry Data: %s", config_data)
+        #_LOGGER.warning("Config Entry Options: %s", getattr(config, 'options', None))
+        #_LOGGER.warning("Config Entry Unique ID: %s", getattr(config, 'unique_id', None))
+        #_LOGGER.warning("Complete Config Entry: %s", config)
+
+        self._onlyline = config_data.get(CONF_ONLYLINE)
+        self._limit = config_data.get(CONF_LIMIT)
+        self._hidedestination = config_data.get(CONF_HIDEDESTINATION)
+        self._onlydestination = config_data.get(CONF_ONLYDESTINATION)
+        self._globalid = config_data.get(CONF_GLOBALID)
+        self._globalid2 = config_data.get(CONF_GLOBALID2)
+        self._name = config_data.get(CONF_NAME)
+        self._transporttypes = config_data.get(CONF_TRANSPORTTYPES)
+        self._hidename = config_data.get(CONF_HIDENAME)
+        self._show_clock = config_data.get(CONF_SHOW_CLOCK, DEFAULT_SHOW_CLOCK)
+        self._departure_format = config_data.get(CONF_DEPARTURE_FORMAT, DEFAULT_DEPARTURE_FORMAT)
+        self._timezoneFrom = config_data.get(CONF_TIMEZONE_FROM)
+        self._timezoneTo = config_data.get(CONF_TIMEZONE_TO)
+        self._alert_for = config_data.get(CONF_ALERT_FOR)
         self._lateConnections = ""
         self._dataOutdated = ""
+        self._offsetInMinutes = 0
+        self._increased_limit = config_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT)
+        self._custom_attributes = {
+            "config": {
+                "name": self._name, 
+                "hide_name": self._hidename, 
+                "show_clock": self._show_clock, 
+                "departure_format": self._departure_format,
+                "unique_id": self._unique_id
+            }
+        }
+
 
     @property
     def name(self) -> str:
@@ -155,8 +220,7 @@ class ConnectionInfo(SensorEntity):
 
     @property
     def unique_id(self) -> str:
-        """Return a unique, Home Assistant friendly identifier for this entity."""
-        return self._globalid.replace(":", "") + self._doublestationnumber
+        return self._unique_id
 
     @property
     def native_value(self):
@@ -223,7 +287,7 @@ class ConnectionInfo(SensorEntity):
         # check if self._custom_attributes is set to avoid undefined messages if the API is down or if there is an error
         # or for the first call by the frontend when there is no data available in departures
         # normally you should never see this message
-        if not self._custom_attributes:
+        if not self._custom_attributes or not self._custom_attributes.get("departures"):
             # Add a dummy connection
             departures = []
             departures.append(
@@ -243,8 +307,14 @@ class ConnectionInfo(SensorEntity):
         # 1st API call for globalid1
         try:
             data = self.get_api_for_globalid(
-                self._name, self._globalid, self._transporttypes
+                self._name, self._globalid, self._offsetInMinutes, self._transporttypes
             )
+
+            # If data is empty, check if there are results for the next day
+            if not data or len(data) < (self._limit + self._increased_limit): 
+                data = self.fetch_additional_data_for_next_day(data, self._name, self._globalid, self._transporttypes)
+
+
         except MVGException as ex:
             # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
             # because returning an ex leads to an error: Unable to serialize to JSON. Bad data found
@@ -274,8 +344,13 @@ class ConnectionInfo(SensorEntity):
             time.sleep(1)
             try:
                 data2 = self.get_api_for_globalid(
-                    self._name, self._globalid2, self._transporttypes
+                    self._name, self._globalid2, self._offsetInMinutes, self._transporttypes
                 )
+
+                # If data2 is empty, check if there are results for the next day
+                if not data2 or len(data2) < (self._limit + self._increased_limit):  # Überprüft, ob die Liste leer ist
+                    data2 = self.fetch_additional_data_for_next_day(data2, self._name, self._globalid2, self._transporttypes)
+
             except MVGException as ex:
                 # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
                 # because returning an ex leads to an error: Unable to serialize to JSON. Bad data found
@@ -327,6 +402,47 @@ class ConnectionInfo(SensorEntity):
         
         self._dataOutdated = ""
         return self.pre_process_output(sorted_data)
+
+
+
+
+    def fetch_additional_data_for_next_day(self, data, name, globalid, transporttypes):
+        # wait 1 second because of 509 error
+        time.sleep(1)
+
+        # calculate minutes till midnight
+        now = datetime.now()
+        midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        seconds_to_midnight = (midnight - now).total_seconds()
+        minutes_to_midnight = int((seconds_to_midnight + 59) // 60)  # Rundet auf die nächste volle Minute
+
+        if data is None:
+            _LOGGER.debug(
+                "AnotherMVG: For %s, no data was returned for this day. Current time is %s. Minutes to midnight: %s",
+                name,
+                now.strftime("%H:%M:%S"),
+                minutes_to_midnight,
+            )
+            data = []  # Initialise `data` as empty list
+        else:
+            _LOGGER.debug(
+                "AnotherMVG: For %s there were only %s results for this day, trying to get results for the next day. Current time is %s. Minutes to midnight: %s",
+                name,
+                len(data),
+                now.strftime("%H:%M:%S"),
+                minutes_to_midnight,
+            )
+
+        # get additional data from API
+        additional_data = self.get_api_for_globalid(name, globalid, minutes_to_midnight, transporttypes)
+
+        # merge it
+        if additional_data:
+            data.extend(additional_data)
+
+        return data
+
+
 
     def pre_process_output(self, data: dict) -> dict:
         """Preformat necessary values into list of Departure."""
@@ -438,10 +554,10 @@ class ConnectionInfo(SensorEntity):
         return departures
 
     def get_api_for_globalid(
-        self, name: str, global_id: str, transport_types: str
+        self, name: str, global_id: str, offsetInMinutes: int, transport_types: str
     ) -> dict:
         """Get departure data from api."""
-        url = URL.format(global_id, transport_types)
+        url = URL.format(global_id, offsetInMinutes, transport_types)
         headers = {}
         headers["User-Agent"] = USER_AGENT
 

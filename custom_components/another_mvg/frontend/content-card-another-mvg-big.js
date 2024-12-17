@@ -22,10 +22,12 @@ class ContentAnotherMVGbig extends HTMLElement {
           border-radius: 10px;
         }
 
-        table td {
-          padding: 2px;
-          vertical-align: top;
-        }
+		table td {
+		  padding: 2px;
+		  vertical-align: top; /* or middle */
+		  word-wrap: break-word;
+		  line-height: normal;
+		}
 
         table tr:first-child td:first-child {
           border-radius: 9px 0 0 0;
@@ -48,7 +50,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         }
 
         table tr td:first-child {
-          vertical-align: middle;
+          vertical-align: top;  /* or middle */
         }
 
         table tr:last-child td {
@@ -77,13 +79,15 @@ class ContentAnotherMVGbig extends HTMLElement {
 		  height:50px;
         }
         
-	/* Table Content - Departure Lines */
-	.departureline {
-          height:65px;
-	  font-size:3.9em;
-	  vertical-align: middle;
-	  color: #FFFFFF;
-	}
+		/* Table Content - Departure Lines */
+		.departureline {
+		  height: auto;
+		  font-size: 3.9em;
+		  vertical-align: top;
+		  color: #FFFFFF;
+		  word-wrap: break-word;
+		  white-space: normal;
+		}
 
         /* Name of the card - from name parameter */
         .amvg-cardname {
@@ -112,6 +116,13 @@ class ContentAnotherMVGbig extends HTMLElement {
           padding:2px 4px 2px 4px;
         }
 
+        /* BAHN */
+        span.BAHN {
+          background-color: #FFFFFF;
+		  color: #E30613;
+		  border: 1px solid #E30613;
+        }
+
         /* SBAHN */
         span.SBAHN {
           border-radius:1000px;
@@ -121,6 +132,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         span.S2  {background-color: #76B82A;}
         span.S3  {background-color: #951B81;}
         span.S4  {background-color: #E30613;}
+		span.S5  {background-color: #005E82;}
         span.S6  {background-color: #00975F;}
         span.S7  {background-color: #943126;}
         span.S8  {background-color: #000000; color: #FFFFFF;}
@@ -148,13 +160,24 @@ class ContentAnotherMVGbig extends HTMLElement {
     const entityId = this.config.entity;
     const state    = hass.states[entityId];
     const stateStr = state ? state.state : "unavailable";
+	const departureFormat = state && state.attributes && state.attributes.config && 
+    ["1", "2", "3"].includes(state.attributes.config.departure_format ?? "") 
+    ? state.attributes.config.departure_format 
+    : "1";
 
     /* state undefined */
     if (!state || state === "undefined") {
 	   var html = "<b><u>Another MVG:</u></b><br>The entity <b>" + entityId + "</b> is undefined!<br>Maybe only a typo ?<br>Or did you delete the stop ?";
 	   this.content.innerHTML = html;
     } else {
-		let html = `<table><tr><td colspan="4" class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}</td></tr>
+		// Function, to show the current time
+		function getCurrentTime() {
+			const now = new Date();
+			return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			//return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // only for testing, there is no update every second
+		}
+
+		let html = `<table><tr><td colspan="4" class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right; margin-right: 5px;">${state.attributes.config.show_clock ? ` ${getCurrentTime()} ` : ""}</span></td></tr>
 							  <tr>
 								<td class="amvg-headline">Linie</td>
 								<td class="amvg-headline">Ziel</td>
@@ -173,18 +196,45 @@ class ContentAnotherMVGbig extends HTMLElement {
 			  html += `</tr>`;
 		} else {
 			this.data.forEach((departure) => {
-			  html += `       <tr>`;
-			  html += `          <td class="departureline"><span class="line ${departure.transport_type} ${departure.label}" > ${departure.label}</span></td>`;
-			  html += `          <td class="departureline">${departure.destination}</td>`;
-			  html += `          <td class="departureline">${departure.track}</td>`;
-			  let delay = ``;
-			  if (departure.cancelled) {
-				delay = `<span class="cancelled">Entfällt</span>`;
-			  } else if(departure.delay > 0) {
-				delay = `<span class="delay"> +${departure.delay}</span> <span class="expected">(${departure.expected_departure})</span>`;
+			  html += `<tr>`;
+			  html += `<td class="departureline"><span class="line ${departure.transport_type} ${departure.label}">${departure.label}</span></td>`;
+			  html += `<td class="departureline">${departure.destination}</td>`;
+			  html += `<td class="departureline">${departure.track}</td>`;
+			  
+			  let timeDisplay = "";
+			  
+			  if (departureFormat === "1") {
+				timeDisplay = departure.planned_departure;
+
+				if (departure.cancelled) {
+				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+				} else if (departure.delay > 0) {
+				  timeDisplay += ` <span class="delay">+${departure.delay}</span> (${departure.expected_departure})`;
+				}
+				
+			  } else if (departureFormat === "2") {
+				timeDisplay = departure.planned_departure;
+
+				if (departure.cancelled) {
+				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+				} else if (departure.delay > 0) {
+				  timeDisplay += ` <span class="delay">+${departure.delay}</span>`;
+				}
+				
+			  } else if (departureFormat === "3") {
+				if (departure.delay > 0) {
+				  timeDisplay = `<span class="delay">${departure.expected_departure}</span>`;
+				} else {
+				  timeDisplay = departure.expected_departure;
+				}
+
+				if (departure.cancelled) {
+				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+				}
 			  }
-			  html += `          <td class="departureline">${departure.planned_departure} ${delay ? delay: ""}</td>`;
-			  html += `       </tr>`;
+
+			  html += `<td class="departureline">${timeDisplay}</td>`;
+			  html += `</tr>`;
 			});
 		}
 		html += `</table>`;

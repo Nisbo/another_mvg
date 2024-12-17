@@ -109,6 +109,13 @@ class ContentAnotherMVG extends HTMLElement {
           background-color: #4682B4;
         }
 
+        /* BAHN */
+        span.BAHN {
+          background-color: #FFFFFF;
+		  color: #E30613;
+		  border: 1px solid #E30613;
+        }
+
         /* SBAHN */
         span.SBAHN {
           border-radius:1000px;
@@ -118,6 +125,7 @@ class ContentAnotherMVG extends HTMLElement {
         span.S2  {background-color: #76B82A;}
         span.S3  {background-color: #951B81;}
         span.S4  {background-color: #E30613;}
+		span.S5  {background-color: #005E82;}
         span.S6  {background-color: #00975F;}
         span.S7  {background-color: #943126;}
         span.S8  {background-color: #000000; color: #FFFFFF;}
@@ -146,15 +154,27 @@ class ContentAnotherMVG extends HTMLElement {
     const entityId = this.config.entity;
     const state    = hass.states[entityId];
     const stateStr = state ? state.state : "unavailable";
+	const departureFormat = state && state.attributes && state.attributes.config && 
+    ["1", "2", "3"].includes(state.attributes.config.departure_format ?? "") 
+    ? state.attributes.config.departure_format 
+    : "1";
+
 
     /* state undefined */
     if (!state || state === "undefined") {
 	   var html = "<b><u>Another MVG:</u></b><br>The entity <b>" + entityId + "</b> is undefined!<br>Maybe only a typo ?<br>Or did you delete the stop ?";
 	   this.content.innerHTML = html;
     } else {
+		// Function, to show the current time
+		function getCurrentTime() {
+			const now = new Date();
+			return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			//return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // only for testing, there is no update every second
+		}
+
 		let html = `
 		<div class="amvg-container">
-		  ${!state.attributes.config.hide_name ? `<div class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}</div>` : ""}
+		  ${!state.attributes.config.hide_name ? `<div class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right; margin-right: 5px;">${state.attributes.config.show_clock ? ` ${getCurrentTime()} ` : ""}</span></div>` : ""}
 		  <table class="amvg-table">
 			<tr class="amvg-headline">
 			  <th class="labelHL">Linie</th>
@@ -175,16 +195,43 @@ class ContentAnotherMVG extends HTMLElement {
 		} else {
 			this.data.forEach((departure) => {
 			  html += `<tr class="item">`;
-			  html += `<td class="label"><span class="line ${departure.transport_type} ${departure.label}" > ${departure.label}</span></td>`;
+			  html += `<td class="label"><span class="line ${departure.transport_type} ${departure.label}">${departure.label}</span></td>`;
 			  html += `<td class="destination">${departure.destination}</td>`;
 			  html += `<td class="track">${departure.track}</td>`;
-			  let delay = ``;
-			  if (departure.cancelled) {
-				delay = `<span class="cancelled">Entfällt</span>`;
-			  } else if(departure.delay > 0) {
-				delay = `<span class="delay"> +${departure.delay}</span> <span class="expected">(${departure.expected_departure})</span>`;
+			  
+			  let timeDisplay = "";
+			  
+			  if (departureFormat === "1") {
+				timeDisplay = departure.planned_departure;
+
+				if (departure.cancelled) {
+				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+				} else if (departure.delay > 0) {
+				  timeDisplay += ` <span class="delay">+${departure.delay}</span> (${departure.expected_departure})`;
+				}
+				
+			  } else if (departureFormat === "2") {
+				timeDisplay = departure.planned_departure;
+
+				if (departure.cancelled) {
+				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+				} else if (departure.delay > 0) {
+				  timeDisplay += ` <span class="delay">+${departure.delay}</span>`;
+				}
+				
+			  } else if (departureFormat === "3") {
+				if (departure.delay > 0) {
+				  timeDisplay = `<span class="delay">${departure.expected_departure}</span>`;
+				} else {
+				  timeDisplay = departure.expected_departure;
+				}
+
+				if (departure.cancelled) {
+				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+				}
 			  }
-			  html += `<td class="time">${departure.planned_departure} ${delay ? delay: ""}</td>`;
+
+			  html += `<td class="time">${timeDisplay}</td>`;
 			  html += `</tr>`;
 			});
 		}

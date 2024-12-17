@@ -1,4 +1,4 @@
-## v2.0.0 Now with GUI configuration (German and English)
+## v2.1.0 YAML configuration deprecated - will be converted automatically to a "GUI-Sensor"
 
 # Another MVG
 
@@ -8,11 +8,12 @@
 
 2. [Create a sensor for your stop / station](#2-create-a-sensor-for-your-stop--station)  
     2.1. [via GUI (recommended)](#option-1-via-gui-recommended)  
-    2.2. [via configuration.yaml](#option-2-via-configurationyaml)  
+    2.2. [via configuration.yaml](#option-2-via-configurationyaml-deprecated) (deprecated)  
 
 3. [Adding a card to your dashboard](#3-adding-a-card-to-your-dashboard)  
+    3.1. [Add the map to your dashboard](#31-add-the-map-to-your-dashboard)
 
-4. [Code for your configuration.yaml](#4-code-for-your-configurationyaml)  
+4. [Code for your configuration.yaml](#4-code-for-your-configurationyaml-deprecated) (deprecated)  
 
 5. [Screenshots](#5-screenshots)  
 
@@ -27,6 +28,8 @@
 # Quick installation - for those who are familiar with the process.
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=another_mvg&owner=Nisbo)
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
+
+* go to ```Settings``` --> ```Devices and services``` --> add integration ```another mvg``` and follow the configuration flow
 
 * create a manual card with this content:
 ```
@@ -105,7 +108,7 @@ Or use these steps:
 ⚠️ It may take a minute to create the entity
 
 
-## Option 2: via ```configuration.yaml```
+## Option 2: via ```configuration.yaml``` (deprecated)
 * Configure the configuration.yaml [(see guide below)](#4-code-for-your-configurationyaml)
 * Check configuration.yaml with the check function under Dev-Tools
 * Restart HA again
@@ -127,7 +130,42 @@ entity: sensor.yourSensor
 ⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend / browser cache.
 
 
-# 4. Code for your configuration.yaml
+
+
+
+### 3.1 Add the map to your dashboard
+
+![grafik](https://github.com/user-attachments/assets/138f06bc-dc74-4dc6-b0ee-fbdc49af74e7)
+
+The card can be added and configured directly through the map selector, like other cards. 
+Simply go to your dashboard, click on "Add Card", search for "Another MVG", and select the card from the results.
+
+![grafik](https://github.com/user-attachments/assets/aac03dfb-9358-4787-a1f8-0923aeb1db1a)
+
+![grafik](https://github.com/user-attachments/assets/da13be9f-e8cf-461d-a907-7841b89bbc8a)
+
+That’s all. In the standard configuration, it shows the complete map. 
+If you want to zoom in, follow the instructions in the description. 
+This editor is currently only available in German because I have no clue how to add language support to the card. 
+If there is a real need, I can create an additional card for English users.
+
+If, for some reason, you are not able to find the card, try clearing your frontend and browser cache, or try configuring the card on your own.
+
+```
+type: custom:content-card-another-mvg-livemap
+mode: schematic
+x: "2750800"
+y: "1560005"
+zoom: "4.8"
+``` 
+
+
+# 4. Code for your configuration.yaml (deprecated)
+
+⚠️ Currently its still working, but it will be removed in one of the next versions.
+All sensors from the configuration.yaml will be migrated automatically. 
+If you see the sensors in the GUI you can remove the code from the configuration.yaml.
+There will be no more updates on this section in the documentation.
 
 ### Add the name of this integration
 
