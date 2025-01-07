@@ -23,9 +23,11 @@ CONF_HIDENAME = "hidename"  # Hide the name of the card
 CONF_TIMEZONE_FROM = "timezone_from"  # like "Europe/Berlin" or "UTC" if your system is running with UTC settings
 CONF_TIMEZONE_TO = "timezone_to"  # like "Europe/Berlin"
 CONF_ALERT_FOR = "alert_for"  # optional
+CONF_STATS_TEMPLATE = "stats_template" # optional
 CONF_SHOW_CLOCK = "show_clock" # optional
 CONF_DEPARTURE_FORMAT = "departure_format" # required
 CONF_INCREASED_LIMIT = "increased_limit" # optional
+CONF_SORT_BY_REAL_DEPARTURE = "sort_by_real_departure" # optional
 
 DEFAULT_HIDEDESTINATION = ""
 DEFAULT_ONLYDESTINATION = ""
@@ -37,25 +39,27 @@ DEFAULT_TIMEZONE_FROM = "Europe/Berlin"  # or UTC
 DEFAULT_TIMEZONE_TO = "Europe/Berlin"
 DEFAULT_HIDENAME = False
 DEFAULT_ALERT_FOR = ""
+DEFAULT_STATS_TEMPLATE = ""
 DEFAULT_SHOW_CLOCK = False
 DEFAULT_DEPARTURE_FORMAT = "1"
 DEFAULT_INCREASED_LIMIT = 0
+DEFAULT_SORT_BY_REAL_DEPARTURE = False
 
 URL_BASE = "/another_mvg"
 ANOTHER_MVG_CARDS = [
     {
         "name": "Another MVG Card",
         "filename": "content-card-another-mvg.js",
-        "version": "2.1.0",
+        "version": "2.2.0-BETA.1",
     },
     {
         "name": "Another MVG Big Card",
         "filename": "content-card-another-mvg-big.js",
-        "version": "2.1.0",
+        "version": "2.2.0-BETA.1",
     },
     {
         "name": "Another MVG LiveMap Card",
         "filename": "content-card-another-mvg-livemap.js",
-        "version": "2.1.0",
+        "version": "2.2.0-BETA.1",
     },
 ]
