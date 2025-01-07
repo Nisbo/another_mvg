@@ -5,17 +5,18 @@
         },
         "step": {
             "user": {
-	    	"sections": {
+            "sections": {
                     "advanced_options": {
                        "name": "Erweiterte Einstellungen",
                        "data": {
                           "hidename": "Den Namen der Karte (inkl. Uhr) ausblenden",
-			  "show_clock": "Uhr oben rechts anzeigen",
-			  "increased_limit": "Erweitertes Limit",
+                          "show_clock": "Uhr oben rechts anzeigen",
+                          "increased_limit": "Erweitertes Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Zeitzone von",
                           "timezone_to": "Zeitzone nach",
-                          "alert_for": "Alarmattribute für"
+                          "alert_for": "Alarmattribute für",
+                          "stats_template": "Inhalt der Statusvariabel"
                        },
                        "data_description": {
                           "hidename": "Wenn Sie den Namen der Karte nicht sehen möchten, aktivieren Sie diese Option.",
@@ -23,10 +24,11 @@
                           "globalid2": "Wenn Sie zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, können Sie beide in einer Karte kombinieren. Beachten Sie, dass Sie die Transportarten für beide Stationen auswählen müssen. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe gibt, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Sie diese Option nur für eine Karte verwenden, sollte es kein Problem sein, aber wenn Sie es für mehr verwenden, steigt das Risiko, dass die API die Anfrage blockiert. Wenn Sie die Global ID 2 nicht kennen, können Sie diese später unter **'KONFIGURIEREN'** über die Option **'Zusätzliche Station (Global ID 2) - suchen und speichern'** auswählen. Alternativ können Sie die Global ID für Ihre Station auch hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie dafür einfach den Namen in der Abfrage. Sie müssen die Global ID im Format **de:09162:2** eingeben.",
                           "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
                           "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                          "alert_for": "Wenn Sie zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchten, können Sie sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schauen Sie bitte in die Dokumentation."
+                          "alert_for": "Wenn Sie zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchten, können Sie sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schauen Sie bitte in die Dokumentation.",
+                          "stats_template": "Hier können Sie den Wert der Statusvariabel bestimmen. Ihnen stehen die folgenden Variabeln zur Verfügung (Mehrere zusammen sind möglich). Geplante Abfahrt: ```'{planned_departure}'```, Erwartete Abfahrt: ```'{expected_departure}'```, Gleis: ```'{track}'```, Transportmittel: ```'{transport_type}'```, Linie: ```'{label}'```, Ziel ```'{destination}'```, Verspätung: ```'{delay}'``` (in Minuten), Zugtyp: ```'{trainType}'``` (bei Bahn, außer RB und RE), Stornierung: ```'{cancelled}'```, Geplante Abfahrtszeit: ```'{plannedDepartureTime}'``` (Timestamp), Reale Abfahrtszeit: ```'{realtimeDepartureTime}'``` (Timestamp), Differenz zur realen Abfahrtszeit: ```'{realtime_departure_diff_minutes}'``` (in Minuten), Differenz zur realen Abfahrtszeit gerundet: ```'{minutes_difference}'``` (in Minuten). Wenn Sie einen vorgefertigten Text in Form einer Bahnhofsdurchsage (in deutsch) wünschen, dann tragen Sie hier ```'{announcement}'``` ein. Für die englische Version tragen Sie  ```'{announcementEN}'``` ein."
                         }
                      },
-		     "filter_options": {
+            "filter_options": {
                        "name": "Filter für Linien und Ziele",
                        "data": {
                           "onlyline": "Nur diese Linien",
@@ -48,6 +50,7 @@
                     "limit": "Anzahl der Abfahrten",
                     "departure_format": "Formatierung der Abfahrtzeit",
                     "transporttypes": "Transportarten",
+                    "sort_by_real_departure": "Nach der tatsächlichen Abfahrtszeit sortieren (anstatt nach der geplanten Abfahrtszeit).",
                     "station_name": "Stationsname"
                 },
                 "data_description": {
@@ -83,17 +86,18 @@
                 }
             },
             "edit": {
-	    	"sections": {
+            "sections": {
                     "advanced_options": {
                        "name": "Erweiterte Einstellungen",
                        "data": {
                           "hidename": "Den Namen der Karte (inkl. Uhr) ausblenden",
-			  "show_clock": "Uhr oben rechts anzeigen",
-			  "increased_limit": "Erweitertes Limit",
+                          "show_clock": "Uhr oben rechts anzeigen",
+                          "increased_limit": "Erweitertes Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Zeitzone von",
                           "timezone_to": "Zeitzone nach",
-                          "alert_for": "Alarmattribute für"
+                          "alert_for": "Alarmattribute für",
+                          "stats_template": "Inhalt der Statusvariabel"
                        },
                        "data_description": {
                           "hidename": "Wenn Sie den Namen der Karte nicht sehen möchten, aktivieren Sie diese Option.",
@@ -101,10 +105,11 @@
                           "globalid2": "Wenn Sie zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, können Sie beide in einer Karte kombinieren. Beachten Sie, dass Sie die Transportarten für beide Stationen auswählen müssen. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe gibt, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Sie diese Option nur für eine Karte verwenden, sollte es kein Problem sein, aber wenn Sie es für mehr verwenden, steigt das Risiko, dass die API die Anfrage blockiert. Wenn Sie die Global ID 2 ändern möchten und die ID nicht kennen, schließen Sie diese Eingabemaske und wählen Sie unter **'KONFIGURIEREN'** die Option **'Zusätzliche Station (Global ID 2) - suchen und speichern'** aus. Alternativ können Sie die Global ID für Ihre Station auch hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie dafür einfach den Namen in der Abfrage. Sie müssen die Global ID im Format **de:09162:2** eingeben.", 
                           "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
                           "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                          "alert_for": "Wenn Sie zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchten, können Sie sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schauen Sie bitte in die Dokumentation."
+                          "alert_for": "Wenn Sie zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchten, können Sie sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schauen Sie bitte in die Dokumentation.",
+                          "stats_template": "Hier können Sie den Wert der Statusvariabel bestimmen. Ihnen stehen die folgenden Variabeln zur Verfügung (Mehrere zusammen sind möglich). Geplante Abfahrt: ```'{planned_departure}'```, Erwartete Abfahrt: ```'{expected_departure}'```, Gleis: ```'{track}'```, Transportmittel: ```'{transport_type}'```, Linie: ```'{label}'```, Ziel ```'{destination}'```, Verspätung: ```'{delay}'``` (in Minuten), Zugtyp: ```'{trainType}'``` (bei Bahn, außer RB und RE), Stornierung: ```'{cancelled}'```, Geplante Abfahrtszeit: ```'{plannedDepartureTime}'``` (Timestamp), Reale Abfahrtszeit: ```'{realtimeDepartureTime}'``` (Timestamp), Differenz zur realen Abfahrtszeit: ```'{realtime_departure_diff_minutes}'``` (in Minuten), Differenz zur realen Abfahrtszeit gerundet: ```'{minutes_difference}'``` (in Minuten). Wenn Sie einen vorgefertigten Text in Form einer Bahnhofsdurchsage (in deutsch) wünschen, dann tragen Sie hier ```'{announcement}'``` ein. Für die englische Version tragen Sie  ```'{announcementEN}'``` ein."
                         }
                      },
-		     "filter_options": {
+            "filter_options": {
                        "name": "Filter für Linien und Ziele",
                        "data": {
                           "onlyline": "Nur diese Linien",
@@ -124,7 +129,8 @@
                     "name": "Name der Karte",
                     "limit": "Anzahl der Abfahrten",
                     "departure_format": "Formatierung der Abfahrtzeit",
-                    "transporttypes": "Transportarten"
+                    "transporttypes": "Transportarten",
+                    "sort_by_real_departure": "Nach der tatsächlichen Abfahrtszeit sortieren (anstatt nach der geplanten Abfahrtszeit)."
                 },
                 "data_description": {
                     "globalid": "Die Stationskennung für die Haltestelle/Station/Ort. Dieser Eintrag wird normalerweise während der Erstkonfiguration automatisch erstellt und ist **NICHT** der Name der Station! Wenn Sie diesen Eintrag ändern möchten und die ID nicht kennen, schließen Sie diese Eingabemaske und wählen Sie unter **'KONFIGURIEREN'** die Option **'Station (Global ID 1) - suchen und speichern'** aus. Alternativ können Sie die Global ID für Ihre Station hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie dafür einfach den Namen in der Abfrage.",
@@ -144,7 +150,7 @@
                     "station_name": "Geben Sie den Namen der Station ein, nach der Sie suchen möchten."
                 }
             },
-	    "globalid1search": {
+        "globalid1search": {
                 "title": "Suchen Sie nach Ihrer Station / Haltestelle für Global ID1",
                 "description": "Hier können Sie nach der Global ID1 suchen.",
                 "data": {
