@@ -25,9 +25,11 @@ from .const import (
     CONF_TIMEZONE_FROM,
     CONF_TIMEZONE_TO,
     CONF_ALERT_FOR,
+    CONF_STATS_TEMPLATE,
     CONF_SHOW_CLOCK,
     CONF_DEPARTURE_FORMAT,
     CONF_INCREASED_LIMIT,
+    CONF_SORT_BY_REAL_DEPARTURE,
     DEFAULT_ONLYLINE,
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
@@ -38,9 +40,11 @@ from .const import (
     DEFAULT_TIMEZONE_FROM,
     DEFAULT_TIMEZONE_TO,
     DEFAULT_ALERT_FOR,
+    DEFAULT_STATS_TEMPLATE,
     DEFAULT_SHOW_CLOCK,
     DEFAULT_DEPARTURE_FORMAT,
     DEFAULT_INCREASED_LIMIT,
+    DEFAULT_SORT_BY_REAL_DEPARTURE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -74,8 +78,10 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_TIMEZONE_FROM: import_data.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM),
                 CONF_TIMEZONE_TO: import_data.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO),
                 CONF_ALERT_FOR: import_data.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR),
+                CONF_STATS_TEMPLATE: import_data.get(CONF_STATS_TEMPLATE, DEFAULT_STATS_TEMPLATE),
                 CONF_SHOW_CLOCK: import_data.get(CONF_SHOW_CLOCK, DEFAULT_SHOW_CLOCK),
                 CONF_DEPARTURE_FORMAT: import_data.get(CONF_DEPARTURE_FORMAT, DEFAULT_DEPARTURE_FORMAT),
+                CONF_SORT_BY_REAL_DEPARTURE: import_data.get(CONF_SORT_BY_REAL_DEPARTURE, DEFAULT_SORT_BY_REAL_DEPARTURE),
             }
         )
 
@@ -121,6 +127,9 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     
                 if CONF_ALERT_FOR in advanced_options:
                     user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
+                    
+                if CONF_STATS_TEMPLATE in advanced_options:
+                    user_input[CONF_STATS_TEMPLATE] = advanced_options[CONF_STATS_TEMPLATE]
           
                 if CONF_TIMEZONE_FROM in advanced_options:
                     user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
@@ -242,27 +251,26 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }),
             vol.Optional(CONF_LIMIT,               default=DEFAULT_LIMIT): int,
 
-			vol.Required(CONF_DEPARTURE_FORMAT, default=DEFAULT_DEPARTURE_FORMAT): SelectSelector(
+            vol.Required(CONF_DEPARTURE_FORMAT, default=DEFAULT_DEPARTURE_FORMAT): SelectSelector(
                 SelectSelectorConfig(
                     options = [
-                        {"label": "16:27 +2 (16:29)", 
-						 "value": "1"},
-                        {"label": "16:27 +2", 
-						 "value": "2"},
-                        {"label": "16:29", 
-						 "value": "3"}
+                        {"label": "16:27 +2 (16:29)", "value": "1"},
+                        {"label": "16:27 +2",         "value": "2"},
+                        {"label": "16:29",            "value": "3"}
                     ], mode = SelectSelectorMode.DROPDOWN,
                 )
             ),
 
-			# Filter
+            vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, default=DEFAULT_SORT_BY_REAL_DEPARTURE): bool,
+
+            # Filter
             vol.Required("filter_options"): data_entry_flow.section(
                 vol.Schema(
-				    {
+                    {
                         vol.Optional(CONF_ONLYLINE,            default=DEFAULT_ONLYLINE): str,
                         vol.Optional(CONF_HIDEDESTINATION,     default=DEFAULT_HIDEDESTINATION): str,
                         vol.Optional(CONF_ONLYDESTINATION,     default=DEFAULT_ONLYDESTINATION): str,
-					}
+                    }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
                 {"collapsed": True},
@@ -270,7 +278,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Advanced Options
             vol.Required("advanced_options"): data_entry_flow.section(
                 vol.Schema(
-				    {
+                    {
                         vol.Optional(CONF_SHOW_CLOCK,          default=DEFAULT_SHOW_CLOCK): bool,
                         vol.Optional(CONF_HIDENAME,            default=DEFAULT_HIDENAME): bool,
                         vol.Optional(CONF_INCREASED_LIMIT,     default=DEFAULT_INCREASED_LIMIT): int,
@@ -278,7 +286,8 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         vol.Optional(CONF_TIMEZONE_FROM,       default=DEFAULT_TIMEZONE_FROM): str,
                         vol.Optional(CONF_TIMEZONE_TO,         default=DEFAULT_TIMEZONE_TO): str,
                         vol.Optional(CONF_ALERT_FOR,           default=DEFAULT_ALERT_FOR): str,
-					}
+                        vol.Optional(CONF_STATS_TEMPLATE,      default=DEFAULT_STATS_TEMPLATE): str,
+                    }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
                 {"collapsed": True},
@@ -456,13 +465,16 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             filter_options   = user_input.get("filter_options", {})
         
             # and convert the input
-			# this is because the section function creates an dictionary and I dont want this
-			# I only want an optical "collapsing"
+            # this is because the section function creates a dictionary and I dont want this
+            # I only want an optical "collapsing"
             if CONF_SHOW_CLOCK in advanced_options:
                 user_input[CONF_SHOW_CLOCK] = advanced_options[CONF_SHOW_CLOCK]
                 
             if CONF_ALERT_FOR in advanced_options:
                 user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
+            
+            if CONF_STATS_TEMPLATE in advanced_options:
+                user_input[CONF_STATS_TEMPLATE] = advanced_options[CONF_STATS_TEMPLATE]
           
             if CONF_TIMEZONE_FROM in advanced_options:
                 user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
@@ -492,7 +504,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
 
             # Ensure that empty fields are stored as empty strings
             for key in [CONF_ONLYLINE, CONF_HIDEDESTINATION, CONF_ONLYDESTINATION, 
-                        CONF_TIMEZONE_FROM, CONF_TIMEZONE_TO, CONF_ALERT_FOR, CONF_GLOBALID2]:
+                        CONF_TIMEZONE_FROM, CONF_TIMEZONE_TO, CONF_ALERT_FOR, CONF_GLOBALID2, CONF_STATS_TEMPLATE]:
                 if key not in user_input:
                     user_input[key] = ""  # Explicitly set the field to an empty string if it's not in the user_input
             
@@ -529,17 +541,16 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             vol.Required(CONF_DEPARTURE_FORMAT, default=current_data.get(CONF_DEPARTURE_FORMAT, "1")): SelectSelector(
                 SelectSelectorConfig(
                     options = [
-                        {"label": "16:27 +2 (16:29)", 
-						 "value": "1"},
-                        {"label": "16:27 +2", 
-						 "value": "2"},
-                        {"label": "16:29", 
-						 "value": "3"}
+                        {"label": "16:27 +2 (16:29)", "value": "1"},
+                        {"label": "16:27 +2",         "value": "2"},
+                        {"label": "16:29",            "value": "3"}
                     ], mode = SelectSelectorMode.DROPDOWN,
                 )
             ),
 
-			# Filter
+            vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, description={"suggested_value": current_data.get(CONF_SORT_BY_REAL_DEPARTURE, "")}): bool,
+
+            # Filter
             vol.Required("filter_options"): data_entry_flow.section(
                 vol.Schema(
                     {
@@ -562,6 +573,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
                         vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
                         vol.Optional(CONF_ALERT_FOR,           description={"suggested_value": current_data.get(CONF_ALERT_FOR, "")}): str,
+                        vol.Optional(CONF_STATS_TEMPLATE,      description={"suggested_value": current_data.get(CONF_STATS_TEMPLATE, "")}): str,
                     }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
