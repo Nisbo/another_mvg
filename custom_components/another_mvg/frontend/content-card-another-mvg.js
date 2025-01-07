@@ -195,7 +195,7 @@ class ContentAnotherMVG extends HTMLElement {
 		} else {
 			this.data.forEach((departure) => {
 			  html += `<tr class="item">`;
-			  html += `<td class="label"><span class="line ${departure.transport_type} ${departure.label}">${departure.label}</span></td>`;
+			  html += `<td class="label"><span class="line ${departure.transport_type} ${departure.label}">${departure.trainType}${departure.label}</span></td>`;
 			  html += `<td class="destination">${departure.destination}</td>`;
 			  html += `<td class="track">${departure.track}</td>`;
 			  
