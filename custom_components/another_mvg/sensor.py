@@ -22,6 +22,7 @@ from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from .const import (
     DOMAIN,
     CONF_ALERT_FOR,
+    CONF_STATS_TEMPLATE,
     CONF_DOUBLESTATIONNUMBER,
     CONF_GLOBALID,
     CONF_GLOBALID2,
@@ -36,6 +37,7 @@ from .const import (
     CONF_SHOW_CLOCK,
     CONF_DEPARTURE_FORMAT,
     CONF_INCREASED_LIMIT,
+    CONF_SORT_BY_REAL_DEPARTURE,
     URL,
     USER_AGENT,
     MVGException,
@@ -49,9 +51,11 @@ from .const import (
     DEFAULT_TIMEZONE_FROM,
     DEFAULT_TIMEZONE_TO,
     DEFAULT_ALERT_FOR,
+    DEFAULT_STATS_TEMPLATE,
     DEFAULT_SHOW_CLOCK,
     DEFAULT_DEPARTURE_FORMAT,
     DEFAULT_INCREASED_LIMIT,
+    DEFAULT_SORT_BY_REAL_DEPARTURE,
 )
 
 # integration imports end
@@ -77,8 +81,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): cv.string,
         vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): cv.string,
         vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR): cv.string,
+        vol.Optional(CONF_STATS_TEMPLATE, default=DEFAULT_STATS_TEMPLATE): cv.string,
         vol.Optional(CONF_SHOW_CLOCK, default=DEFAULT_SHOW_CLOCK): cv.boolean,
         vol.Optional(CONF_INCREASED_LIMIT, default=DEFAULT_INCREASED_LIMIT): cv.positive_int,
+        vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, default=DEFAULT_SORT_BY_REAL_DEPARTURE): cv.boolean,
     }
 )
 
@@ -146,6 +152,7 @@ class Departure:
     expected_departure: str
     cancelled: bool
     delay: int
+    trainType: str
 
 @dataclass
 class DepartureAlarms:
@@ -188,11 +195,14 @@ class ConnectionInfo(SensorEntity):
         self._transporttypes = config_data.get(CONF_TRANSPORTTYPES)
         self._hidename = config_data.get(CONF_HIDENAME)
         self._show_clock = config_data.get(CONF_SHOW_CLOCK, DEFAULT_SHOW_CLOCK)
+        self._sort_by_real_departure = config_data.get(CONF_SORT_BY_REAL_DEPARTURE, DEFAULT_SORT_BY_REAL_DEPARTURE)
         self._departure_format = config_data.get(CONF_DEPARTURE_FORMAT, DEFAULT_DEPARTURE_FORMAT)
+        self._stats_template = config_data.get(CONF_STATS_TEMPLATE, DEFAULT_STATS_TEMPLATE)
         self._timezoneFrom = config_data.get(CONF_TIMEZONE_FROM)
         self._timezoneTo = config_data.get(CONF_TIMEZONE_TO)
         self._alert_for = config_data.get(CONF_ALERT_FOR)
         self._lateConnections = ""
+        self._nextDeparture = ""
         self._dataOutdated = ""
         self._offsetInMinutes = 0
         self._increased_limit = config_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT)
@@ -225,7 +235,7 @@ class ConnectionInfo(SensorEntity):
     @property
     def native_value(self):
         """Return native value."""
-        return "Please use the project lovelace card to show your stop: " + self._name
+        return self.nextDeparture #"Please use the project lovelace card to show your stop: " + self._name
 
     @property
     def dataOutdated(self):
@@ -247,6 +257,110 @@ class ConnectionInfo(SensorEntity):
         """Setter-Method"""
         self._lateConnections = value
 
+    @property
+    def nextDeparture(self):
+        """Getter-Method"""
+        return self._nextDeparture
+
+    @nextDeparture.setter
+    def nextDeparture(self, value):
+        """Setter-Method"""
+        self._nextDeparture = value
+        
+
+    def set_next_departure(self, planned_departure, expected_departure, track, transport_type, label, destination, cancelled, delay, trainType, plannedDepartureTime, realtimeDepartureTime):
+        template = self._stats_template
+        
+        transport_map = {
+            "SBAHN": "S-Bahn",
+            "BAHN": "Bahn",
+            "UBAHN": "U-Bahn",
+            "TRAM": "Tram",
+            "BUS": "Bus",
+            "REGIONAL_BUS": "Bus"
+        }
+        
+        # realtimeDepartureTime < plannedDepartureTime use plannedDepartureTime
+        if realtimeDepartureTime < plannedDepartureTime:
+            realtimeDepartureTime = plannedDepartureTime
+        
+        # if transport_type is not in the map above, use transport_type as value
+        readable_transport_type = transport_map.get(transport_type, transport_type)
+        
+        # make date objects
+        planned_departure_datetime = datetime.utcfromtimestamp(plannedDepartureTime / 1000)
+        realtime_departure_datetime = datetime.utcfromtimestamp(realtimeDepartureTime / 1000)
+
+        # calculate time diff in minues
+        current_time = datetime.utcnow()
+        time_diff =  realtime_departure_datetime - current_time
+        realtime_departure_diff_minutes = time_diff.total_seconds() / 60  # minutes with decimals
+        minutes_difference = int(realtime_departure_diff_minutes)         # round, "cut" the decimals with int
+
+        if track != "Bus" and track != "---":
+            trackCheck   = " von Gleis " + track
+            trackCheckEN = " from track " + track
+        else:
+            trackCheck   = ""
+            trackCheckEN = ""
+        
+        # Bestimmen, ob der transport_type angezeigt werden soll
+        transport_type_text = ""  # Standardmäßig nichts anzeigen
+        if transport_type not in ["SBAHN", "UBAHN"]:
+            transport_type_text = f"{readable_transport_type} "
+        
+        # Überprüfe, ob transport_type = "BAHN" und label nur Zahlen enthält
+        if transport_type == "BAHN" and label.replace(" ", "").isdigit():
+            transport_type_text = trainType
+        
+        if transport_type == "BAHN" and not label.replace(" ", "").isdigit():
+            transport_type_text = ""
+        
+        announcement = ""
+        
+        # check if cancelled
+        if cancelled:
+            value   = f"{transport_type_text}{label} nach {destination}, planmäßige Abfahrt um {planned_departure} entfällt."
+            valueEN = f"{transport_type_text}{label} to {destination}, scheduled departure at {planned_departure} is cancelled."
+        else:
+            if planned_departure != expected_departure:
+                # Bestimmen, ob "Minute" oder "Minuten" angezeigt werden soll
+                delay_text   = f"{delay} Minute" if delay == 1 else f"{delay} Minuten"
+                delay_textEN = f"{delay} minute" if delay == 1 else f"{delay} minutes"
+
+                value   = f"{transport_type_text}{label} nach {destination}, planmäßige Abfahrt um {planned_departure}, Abfahrt {delay_text} später um {expected_departure}{trackCheck}."
+                valueEN = f"{transport_type_text}{label} to {destination}, scheduled departure at {planned_departure}, departure {delay_textEN} later at {expected_departure}{trackCheckEN}."
+            else:
+                value   = f"{transport_type_text}{label} nach {destination}, planmäßige Abfahrt um {planned_departure}{trackCheck}"
+                valueEN = f"{transport_type_text}{label} to {destination}, scheduled departure at {planned_departure}{trackCheckEN}"
+
+        # fill the template with the vaules
+        departure_info = template.format(
+            planned_departure=planned_departure,
+            expected_departure=expected_departure,
+            track=track,
+            transport_type=readable_transport_type,  # use real name of transport_type 
+            label=label,
+            destination=destination,
+            cancelled=cancelled,
+            delay=delay,
+            trainType=trainType,
+            plannedDepartureTime=planned_departure_datetime.strftime("%Y-%m-%dT%H:%M:%S+00:00"),
+            realtimeDepartureTime=realtime_departure_datetime.strftime("%Y-%m-%dT%H:%M:%S+00:00"),
+            realtime_departure_diff_minutes=realtime_departure_diff_minutes,
+            minutes_difference=minutes_difference,
+            announcement=value,
+            announcementEN=valueEN
+        )
+        
+        #_LOGGER.error(
+        #         "AnotherMVG: %s --> Template: %s",
+        #          self._name,
+        #          message,
+        #)
+        
+        self.nextDeparture = departure_info
+  
     def update(self) -> None:
         """Fetch new state data for the sensor."""
         self._custom_attributes["departures"] = self.get_departures()
@@ -300,6 +414,7 @@ class ConnectionInfo(SensorEntity):
                     expected_departure="---",
                     cancelled=False,
                     delay=0,
+                    trainType="",
                 )
             )
             self._custom_attributes["departures"] = departures
@@ -332,6 +447,7 @@ class ConnectionInfo(SensorEntity):
                         expected_departure="---",
                         cancelled=False,
                         delay=0,
+                        trainType="",
                     )
                 )
                 self._custom_attributes["departures"] = departures
@@ -368,6 +484,7 @@ class ConnectionInfo(SensorEntity):
                             expected_departure="---",
                             cancelled=False,
                             delay=0,
+                            trainType="",
                         )
                     )
                     self._custom_attributes["departures"] = departures
@@ -443,16 +560,25 @@ class ConnectionInfo(SensorEntity):
         return data
 
 
-
     def pre_process_output(self, data: dict) -> dict:
         """Preformat necessary values into list of Departure."""
         
+        # sort by 'realtimeDepartureTime' asc
+        if self._sort_by_real_departure:
+            sorted_data = sorted(data, key=lambda x: x["realtimeDepartureTime"], reverse=False)
+        else:
+            sorted_data = data
+
         connectioninfos = []
         verbindungen_list = self._alert_for.split(",")
         counter_dict = {wert: 0 for wert in verbindungen_list}
         
         departures = []
-        for departure in data:
+        counter = 0
+        lastRealtimeDepartureTime = 0
+        final_departure = None  # Variable zum Zwischenspeichern der aktuellen Abfahrt
+        
+        for departure in sorted_data:
             # if self._onlyline is set, check if it is the correct line
             if self._onlyline != "" and departure["label"] not in self._onlyline.split(
                 ","
@@ -473,6 +599,8 @@ class ConnectionInfo(SensorEntity):
             ):
                 continue
             
+            counter += 1
+            
             # Format platform
             if departure["transportType"] in ["BUS", "REGIONAL_BUS"]:
                 track = "Bus"
@@ -485,27 +613,66 @@ class ConnectionInfo(SensorEntity):
             else:
                 # the key 'platform' doesnt exist in Dictionary user
                 track = "---"
-            
-            departures.append(
-                Departure(
-                    transport_type=departure["transportType"],
-                    label=departure["label"],
-                    destination=departure["destination"],
-                    track=track,
-                    planned_departure=self.convert_timestamp_timezone(
+                
+            planned_departure = self.convert_timestamp_timezone(
                         departure["plannedDepartureTime"] / 1000,
                         self._timezoneFrom,
                         self._timezoneTo,
                         "%H:%M",
-                    ),
-                    expected_departure=self.convert_timestamp_timezone(
+                    )
+
+            expected_departure=self.convert_timestamp_timezone(
                         departure["realtimeDepartureTime"] / 1000,
                         self._timezoneFrom,
                         self._timezoneTo,
                         "%H:%M",
-                    ),
-                    cancelled=departure["cancelled"],
-                    delay=departure.get("delayInMinutes", 0),
+                    )
+            
+            transport_type = departure["transportType"]
+            label          = departure["label"]
+            destination    = departure["destination"]
+            cancelled      = departure["cancelled"]
+            delay          = departure.get("delayInMinutes", 0)
+            trainType      = departure["trainType"]
+            
+            #if counter == 1:
+                
+            current_time = datetime.utcnow()
+            time_diff    = datetime.utcfromtimestamp(departure["realtimeDepartureTime"] / 1000) - current_time
+            
+            # already departured
+            if time_diff.total_seconds() < 0:
+                continue
+            
+            #if lastRealtimeDepartureTime == 0 or departure["realtimeDepartureTime"] < lastRealtimeDepartureTime:
+            if ((lastRealtimeDepartureTime == 0 and time_diff.total_seconds() > 0) or (departure["realtimeDepartureTime"] < lastRealtimeDepartureTime and time_diff.total_seconds() > 0)):
+                # Setze die Abfahrtsdaten in die Zwischenspeicher-Variable
+                lastRealtimeDepartureTime = departure["realtimeDepartureTime"]
+                final_departure = {
+                    'planned_departure': planned_departure,
+                    'expected_departure': expected_departure,
+                    'track': track,
+                    'transport_type': transport_type,
+                    'label': label,
+                    'destination': destination,
+                    'cancelled': cancelled,
+                    'delay': delay,
+                    'trainType': trainType,
+                    'plannedDepartureTime': departure["plannedDepartureTime"],
+                    'realtimeDepartureTime': departure["realtimeDepartureTime"]
+                }
+            
+            departures.append(
+                Departure(
+                    transport_type=transport_type,
+                    label=label,
+                    destination=destination,
+                    track=track,
+                    planned_departure=planned_departure,
+                    expected_departure=expected_departure,
+                    cancelled=cancelled,
+                    delay=delay,
+                    trainType=trainType,
                 )
             )
 
@@ -543,7 +710,21 @@ class ConnectionInfo(SensorEntity):
             
             if len(departures) >= self._limit:
                 break
-        
+        # Wenn nach der Schleife final_departure gesetzt wurde, dann setze es in Home Assistant
+        if final_departure:
+            self.set_next_departure(
+                final_departure['planned_departure'],
+                final_departure['expected_departure'],
+                final_departure['track'],
+                final_departure['transport_type'],
+                final_departure['label'],
+                final_departure['destination'],
+                final_departure['cancelled'],
+                final_departure['delay'],
+                final_departure['trainType'],
+                final_departure['plannedDepartureTime'],
+                final_departure['realtimeDepartureTime']
+            )
         self.lateConnections = connectioninfos
         
         # if there was an empty result from the API, return the old value
