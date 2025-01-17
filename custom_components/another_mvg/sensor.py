@@ -38,6 +38,7 @@ from .const import (
     CONF_DEPARTURE_FORMAT,
     CONF_INCREASED_LIMIT,
     CONF_SORT_BY_REAL_DEPARTURE,
+    CONF_OFFSET_IN_MINUTES,
     URL,
     USER_AGENT,
     MVGException,
@@ -56,6 +57,7 @@ from .const import (
     DEFAULT_DEPARTURE_FORMAT,
     DEFAULT_INCREASED_LIMIT,
     DEFAULT_SORT_BY_REAL_DEPARTURE,
+    DEFAULT_OFFSET_IN_MINUTES,
 )
 
 # integration imports end
@@ -85,6 +87,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_SHOW_CLOCK, default=DEFAULT_SHOW_CLOCK): cv.boolean,
         vol.Optional(CONF_INCREASED_LIMIT, default=DEFAULT_INCREASED_LIMIT): cv.positive_int,
         vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, default=DEFAULT_SORT_BY_REAL_DEPARTURE): cv.boolean,
+        vol.Optional(CONF_OFFSET_IN_MINUTES, default=DEFAULT_OFFSET_IN_MINUTES): cv.positive_int,
     }
 )
 
@@ -204,7 +207,7 @@ class ConnectionInfo(SensorEntity):
         self._lateConnections = ""
         self._nextDeparture = ""
         self._dataOutdated = ""
-        self._offsetInMinutes = 0
+        self._offsetInMinutes = config_data.get(CONF_OFFSET_IN_MINUTES, DEFAULT_OFFSET_IN_MINUTES)
         self._increased_limit = config_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT)
         self._custom_attributes = {
             "config": {
