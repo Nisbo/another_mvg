@@ -28,6 +28,7 @@ CONF_SHOW_CLOCK = "show_clock" # optional
 CONF_DEPARTURE_FORMAT = "departure_format" # required
 CONF_INCREASED_LIMIT = "increased_limit" # optional
 CONF_SORT_BY_REAL_DEPARTURE = "sort_by_real_departure" # optional
+CONF_OFFSET_IN_MINUTES = "offset_in_minutes" # optional
 
 DEFAULT_HIDEDESTINATION = ""
 DEFAULT_ONLYDESTINATION = ""
@@ -44,6 +45,7 @@ DEFAULT_SHOW_CLOCK = False
 DEFAULT_DEPARTURE_FORMAT = "1"
 DEFAULT_INCREASED_LIMIT = 0
 DEFAULT_SORT_BY_REAL_DEPARTURE = False
+DEFAULT_OFFSET_IN_MINUTES = 0
 
 URL_BASE = "/another_mvg"
 ANOTHER_MVG_CARDS = [
