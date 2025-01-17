@@ -325,7 +325,7 @@ class ContentAnotherMVGEditorBig extends HTMLElement {
     if (!this.config.entity && entities.length > 0) {
       this.config.entity = entities[0].entity_id;
       entitySelect.value = this.config.entity; // Select Dropdown
-      this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+      //this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
     }
 
     // add dropdown to container
