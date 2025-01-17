@@ -51,6 +51,7 @@
                     "departure_format": "Formatting of the departure time",
                     "transporttypes": "Transport Types",
                     "sort_by_real_departure": "Sort by the actual departure time (instead of the scheduled departure time).",
+                    "offset_in_minutes": "Offset in Minutes",
                     "station_name": "Station name"
                 },
                 "data_description": {
@@ -59,6 +60,7 @@
                     "limit": "By default, you will see 6 departures. If you want to see more or fewer, you can configure this setting. The API will retrieve a maximum of 80 departures. If you use filters like 'hidedestination' and it filters out 40 entries, you will only see the remaining 40 as the maximum.",
                     "departure_format": "In the example, 16:27 is the scheduled departure time, the train has a delay of 2 minutes, and 16:29 is the current departure time. If only the current departure time (Option 3) is displayed, the time will be shown in red if there is a delay.",
                     "transporttypes": "Select the Transport Types you want to see in the card. You can also enter **'BAHN'** (and press **'ENTER'**) to additionally see departures for regular trains. However, this feature is not yet fully supported.",
+                    "offset_in_minutes": "Enter the number of minutes here to adjust the displayed departure times. For example, if you enter 10 minutes, only departures that are at least 10 minutes in the future will be shown. This is useful for viewing connections you can reach on foot in time.",
                     "station_name": "Enter the name of the station you want to search for."
                 }
             },
@@ -130,14 +132,16 @@
                     "limit": "Number of departures",
                     "departure_format": "Formatting of the departure time",
                     "transporttypes": "Transport Types",
-                    "sort_by_real_departure": "Sort by the actual departure time (instead of the scheduled departure time)."
+                    "sort_by_real_departure": "Sort by the actual departure time (instead of the scheduled departure time).",
+                    "offset_in_minutes": "Offset in Minutes"
                 },
                 "data_description": {
                     "globalid": "The station identifier for the stop/station/location. This entry is usually created automatically during the initial setup and is **NOT** the station name! If you wish to change this entry and don’t know the ID, close this input form and select the option **'Station (Global ID 1) - search and save'** under **'CONFIGURE.'** Alternatively, you can find the Global ID for your station here: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Simply replace the name in the query.",
                     "name": "Name to display in the Card.",
                     "limit": "By default, you will see 6 departures. If you want to see more or fewer, you can configure this setting. The API will retrieve a maximum of 80 departures. If you use filters like 'hidedestination' and it filters out 40 entries, you will only see the remaining 40 as the maximum.",
                     "departure_format": "In the example, 16:27 is the scheduled departure time, the train has a delay of 2 minutes, and 16:29 is the current departure time. If only the current departure time (Option 3) is displayed, the time will be shown in red if there is a delay.",
-                    "transporttypes": "Select the Transport Types you want to see in the card. You can also enter **'BAHN'** (and press **'ENTER'**) to additionally see departures for regular trains. However, this feature is not yet fully supported."
+                    "transporttypes": "Select the Transport Types you want to see in the card. You can also enter **'BAHN'** (and press **'ENTER'**) to additionally see departures for regular trains. However, this feature is not yet fully supported.",
+                    "offset_in_minutes": "Enter the number of minutes here to adjust the displayed departure times. For example, if you enter 10 minutes, only departures that are at least 10 minutes in the future will be shown. This is useful for viewing connections you can reach on foot in time."
                 }
             },
             "globalid2search": {
