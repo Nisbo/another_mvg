@@ -51,6 +51,7 @@
                     "departure_format": "Formatierung der Abfahrtzeit",
                     "transporttypes": "Transportarten",
                     "sort_by_real_departure": "Nach der tatsächlichen Abfahrtszeit sortieren (anstatt nach der geplanten Abfahrtszeit).",
+                    "offset_in_minutes": "Zeitversatz in Minuten",
                     "station_name": "Stationsname"
                 },
                 "data_description": {
@@ -59,6 +60,7 @@
                     "limit": "Standardmäßig sehen Sie 6 Abfahrten. Wenn Sie mehr oder weniger sehen möchten, können Sie diese Einstellung konfigurieren. Die API ruft maximal 80 Abfahrten ab. Wenn Sie Filter wie 'hidedestination' verwenden und 40 Einträge herausgefiltert werden, sehen Sie maximal die verbleibenden 40.",
                     "departure_format": "In dem Beispiel ist 16:27 die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist die aktuelle Abfahrtszeit. Sollte nur die aktuelle Abfahrtszeit (Option 3) angezeigt werden, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt.",
                     "transporttypes": "Wählen Sie die Transportarten aus, die Sie in der Karte sehen möchten. Sie können auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich die Abfahrten der normalen Züge zu sehen. Diese Funktion wird aber noch nicht zu 100% unterstützt.",
+                    "offset_in_minutes": "Tragen Sie hier die Minuten ein, um die angezeigten Abfahrten zu korrigieren. Zum Beispiel: Wenn Sie 10 Minuten eingeben, werden nur Abfahrten angezeigt, die mindestens 10 Minuten in der Zukunft liegen. Dies ist nützlich, um nur die Verbindungen zu sehen, die Sie rechtzeitig zu Fuß erreichen können.",
                     "station_name": "Geben Sie den Namen der Station ein, nach der Sie suchen möchten."
                 }
             },
@@ -130,14 +132,16 @@
                     "limit": "Anzahl der Abfahrten",
                     "departure_format": "Formatierung der Abfahrtzeit",
                     "transporttypes": "Transportarten",
-                    "sort_by_real_departure": "Nach der tatsächlichen Abfahrtszeit sortieren (anstatt nach der geplanten Abfahrtszeit)."
+                    "sort_by_real_departure": "Nach der tatsächlichen Abfahrtszeit sortieren (anstatt nach der geplanten Abfahrtszeit).",
+                    "offset_in_minutes": "Zeitversatz in Minuten"
                 },
                 "data_description": {
                     "globalid": "Die Stationskennung für die Haltestelle/Station/Ort. Dieser Eintrag wird normalerweise während der Erstkonfiguration automatisch erstellt und ist **NICHT** der Name der Station! Wenn Sie diesen Eintrag ändern möchten und die ID nicht kennen, schließen Sie diese Eingabemaske und wählen Sie unter **'KONFIGURIEREN'** die Option **'Station (Global ID 1) - suchen und speichern'** aus. Alternativ können Sie die Global ID für Ihre Station hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie dafür einfach den Namen in der Abfrage.",
                     "name": "Der Name, der in der Karte angezeigt werden soll.",
                     "limit": "Standardmäßig sehen Sie 6 Abfahrten. Wenn Sie mehr oder weniger sehen möchten, können Sie diese Einstellung konfigurieren. Die API ruft maximal 80 Abfahrten ab. Wenn Sie Filter wie 'hidedestination' verwenden und 40 Einträge herausgefiltert werden, sehen Sie maximal die verbleibenden 40.",
                     "departure_format": "In dem Beispiel ist 16:27 die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist die aktuelle Abfahrtszeit. Sollte nur die aktuelle Abfahrtszeit (Option 3) angezeigt werden, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt.",
-                    "transporttypes": "Wählen Sie die Transportarten aus, die Sie in der Karte sehen möchten. Sie können auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich die Abfahrten der normalen Züge zu sehen. Diese Funktion wird aber noch nicht zu 100% unterstützt."
+                    "transporttypes": "Wählen Sie die Transportarten aus, die Sie in der Karte sehen möchten. Sie können auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich die Abfahrten der normalen Züge zu sehen. Diese Funktion wird aber noch nicht zu 100% unterstützt.",
+                    "offset_in_minutes": "Tragen Sie hier die Minuten ein, um die angezeigten Abfahrten zu korrigieren. Zum Beispiel: Wenn Sie 10 Minuten eingeben, werden nur Abfahrten angezeigt, die mindestens 10 Minuten in der Zukunft liegen. Dies ist nützlich, um nur die Verbindungen zu sehen, die Sie rechtzeitig zu Fuß erreichen können."
                 }
             },
             "globalid2search": {
