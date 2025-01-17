@@ -257,6 +257,98 @@ class ContentAnotherMVGbig extends HTMLElement {
   getCardSize() {
     return 6;
   }
+  
+    static getConfigElement() {
+    return document.createElement('content-card-another-mvg-editor-big');
+  }
+}
+
+
+class ContentAnotherMVGEditorBig extends HTMLElement {
+  constructor() {
+    super();
+    this.config = {};
+  }
+
+  setConfig(config) {
+    this.config = { ...config };
+    this.render();
+  }
+
+  render() {
+    this.innerHTML = ''; // Reset inner HTML
+
+    const container = document.createElement('div');
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+
+    // Beschreibung hinzufügen
+    const description = document.createElement('p');
+    description.innerHTML = `Bitte wählen Sie eine Haltestelle aus der Liste aus.<br /><br />Es werden nur Haltestellen angezeigt, die Sie erstellt haben. Wenn hier keine Einträge angezeigt werden, haben Sie noch keine Haltestelle erstellt oder alle Haltestellen wurden gelöscht.<br /><br />Um eine Haltestelle zu erstellen, gehen Sie zu<br /><b>"Einstellungen"</b> &rarr; <b>"Geräte & Dienste"</b>, klicken Sie auf <b>"INTEGRATION HINZUFÜGEN"</b>, suchen Sie nach <b>"Another MVG"</b> und folgen Sie den Anweisungen.`;
+    description.style.fontSize = "14px";
+    description.style.marginBottom = "15px";
+    container.appendChild(description);
+
+    // Dropdown for entities
+    const entitySelect = document.createElement('ha-select');
+    entitySelect.label = "Wählen Sie eine Haltestelle";
+    entitySelect.value = this.config.entity || "";
+    entitySelect.addEventListener('change', (event) => {
+      const selectedEntity = event.target.value;
+      this.config = {
+        ...this.config,
+        entity: selectedEntity
+      };
+      this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+    });
+
+    // get entities from hass
+    const entities = Object.values(this.hass.states)
+      .filter(entity => entity.entity_id && this.isAnotherMvgEntity(entity))  // only entities for 'another_mvg'
+
+    // sort by friendly_name
+    entities.sort((a, b) => {
+      const nameA = a.attributes.friendly_name || a.entity_id;
+      const nameB = b.attributes.friendly_name || b.entity_id;
+      return nameA.localeCompare(nameB);
+    });
+
+    // add entities to dropdown
+    entities.forEach(entity => {
+      const option = document.createElement('mwc-list-item');
+      option.value = entity.entity_id;
+      option.innerText = entity.attributes.friendly_name || entity.entity_id;
+      entitySelect.appendChild(option);
+    });
+
+    // if no entity is set (adding a card) select the 1st entity
+    if (!this.config.entity && entities.length > 0) {
+      this.config.entity = entities[0].entity_id;
+      entitySelect.value = this.config.entity; // Select Dropdown
+      this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+    }
+
+    // add dropdown to container
+    container.appendChild(entitySelect);
+
+    this.appendChild(container);
+  }
+
+  // Try to find only entities for 'another_mvg' assuming departures is only defined for 'another_mvg'
+  isAnotherMvgEntity(entity) {
+    return entity.attributes && entity.attributes.departures !== undefined;
+  }
 }
 
 customElements.define("content-card-another-mvg-big", ContentAnotherMVGbig);
+customElements.define("content-card-another-mvg-editor-big", ContentAnotherMVGEditorBig);
+
+// add the card to the list of custom cards for the card picker
+window.customCards = window.customCards || []; // Create the list if it doesn't exist.
+window.customCards.push({
+    type: "content-card-another-mvg-big",
+    name: "AnotherMVG Departure Card (Big)",
+    preview: false, // Optional - defaults to false
+    description: "Mit dieser Karte kann man sich die Abfahrtzeiten einer Station als einzelne Karte auf einer Seite anzeigen lassen.",
+    documentationURL: "https://github.com/Nisbo/another_mvg",
+});
