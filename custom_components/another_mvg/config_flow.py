@@ -30,6 +30,7 @@ from .const import (
     CONF_DEPARTURE_FORMAT,
     CONF_INCREASED_LIMIT,
     CONF_SORT_BY_REAL_DEPARTURE,
+    CONF_OFFSET_IN_MINUTES,
     DEFAULT_ONLYLINE,
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
@@ -45,6 +46,7 @@ from .const import (
     DEFAULT_DEPARTURE_FORMAT,
     DEFAULT_INCREASED_LIMIT,
     DEFAULT_SORT_BY_REAL_DEPARTURE,
+    DEFAULT_OFFSET_IN_MINUTES,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -82,6 +84,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_SHOW_CLOCK: import_data.get(CONF_SHOW_CLOCK, DEFAULT_SHOW_CLOCK),
                 CONF_DEPARTURE_FORMAT: import_data.get(CONF_DEPARTURE_FORMAT, DEFAULT_DEPARTURE_FORMAT),
                 CONF_SORT_BY_REAL_DEPARTURE: import_data.get(CONF_SORT_BY_REAL_DEPARTURE, DEFAULT_SORT_BY_REAL_DEPARTURE),
+                CONF_OFFSET_IN_MINUTES: import_data.get(CONF_OFFSET_IN_MINUTES, DEFAULT_OFFSET_IN_MINUTES),
             }
         )
 
@@ -262,6 +265,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
 
             vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, default=DEFAULT_SORT_BY_REAL_DEPARTURE): bool,
+            vol.Optional(CONF_OFFSET_IN_MINUTES, default=DEFAULT_OFFSET_IN_MINUTES): int,
 
             # Filter
             vol.Required("filter_options"): data_entry_flow.section(
@@ -549,6 +553,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             ),
 
             vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, description={"suggested_value": current_data.get(CONF_SORT_BY_REAL_DEPARTURE, "")}): bool,
+            vol.Optional(CONF_OFFSET_IN_MINUTES, default=current_data.get(CONF_OFFSET_IN_MINUTES, DEFAULT_OFFSET_IN_MINUTES)): int,
 
             # Filter
             vol.Required("filter_options"): data_entry_flow.section(
