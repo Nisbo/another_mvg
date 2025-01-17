@@ -112,8 +112,8 @@ class ContentAnotherMVG extends HTMLElement {
         /* BAHN */
         span.BAHN {
           background-color: #FFFFFF;
-		  color: #E30613;
-		  border: 1px solid #E30613;
+          color: #E30613;
+          border: 1px solid #E30613;
         }
 
         /* SBAHN */
@@ -125,7 +125,7 @@ class ContentAnotherMVG extends HTMLElement {
         span.S2  {background-color: #76B82A;}
         span.S3  {background-color: #951B81;}
         span.S4  {background-color: #E30613;}
-		span.S5  {background-color: #005E82;}
+        span.S5  {background-color: #005E82;}
         span.S6  {background-color: #00975F;}
         span.S7  {background-color: #943126;}
         span.S8  {background-color: #000000; color: #FFFFFF;}
@@ -154,7 +154,7 @@ class ContentAnotherMVG extends HTMLElement {
     const entityId = this.config.entity;
     const state    = hass.states[entityId];
     const stateStr = state ? state.state : "unavailable";
-	const departureFormat = state && state.attributes && state.attributes.config && 
+    const departureFormat = state && state.attributes && state.attributes.config && 
     ["1", "2", "3"].includes(state.attributes.config.departure_format ?? "") 
     ? state.attributes.config.departure_format 
     : "1";
@@ -162,83 +162,83 @@ class ContentAnotherMVG extends HTMLElement {
 
     /* state undefined */
     if (!state || state === "undefined") {
-	   var html = "<b><u>Another MVG:</u></b><br>The entity <b>" + entityId + "</b> is undefined!<br>Maybe only a typo ?<br>Or did you delete the stop ?";
-	   this.content.innerHTML = html;
+       var html = "<b><u>Another MVG:</u></b><br>The entity <b>" + entityId + "</b> is undefined!<br>Maybe only a typo ?<br>Or did you delete the stop ?";
+       this.content.innerHTML = html;
     } else {
-		// Function, to show the current time
-		function getCurrentTime() {
-			const now = new Date();
-			return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-			//return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // only for testing, there is no update every second
-		}
+        // Function, to show the current time
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            //return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // only for testing, there is no update every second
+        }
 
-		let html = `
-		<div class="amvg-container">
-		  ${!state.attributes.config.hide_name ? `<div class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right; margin-right: 5px;">${state.attributes.config.show_clock ? ` ${getCurrentTime()} ` : ""}</span></div>` : ""}
-		  <table class="amvg-table">
-			<tr class="amvg-headline">
-			  <th class="labelHL">Linie</th>
-			  <th class="destinationHL">Ziel</th>
-			  <th class="trackHL">Gleis</th>
-			  <th class="timeHL">Abfahrt</th>
-			</tr>
-		  `;
+        let html = `
+        <div class="amvg-container">
+          ${!state.attributes.config.hide_name ? `<div class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right; margin-right: 5px;">${state.attributes.config.show_clock ? ` ${getCurrentTime()} ` : ""}</span></div>` : ""}
+          <table class="amvg-table">
+            <tr class="amvg-headline">
+              <th class="labelHL">Linie</th>
+              <th class="destinationHL">Ziel</th>
+              <th class="trackHL">Gleis</th>
+              <th class="timeHL">Abfahrt</th>
+            </tr>
+        `;
 
-		this.data = state.attributes.departures;
-		if (!this.data || this.data === "undefined") {
-			  html += `<tr class="item">`;
-			  html += `<td class="label">XX</td>`;
-			  html += `<td class="destination">Addon is loading.</td>`;
-			  html += `<td class="track">-</td>`;
-			  html += `<td class="time">-</td>`;
-			  html += `</tr>`;
-		} else {
-			this.data.forEach((departure) => {
-			  html += `<tr class="item">`;
-			  html += `<td class="label"><span class="line ${departure.transport_type} ${departure.label}">${departure.trainType}${departure.label}</span></td>`;
-			  html += `<td class="destination">${departure.destination}</td>`;
-			  html += `<td class="track">${departure.track}</td>`;
-			  
-			  let timeDisplay = "";
-			  
-			  if (departureFormat === "1") {
-				timeDisplay = departure.planned_departure;
+        this.data = state.attributes.departures;
+        if (!this.data || this.data === "undefined") {
+              html += `<tr class="item">`;
+              html += `<td class="label">XX</td>`;
+              html += `<td class="destination">Addon is loading.</td>`;
+              html += `<td class="track">-</td>`;
+              html += `<td class="time">-</td>`;
+              html += `</tr>`;
+        } else {
+            this.data.forEach((departure) => {
+              html += `<tr class="item">`;
+              html += `<td class="label"><span class="line ${departure.transport_type} ${departure.label}">${departure.trainType}${departure.label}</span></td>`;
+              html += `<td class="destination">${departure.destination}</td>`;
+              html += `<td class="track">${departure.track}</td>`;
+              
+              let timeDisplay = "";
+              
+              if (departureFormat === "1") {
+                timeDisplay = departure.planned_departure;
 
-				if (departure.cancelled) {
-				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
-				} else if (departure.delay > 0) {
-				  timeDisplay += ` <span class="delay">+${departure.delay}</span> (${departure.expected_departure})`;
-				}
-				
-			  } else if (departureFormat === "2") {
-				timeDisplay = departure.planned_departure;
+                if (departure.cancelled) {
+                  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+                } else if (departure.delay > 0) {
+                  timeDisplay += ` <span class="delay">+${departure.delay}</span> (${departure.expected_departure})`;
+                }
+                
+              } else if (departureFormat === "2") {
+                timeDisplay = departure.planned_departure;
 
-				if (departure.cancelled) {
-				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
-				} else if (departure.delay > 0) {
-				  timeDisplay += ` <span class="delay">+${departure.delay}</span>`;
-				}
-				
-			  } else if (departureFormat === "3") {
-				if (departure.delay > 0) {
-				  timeDisplay = `<span class="delay">${departure.expected_departure}</span>`;
-				} else {
-				  timeDisplay = departure.expected_departure;
-				}
+                if (departure.cancelled) {
+                  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+                } else if (departure.delay > 0) {
+                  timeDisplay += ` <span class="delay">+${departure.delay}</span>`;
+                }
+                
+              } else if (departureFormat === "3") {
+                if (departure.delay > 0) {
+                  timeDisplay = `<span class="delay">${departure.expected_departure}</span>`;
+                } else {
+                  timeDisplay = departure.expected_departure;
+                }
 
-				if (departure.cancelled) {
-				  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
-				}
-			  }
+                if (departure.cancelled) {
+                  timeDisplay += ` <span class="cancelled">Entfällt</span>`;
+                }
+              }
 
-			  html += `<td class="time">${timeDisplay}</td>`;
-			  html += `</tr>`;
-			});
-		}
+              html += `<td class="time">${timeDisplay}</td>`;
+              html += `</tr>`;
+            });
+        }
 
-		html += `</table></div>`; 
-		this.content.innerHTML = html;
-	}
+        html += `</table></div>`; 
+        this.content.innerHTML = html;
+    }
   }
 
   // The user supplied configuration. Throw an exception and Home Assistant
@@ -255,6 +255,99 @@ class ContentAnotherMVG extends HTMLElement {
   getCardSize() {
     return 6;
   }
+  
+  static getConfigElement() {
+    return document.createElement('content-card-another-mvg-editor');
+  }
+}
+
+
+class ContentAnotherMVGEditor extends HTMLElement {
+  constructor() {
+    super();
+    this.config = {};
+  }
+
+  setConfig(config) {
+    this.config = { ...config };
+    this.render();
+  }
+
+  render() {
+    this.innerHTML = ''; // Reset inner HTML
+
+    const container = document.createElement('div');
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+
+    // Beschreibung hinzufügen
+    const description = document.createElement('p');
+    description.innerHTML = `Bitte wählen Sie eine Haltestelle aus der Liste aus.<br /><br />Es werden nur Haltestellen angezeigt, die Sie erstellt haben. Wenn hier keine Einträge angezeigt werden, haben Sie noch keine Haltestelle erstellt oder alle Haltestellen wurden gelöscht.<br /><br />Um eine Haltestelle zu erstellen, gehen Sie zu<br /><b>"Einstellungen"</b> &rarr; <b>"Geräte & Dienste"</b>, klicken Sie auf <b>"INTEGRATION HINZUFÜGEN"</b>, suchen Sie nach <b>"Another MVG"</b> und folgen Sie den Anweisungen.`;
+    description.style.fontSize = "14px";
+    description.style.marginBottom = "15px";
+    container.appendChild(description);
+
+    // Dropdown for entities
+    const entitySelect = document.createElement('ha-select');
+    entitySelect.label = "Wählen Sie eine Haltestelle";
+    entitySelect.value = this.config.entity || "";
+    entitySelect.addEventListener('change', (event) => {
+      const selectedEntity = event.target.value;
+      this.config = {
+        ...this.config,
+        entity: selectedEntity
+      };
+      this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+    });
+
+    // get entities from hass
+    const entities = Object.values(this.hass.states)
+      .filter(entity => entity.entity_id && this.isAnotherMvgEntity(entity))  // only entities for 'another_mvg'
+
+    // sort by friendly_name
+    entities.sort((a, b) => {
+      const nameA = a.attributes.friendly_name || a.entity_id;
+      const nameB = b.attributes.friendly_name || b.entity_id;
+      return nameA.localeCompare(nameB);
+    });
+
+    // add entities to dropdown
+    entities.forEach(entity => {
+      const option = document.createElement('mwc-list-item');
+      option.value = entity.entity_id;
+      option.innerText = entity.attributes.friendly_name || entity.entity_id;
+      entitySelect.appendChild(option);
+    });
+
+    // if no entity is set (adding a card) select the 1st entity
+    if (!this.config.entity && entities.length > 0) {
+      this.config.entity = entities[0].entity_id;
+      entitySelect.value = this.config.entity; // Select Dropdown
+      this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+    }
+
+    // add dropdown to container
+    container.appendChild(entitySelect);
+
+    this.appendChild(container);
+  }
+
+  // Try to find only entities for 'another_mvg' assuming departures is only defined for 'another_mvg'
+  isAnotherMvgEntity(entity) {
+    return entity.attributes && entity.attributes.departures !== undefined;
+  }
 }
 
 customElements.define("content-card-another-mvg", ContentAnotherMVG);
+customElements.define("content-card-another-mvg-editor", ContentAnotherMVGEditor);
+
+// add the card to the list of custom cards for the card picker
+window.customCards = window.customCards || []; // Create the list if it doesn't exist.
+window.customCards.push({
+    type: "content-card-another-mvg",
+    name: "AnotherMVG Departure Card",
+    preview: false, // Optional - defaults to false
+    description: "Mit dieser Karte kann man sich die Abfahrtzeiten einer Station anzeigen lassen.",
+    documentationURL: "https://github.com/Nisbo/another_mvg",
+});
+
