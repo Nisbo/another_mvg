@@ -144,5 +144,5 @@ window.customCards.push({
 	type: "content-card-another-mvg-livemap",
 	name: "AnotherMVG LiveMap",
 	preview: false, // Optional - defaults to false
-	description: "Mit dieser Karte kann man sich die MVG Live Map einbinden. Diese Karte ist für Panel (einzelne Karte) gedacht.",
+	description: "Mit dieser Karte kann die MVG Live Map eingebunden werden. Sie ist für die Anzeige einer Karte pro Seite gedacht, funktioniert jedoch auch in Kombination mit anderen Karten. In diesem Fall ist die Anzeige jedoch eingeschränkt, besonders wenn Meldungen vorliegen.",
 });
