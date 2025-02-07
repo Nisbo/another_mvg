@@ -16,7 +16,7 @@ class AnotherMvgCardRegistration:
 
     async def async_register(self):
         await self.async_register_another_mvg_path()
-        if self.hass.data["lovelace"]["mode"] == "storage":
+        if self.hass.data["lovelace"].mode == "storage":
             await self.async_wait_for_lovelace_resources()
 
     # install card resources
@@ -32,7 +32,7 @@ class AnotherMvgCardRegistration:
 
     async def async_wait_for_lovelace_resources(self) -> None:
         async def check_lovelace_resources_loaded(now):
-            if self.hass.data["lovelace"]["resources"].loaded:
+            if self.hass.data["lovelace"].resources.loaded:
                 await self.async_register_another_mvg_cards()
             else:
                 _LOGGER.debug(
@@ -48,7 +48,7 @@ class AnotherMvgCardRegistration:
         # Get resources already registered
         another_mvg_resources = [
             resource
-            for resource in self.hass.data["lovelace"]["resources"].async_items()
+            for resource in self.hass.data["lovelace"].resources.async_items()
             if resource["url"].startswith(URL_BASE)
         ]
 
