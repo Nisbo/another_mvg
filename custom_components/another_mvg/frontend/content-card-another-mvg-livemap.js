@@ -141,8 +141,8 @@ customElements.define("content-another-mvg-livemap-editor", ContentAnotherMVGliv
 // add the card to the list of custom cards for the card picker
 window.customCards = window.customCards || []; // Create the list if it doesn't exist.
 window.customCards.push({
-	type: "content-card-another-mvg-livemap",
-	name: "AnotherMVG LiveMap",
-	preview: false, // Optional - defaults to false
-	description: "Mit dieser Karte kann die MVG Live Map eingebunden werden. Sie ist für die Anzeige einer Karte pro Seite gedacht, funktioniert jedoch auch in Kombination mit anderen Karten. In diesem Fall ist die Anzeige jedoch eingeschränkt, besonders wenn Meldungen vorliegen.",
+	  type: "content-card-another-mvg-livemap",
+	  name: "AnotherMVG LiveMap",
+	  preview: false, // Optional - defaults to false
+	  description: "DE: Mit dieser Karte kann die MVG Live Map eingebunden werden. Sie ist für die Anzeige einer Karte pro Seite gedacht, funktioniert jedoch auch in Kombination mit anderen Karten. In diesem Fall ist die Anzeige jedoch eingeschränkt, besonders wenn Meldungen vorliegen. EN: This card allows the MVG Live Map to be embedded. It is intended to display one map per page but also works in combination with other cards. However, in that case, the display is limited, especially when alerts are present.",
 });
