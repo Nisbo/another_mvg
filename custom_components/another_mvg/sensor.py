@@ -9,6 +9,7 @@ import logging
 import time
 import requests
 from requests import HTTPError, Timeout
+import urllib.parse
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import CONF_NAME
@@ -28,17 +29,19 @@ from .const import (
     CONF_GLOBALID2,
     CONF_HIDEDESTINATION,
     CONF_ONLYDESTINATION,
-    CONF_HIDENAME,
     CONF_LIMIT,
     CONF_ONLYLINE,
     CONF_TIMEZONE_FROM,
     CONF_TIMEZONE_TO,
     CONF_TRANSPORTTYPES,
-    CONF_SHOW_CLOCK,
-    CONF_DEPARTURE_FORMAT,
     CONF_INCREASED_LIMIT,
     CONF_SORT_BY_REAL_DEPARTURE,
     CONF_OFFSET_IN_MINUTES,
+    CONF_PROXY_URL,
+    CONF_PROXY_USETIME,
+    CONF_FORCE_PROXY,
+    CONF_CSS_CODE,
+    CONF_CSS_CODE_DARKMODE_ONLY,
     URL,
     USER_AGENT,
     MVGException,
@@ -48,16 +51,18 @@ from .const import (
     DEFAULT_LIMIT,
     DEFAULT_CONF_TRANSPORTTYPES,
     DEFAULT_CONF_GLOBALID2,
-    DEFAULT_HIDENAME,
     DEFAULT_TIMEZONE_FROM,
     DEFAULT_TIMEZONE_TO,
     DEFAULT_ALERT_FOR,
     DEFAULT_STATS_TEMPLATE,
-    DEFAULT_SHOW_CLOCK,
-    DEFAULT_DEPARTURE_FORMAT,
     DEFAULT_INCREASED_LIMIT,
     DEFAULT_SORT_BY_REAL_DEPARTURE,
     DEFAULT_OFFSET_IN_MINUTES,
+    DEFAULT_PROXY_URL,
+    DEFAULT_PROXY_USETIME,
+    DEFAULT_FORCE_PROXY,
+    DEFAULT_CSS_CODE,
+    DEFAULT_CSS_CODE_DARKMODE_ONLY,
 )
 
 # integration imports end
@@ -71,7 +76,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_GLOBALID): cv.string,
         vol.Required(CONF_NAME): cv.string,
-        vol.Optional(CONF_DEPARTURE_FORMAT, default=DEFAULT_DEPARTURE_FORMAT): cv.string,
         vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): cv.string,
         vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): cv.string,
         vol.Optional(CONF_ONLYDESTINATION, default=DEFAULT_ONLYDESTINATION): cv.string,
@@ -79,15 +83,18 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_DOUBLESTATIONNUMBER, default=""): cv.string,
         vol.Optional(CONF_TRANSPORTTYPES, default=DEFAULT_CONF_TRANSPORTTYPES): cv.string,
         vol.Optional(CONF_GLOBALID2, default=DEFAULT_CONF_GLOBALID2): cv.string,
-        vol.Optional(CONF_HIDENAME, default=DEFAULT_HIDENAME): cv.boolean,
         vol.Optional(CONF_TIMEZONE_FROM, default=DEFAULT_TIMEZONE_FROM): cv.string,
         vol.Optional(CONF_TIMEZONE_TO, default=DEFAULT_TIMEZONE_TO): cv.string,
         vol.Optional(CONF_ALERT_FOR, default=DEFAULT_ALERT_FOR): cv.string,
         vol.Optional(CONF_STATS_TEMPLATE, default=DEFAULT_STATS_TEMPLATE): cv.string,
-        vol.Optional(CONF_SHOW_CLOCK, default=DEFAULT_SHOW_CLOCK): cv.boolean,
         vol.Optional(CONF_INCREASED_LIMIT, default=DEFAULT_INCREASED_LIMIT): cv.positive_int,
         vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, default=DEFAULT_SORT_BY_REAL_DEPARTURE): cv.boolean,
         vol.Optional(CONF_OFFSET_IN_MINUTES, default=DEFAULT_OFFSET_IN_MINUTES): cv.positive_int,
+        vol.Optional(CONF_PROXY_URL, default=DEFAULT_PROXY_URL): cv.string,
+        vol.Optional(CONF_PROXY_USETIME, default=DEFAULT_PROXY_USETIME): cv.positive_int,
+        vol.Optional(CONF_FORCE_PROXY, default=DEFAULT_FORCE_PROXY): cv.boolean,
+        vol.Optional(CONF_CSS_CODE, default=DEFAULT_CSS_CODE): cv.string,
+        vol.Optional(CONF_CSS_CODE_DARKMODE_ONLY, default=DEFAULT_CSS_CODE_DARKMODE_ONLY): cv.boolean,
     }
 )
 
@@ -156,6 +163,7 @@ class Departure:
     cancelled: bool
     delay: int
     trainType: str
+    time_diff: int
 
 @dataclass
 class DepartureAlarms:
@@ -196,10 +204,9 @@ class ConnectionInfo(SensorEntity):
         self._globalid2 = config_data.get(CONF_GLOBALID2)
         self._name = config_data.get(CONF_NAME)
         self._transporttypes = config_data.get(CONF_TRANSPORTTYPES)
-        self._hidename = config_data.get(CONF_HIDENAME)
-        self._show_clock = config_data.get(CONF_SHOW_CLOCK, DEFAULT_SHOW_CLOCK)
+        self._css_code = config_data.get(CONF_CSS_CODE, DEFAULT_CSS_CODE)
+        self._css_code_darkmode_only = config_data.get(CONF_CSS_CODE_DARKMODE_ONLY, DEFAULT_CSS_CODE_DARKMODE_ONLY)
         self._sort_by_real_departure = config_data.get(CONF_SORT_BY_REAL_DEPARTURE, DEFAULT_SORT_BY_REAL_DEPARTURE)
-        self._departure_format = config_data.get(CONF_DEPARTURE_FORMAT, DEFAULT_DEPARTURE_FORMAT)
         self._stats_template = config_data.get(CONF_STATS_TEMPLATE, DEFAULT_STATS_TEMPLATE)
         self._timezoneFrom = config_data.get(CONF_TIMEZONE_FROM)
         self._timezoneTo = config_data.get(CONF_TIMEZONE_TO)
@@ -207,15 +214,18 @@ class ConnectionInfo(SensorEntity):
         self._lateConnections = ""
         self._nextDeparture = ""
         self._dataOutdated = ""
+        self._maxConnectionErrorTime = 0
         self._offsetInMinutes = config_data.get(CONF_OFFSET_IN_MINUTES, DEFAULT_OFFSET_IN_MINUTES)
+        self._proxyURL = config_data.get(CONF_PROXY_URL, DEFAULT_PROXY_URL)
+        self._proxyUsetime = config_data.get(CONF_PROXY_USETIME, DEFAULT_PROXY_USETIME)
+        self._forceProxy = config_data.get(CONF_FORCE_PROXY, DEFAULT_FORCE_PROXY)
         self._increased_limit = config_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT)
         self._custom_attributes = {
             "config": {
                 "name": self._name, 
-                "hide_name": self._hidename, 
-                "show_clock": self._show_clock, 
-                "departure_format": self._departure_format,
-                "unique_id": self._unique_id
+                "unique_id": self._unique_id,
+                "css_code": self._css_code,
+                "css_code_darkmode_only": self._css_code_darkmode_only
             }
         }
 
@@ -249,6 +259,16 @@ class ConnectionInfo(SensorEntity):
     def dataOutdated(self, value):
         """Setter-Method"""
         self._dataOutdated = value
+
+    @property
+    def maxConnectionErrorTime(self):
+        """Getter-Method"""
+        return self._maxConnectionErrorTime
+
+    @dataOutdated.setter
+    def maxConnectionErrorTime(self, value):
+        """Setter-Method"""
+        self._maxConnectionErrorTime = value
 
     @property
     def lateConnections(self):
@@ -307,18 +327,19 @@ class ConnectionInfo(SensorEntity):
             trackCheck   = ""
             trackCheckEN = ""
         
-        # Bestimmen, ob der transport_type angezeigt werden soll
-        transport_type_text = ""  # Standardmäßig nichts anzeigen
+        # defice transport_type
+        transport_type_text = ""
         if transport_type not in ["SBAHN", "UBAHN"]:
             transport_type_text = f"{readable_transport_type} "
         
-        # Überprüfe, ob transport_type = "BAHN" und label nur Zahlen enthält
+        # check if transport_type = "BAHN" and label contains only digits
         if transport_type == "BAHN" and label.replace(" ", "").isdigit():
             transport_type_text = trainType
         
         if transport_type == "BAHN" and not label.replace(" ", "").isdigit():
             transport_type_text = ""
         
+        # accouncements
         announcement = ""
         
         # check if cancelled
@@ -327,7 +348,7 @@ class ConnectionInfo(SensorEntity):
             valueEN = f"{transport_type_text}{label} to {destination}, scheduled departure at {planned_departure} is cancelled."
         else:
             if planned_departure != expected_departure:
-                # Bestimmen, ob "Minute" oder "Minuten" angezeigt werden soll
+                # singular or plural
                 delay_text   = f"{delay} Minute" if delay == 1 else f"{delay} Minuten"
                 delay_textEN = f"{delay} minute" if delay == 1 else f"{delay} minutes"
 
@@ -368,6 +389,8 @@ class ConnectionInfo(SensorEntity):
         """Fetch new state data for the sensor."""
         self._custom_attributes["departures"] = self.get_departures()
         self._custom_attributes["dataOutdated"] = self._dataOutdated
+        self._custom_attributes["maxConnectionErrorTime"] = self._maxConnectionErrorTime
+        
         self.process_late_connections()
 
     def process_late_connections(self):
@@ -418,6 +441,7 @@ class ConnectionInfo(SensorEntity):
                     cancelled=False,
                     delay=0,
                     trainType="",
+                    time_diff=0,
                 )
             )
             self._custom_attributes["departures"] = departures
@@ -451,6 +475,7 @@ class ConnectionInfo(SensorEntity):
                         cancelled=False,
                         delay=0,
                         trainType="",
+                        time_diff=0,
                     )
                 )
                 self._custom_attributes["departures"] = departures
@@ -488,6 +513,7 @@ class ConnectionInfo(SensorEntity):
                             cancelled=False,
                             delay=0,
                             trainType="",
+                            time_diff=0,
                         )
                     )
                     self._custom_attributes["departures"] = departures
@@ -506,6 +532,8 @@ class ConnectionInfo(SensorEntity):
                     # and set a variable with the info that the departures are outdated
                     self._dataOutdated = " - nicht aktuell"
                     return self._custom_attributes["departures"]
+            elif data2:
+                data = list(data2)
         
         try:
             sorted_data = sorted(data, key=lambda x: x["plannedDepartureTime"])
@@ -579,7 +607,7 @@ class ConnectionInfo(SensorEntity):
         departures = []
         counter = 0
         lastRealtimeDepartureTime = 0
-        final_departure = None  # Variable zum Zwischenspeichern der aktuellen Abfahrt
+        final_departure = None  # Variable for next departure
         
         for departure in sorted_data:
             # if self._onlyline is set, check if it is the correct line
@@ -649,7 +677,6 @@ class ConnectionInfo(SensorEntity):
             
             #if lastRealtimeDepartureTime == 0 or departure["realtimeDepartureTime"] < lastRealtimeDepartureTime:
             if ((lastRealtimeDepartureTime == 0 and time_diff.total_seconds() > 0) or (departure["realtimeDepartureTime"] < lastRealtimeDepartureTime and time_diff.total_seconds() > 0)):
-                # Setze die Abfahrtsdaten in die Zwischenspeicher-Variable
                 lastRealtimeDepartureTime = departure["realtimeDepartureTime"]
                 final_departure = {
                     'planned_departure': planned_departure,
@@ -676,6 +703,7 @@ class ConnectionInfo(SensorEntity):
                     cancelled=cancelled,
                     delay=delay,
                     trainType=trainType,
+                    time_diff=round(time_diff.total_seconds()),
                 )
             )
 
@@ -713,7 +741,7 @@ class ConnectionInfo(SensorEntity):
             
             if len(departures) >= self._limit:
                 break
-        # Wenn nach der Schleife final_departure gesetzt wurde, dann setze es in Home Assistant
+        
         if final_departure:
             self.set_next_departure(
                 final_departure['planned_departure'],
@@ -737,45 +765,52 @@ class ConnectionInfo(SensorEntity):
         
         return departures
 
-    def get_api_for_globalid(
-        self, name: str, global_id: str, offsetInMinutes: int, transport_types: str
-    ) -> dict:
-        """Get departure data from api."""
+    def get_api_for_globalid(self, name: str, global_id: str, offsetInMinutes: int, transport_types: str) -> dict:
+        """Get departure data from API, fallback to proxy server if needed."""
         url = URL.format(global_id, offsetInMinutes, transport_types)
-        headers = {}
-        headers["User-Agent"] = USER_AGENT
+        headers = {"User-Agent": USER_AGENT}
 
-        try:
-            # Use requests library to simplify http request
-            req = requests.get(url, headers=headers, timeout=10)
-            if req.ok:
-                return req.json()
-            else:
-                pass
-        except Timeout as ex:
-            _LOGGER.error(
-                "AnotherMVG: Timeout while connecting to the MVG API for globalid %s - %s - This usually happens if MVG API not available or your internet connection is down. We can do nothing. Normally it will be fixed by its own.",
-                global_id,
-                name,
-            )
-            raise MVGException(
-                f"AnotherMVG: Timeout while connecting to the MVG API for globalid {global_id} - {name} - This usually happens if MVG API not available or your internet connection is down. We can do nothing. Normally it will be fixed by its own."
-            ) from ex
-        except HTTPError as ex:
-            _LOGGER.error(
-                "AnotherMVG: HTTP Connection Problem for globalid %s - %s - %s - This usually happens if MVG API is rejecting the request. We can do nothing. Normally it will be fixed by its own.", global_id, name, str(ex)
-            )
-            raise MVGException(
-                f"AnotherMVG: HTTP Connection Problem for globalid {global_id} - {name} - This usually happens if MVG API is rejecting your request. We can do nothing. Normally it will be fixed by its own."
-            ) from ex
-        except Exception as ex:
-            _LOGGER.error(
-                "AnotherMVG: Other problem while connecting to the MVG API for %s - %s - %s",
-                global_id,
-                name,
-                str(ex),
-            )
-            raise MVGException(
-                f"AnotherMVG: Other problem while connecting to the MVG API for {global_id} - {name}"
-            ) from ex
+        if self._proxyURL:
+            proxy_url = f"{self._proxyURL}?urlToOpen={urllib.parse.quote(url, safe='')}"
+
+        #_LOGGER.error("AnotherMVG: Test for %s - %s value: %s", global_id, name, self._proxyUsetime)
+    
+        # check if _maxConnectionErrorTime 0 or older than 10 minutes (default)
+        #if self._maxConnectionErrorTime == 0 or (time.time() - self._maxConnectionErrorTime) > self._proxyUsetime:
+        if not self._forceProxy and (self._maxConnectionErrorTime == 0 or (time.time() - self._maxConnectionErrorTime) > self._proxyUsetime):
+            self._maxConnectionErrorTime = 0 # reset
+            try:
+                req = requests.get(url, headers=headers, timeout=10, verify=False)
+                if req.ok:
+                    return req.json()
+            except Timeout as ex:
+                _LOGGER.error("AnotherMVG: Timeout while connecting to the MVG API for globalid %s - %s - This usually happens if MVG API not available or your internet connection is down. We can do nothing. Normally it will be fixed by its own.", global_id, name)
+                raise MVGException(f"AnotherMVG: Timeout while connecting to the MVG API for globalid {global_id} - {name} - This usually happens if MVG API not available or your internet connection is down. We can do nothing. Normally it will be fixed by its own.") from ex
+            except HTTPError as ex:
+                _LOGGER.error("AnotherMVG: HTTP Connection Problem for globalid %s - %s - %s - This usually happens if MVG API is rejecting the request. We can do nothing. Normally it will be fixed by its own.", global_id, name, str(ex))
+                raise MVGException(f"AnotherMVG: HTTP Connection Problem for globalid {global_id} - {name} - This usually happens if MVG API is rejecting your request. We can do nothing. Normally it will be fixed by its own.") from ex
+            except Exception as ex:
+                _LOGGER.error("AnotherMVG: Other problem while connecting to the MVG API for %s - %s - %s", global_id, name, str(ex))
+                if not self._proxyURL:
+                    raise MVGException(f"AnotherMVG: Other problem while connecting to the MVG API for {global_id} - {name}") from ex
+                # no `raise`, to use the fallback via `mvg.php`
+    
+        # Fallback to own "Proxy"
+        if self._proxyURL:
+            try:
+                if not self._forceProxy:
+                    _LOGGER.warning("AnotherMVG: Proxy as fallback used for %s - %s", global_id, name)
+                else:
+                    _LOGGER.warning("AnotherMVG: Proxy due to settings as fallback used for %s - %s", global_id, name)
+
+                proxy_req = requests.get(proxy_url, headers=headers, timeout=10, verify=False)
+                if not self._forceProxy and self._maxConnectionErrorTime == 0:
+                    self._maxConnectionErrorTime = int(time.time())  # set UNIX-Timestamp
+                if proxy_req.ok:
+                    return proxy_req.json()
+            except Exception as ex:
+                _LOGGER.error("AnotherMVG: Proxy request failed for %s - %s - %s", global_id, name, str(ex))
+                raise MVGException(f"API and proxy failed for {global_id} - {name}") from ex
+    
+            raise MVGException(f"AnotherMVG: API and proxy failed for {global_id} - {name}")
 
