@@ -1,4 +1,21 @@
 {
+    "cardeditor": {
+        "station_desc"           : "Please select a station from the list.<br /><br />If no entries are displayed, you have not yet created a station, all stations have been deleted/deactivated, or you made changes to the station less than one minute ago.<br /><br />To create a station, click on:<br />'<b>Settings</b>' &rarr; '<b>Devices & Services</b>' &rarr; '<b>ADD INTEGRATION</b>', search for '<b>Another MVG</b>' and follow the instructions.",
+        "show_clock"             : "Show clock at top right",
+        "hidename"               : "Hide the card name (including clock)",
+        "hide_track"             : "Hide track",
+        "show_type"              : "Show transport type",
+        "departure_options"      : "Display options for the 'Departure' column",
+        "departure_options_desc" : "In the example it is 16:22 and 16:27 is the scheduled departure time, the train is delayed by 2 minutes and 16:29 is therefore the actual departure time. If only the actual departure time (Option 3) is shown, the time will appear in red if there is a delay. Option 4 shows the remaining minutes (rounded down) until the actual departure. Option 5 also shows the remaining minutes (rounded down) and the delay in parentheses."
+    },
+    "frontend": {
+        "column_type"        : "Type",
+        "column_line"        : "Line",
+        "column_destination" : "Destination",
+        "column_track"       : "Track",
+        "column_departure"   : "Departure",
+        "cancelled"          : "Cancelled"
+    },
     "config": {
         "error": {
             "station_not_found": "The specified station was not found. Please check the name and try again."
@@ -9,23 +26,24 @@
                     "advanced_options": {
                        "name": "Advanced Options",
                        "data": {
-                          "hidename": "Hide the name of the card (incl. clock)",
-                          "show_clock": "Show a clock on the top right",
                           "increased_limit": "Increased Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Timezone From",
                           "timezone_to": "Timezone To",
                           "alert_for": "Alert Attributes For",
-                          "stats_template": "Content of the status variable"
+                          "stats_template": "Content of the status variable",
+                          "css_code": "Custom CSS Code",  
+                          "css_code_darkmode_only": "Use only in 'Dark Mode'."  
                        },
                        "data_description": {
-                          "hidename": "If you don't want to see the name of the card, enable this option.",
                           "increased_limit": "This option is intended to correct missing entries after midnight if many filters are used. Use this option only if fewer entries than desired are displayed in the evening. Adjust slowly in steps of 10, as this option can lead to unnecessary additional API requests.",
                           "globalid2": "If you have two stations close to each other (or far apart), such as a train station and a bus stop, you can combine them into a single card. Note that you must select the transportation types for both stations. Using this feature may lead to issues, as it triggers two API calls within one second, and it’s possible that the API may block the second call. If you use this option for only one card, it should not be a problem, but using it for more cards increases the risk of the API blocking the request. If you do not know the Global ID 2, you can later select it under **'CONFIGURE'** using the option **'Additional Station (Global ID 2) - search and save'**. Alternatively, you can find the Global ID for your station here: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Simply replace the name in the query. You need to enter the Global ID in the format **de:09162:2**.",
                           "timezone_from": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "timezone_to": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "alert_for": "If you want to create additional attributes for certain lines, like S3, S4, and S20, you can configure them as a comma-separated list. For more information, refer to the documentation.",
-                          "stats_template": "Here you can define the value of the status variable. The following variables are available (multiple can be combined). Scheduled departure: ```'{planned_departure}'```, Expected departure: ```'{expected_departure}'```, Track: ```'{track}'```, Transport type: ```'{transport_type}'```, Line: ```'{label}'```, Destination: ```'{destination}'```, Delay: ```'{delay}'``` (in minutes), Train type: ```'{trainType}'``` (for trains, excluding RB and RE), Cancellation: ```'{cancelled}'```, Scheduled departure time: ```'{plannedDepartureTime}'``` (timestamp), Real departure time: ```'{realtimeDepartureTime}'``` (timestamp), Difference to real departure time: ```'{realtime_departure_diff_minutes}'``` (in minutes), Rounded difference to real departure time: ```'{minutes_difference}'``` (in minutes). If you want a preformatted text in the form of a station announcement (in German), enter ```'{announcement}'```. For the English version, enter ```'{announcementEN}'```."
+                          "stats_template": "Here you can define the value of the status variable. The following variables are available (multiple can be combined). Scheduled departure: ```'{planned_departure}'```, Expected departure: ```'{expected_departure}'```, Track: ```'{track}'```, Transport type: ```'{transport_type}'```, Line: ```'{label}'```, Destination: ```'{destination}'```, Delay: ```'{delay}'``` (in minutes), Train type: ```'{trainType}'``` (for trains, excluding RB and RE), Cancellation: ```'{cancelled}'```, Scheduled departure time: ```'{plannedDepartureTime}'``` (timestamp), Real departure time: ```'{realtimeDepartureTime}'``` (timestamp), Difference to real departure time: ```'{realtime_departure_diff_minutes}'``` (in minutes), Rounded difference to real departure time: ```'{minutes_difference}'``` (in minutes). If you want a preformatted text in the form of a station announcement (in German), enter ```'{announcement}'```. For the English version, enter ```'{announcementEN}'```.",
+                          "css_code": "Here you can customize the design of the AnotherMVG card by overriding CSS rules for specific areas. Important: The entire code must be written in a single line, as Home Assistant does not support multi-line inputs!",  
+                          "css_code_darkmode_only": "Use the above CSS code only when 'Dark Mode' is enabled."  
                         }
                      },
                     "filter_options": {
@@ -40,7 +58,20 @@
                           "hidedestination": "If you want to hide certain directions/destinations, you must enter the EXACT names of the unwanted destinations as they appear on the connection display (card). The names should be separated by **semicolons**. Example: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
                           "onlydestination": "If you want to see only specific directions/destinations, you must enter the EXACT names of the desired destinations as they appear on the connection display (card). The names should be separated by **semicolons**. Example: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
                         }
-                     }
+                     },
+                     "proxy_options": {  
+                        "name": "PHP 'Proxy' Settings",  
+                        "data": {  
+                            "proxy_url": "URL",  
+                            "proxy_usetime": "Activation Duration (in seconds)",  
+                            "force_proxy": "Force Proxy"  
+                        },  
+                        "data_description": {  
+                            "proxy_url": "URL to the PHP file (without additional parameters) that should handle the request. The system will automatically append `?urlToOpen=` followed by the target page. A template is available on GitHub: https://github.com/Nisbo/another_mvg/blob/main/mvg.php Leave this field empty to disable this function.",  
+                            "proxy_usetime": "Time in seconds for how long the proxy should remain active after a request without a proxy has failed.",  
+                            "force_proxy": "Always use the PHP 'Proxy' (URL) specified above."  
+                        }  
+                    }
                 },
                 "title": "Configure Another MVG",
                 "description": "Please provide the required information to set up the Another MVG integration.",
@@ -48,7 +79,6 @@
                     "globalid": "Global ID",
                     "name": "Name of the Card",
                     "limit": "Number of departures",
-                    "departure_format": "Formatting of the departure time",
                     "transporttypes": "Transport Types",
                     "sort_by_real_departure": "Sort by the actual departure time (instead of the scheduled departure time).",
                     "offset_in_minutes": "Offset in Minutes",
@@ -58,7 +88,6 @@
                     "globalid": "Select your station / stop from the list above.",
                     "name": "Name to display in the Card.",
                     "limit": "By default, you will see 6 departures. If you want to see more or fewer, you can configure this setting. The API will retrieve a maximum of 80 departures. If you use filters like 'hidedestination' and it filters out 40 entries, you will only see the remaining 40 as the maximum.",
-                    "departure_format": "In the example, 16:27 is the scheduled departure time, the train has a delay of 2 minutes, and 16:29 is the current departure time. If only the current departure time (Option 3) is displayed, the time will be shown in red if there is a delay.",
                     "transporttypes": "Select the Transport Types you want to see in the card. You can also enter **'BAHN'** (and press **'ENTER'**) to additionally see departures for regular trains. However, this feature is not yet fully supported.",
                     "offset_in_minutes": "Enter the number of minutes here to adjust the displayed departure times. For example, if you enter 10 minutes, only departures that are at least 10 minutes in the future will be shown. This is useful for viewing connections you can reach on foot in time.",
                     "station_name": "Enter the name of the station you want to search for."
@@ -92,23 +121,24 @@
                     "advanced_options": {
                        "name": "Advanced Options",
                        "data": {
-                          "hidename": "Hide the name of the card (incl. clock)",
-                          "show_clock": "Show a clock on the top right",
                           "increased_limit": "Increased Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Timezone From",
                           "timezone_to": "Timezone To",
                           "alert_for": "Alert Attributes For",
-                          "stats_template": "Content of the status variable"
+                          "stats_template": "Content of the status variable",
+                          "css_code": "Custom CSS Code",  
+                          "css_code_darkmode_only": "Use only in 'Dark Mode'."  
                        },
                        "data_description": {
-                          "hidename": "If you don't want to see the name of the card, enable this option.",
                           "increased_limit": "This option is intended to correct missing entries after midnight if many filters are used. Use this option only if fewer entries than desired are displayed in the evening. Adjust slowly in steps of 10, as this option can lead to unnecessary additional API requests.",
                           "globalid2": "If you have two stations close to each other (or far apart), such as a train station and a bus stop, you can combine them into a single card. Note that you must select the transportation modes for both stations. Using this feature may lead to issues, as it triggers two API calls within one second, and it’s possible that the API may block the second call. If you use this option for only one card, it should not be a problem, but using it for more cards increases the risk of the API blocking the request. If you wish to change the Global ID 2 and do not know the ID, close this input form and select the option **'Additional Station (Global ID 2) - search and save'** under **'CONFIGURE'**. Alternatively, you can find the Global ID for your station here: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Simply replace the name in the query. You need to enter the Global ID in the format **de:09162:2**.",
                           "timezone_from": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "timezone_to": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "alert_for": "If you want to create additional attributes for certain lines, like S3, S4, and S20, you can configure them as a comma-separated list. For more information, refer to the documentation.",
-                          "stats_template": "Here you can define the value of the status variable. The following variables are available (multiple can be combined). Scheduled departure: ```'{planned_departure}'```, Expected departure: ```'{expected_departure}'```, Track: ```'{track}'```, Transport type: ```'{transport_type}'```, Line: ```'{label}'```, Destination: ```'{destination}'```, Delay: ```'{delay}'``` (in minutes), Train type: ```'{trainType}'``` (for trains, excluding RB and RE), Cancellation: ```'{cancelled}'```, Scheduled departure time: ```'{plannedDepartureTime}'``` (timestamp), Real departure time: ```'{realtimeDepartureTime}'``` (timestamp), Difference to real departure time: ```'{realtime_departure_diff_minutes}'``` (in minutes), Rounded difference to real departure time: ```'{minutes_difference}'``` (in minutes). If you want a preformatted text in the form of a station announcement (in German), enter ```'{announcement}'```. For the English version, enter ```'{announcementEN}'```."
+                          "stats_template": "Here you can define the value of the status variable. The following variables are available (multiple can be combined). Scheduled departure: ```'{planned_departure}'```, Expected departure: ```'{expected_departure}'```, Track: ```'{track}'```, Transport type: ```'{transport_type}'```, Line: ```'{label}'```, Destination: ```'{destination}'```, Delay: ```'{delay}'``` (in minutes), Train type: ```'{trainType}'``` (for trains, excluding RB and RE), Cancellation: ```'{cancelled}'```, Scheduled departure time: ```'{plannedDepartureTime}'``` (timestamp), Real departure time: ```'{realtimeDepartureTime}'``` (timestamp), Difference to real departure time: ```'{realtime_departure_diff_minutes}'``` (in minutes), Rounded difference to real departure time: ```'{minutes_difference}'``` (in minutes). If you want a preformatted text in the form of a station announcement (in German), enter ```'{announcement}'```. For the English version, enter ```'{announcementEN}'```.",
+                          "css_code": "Here you can customize the design of the AnotherMVG card by overriding CSS rules for specific areas. Important: The entire code must be written in a single line, as Home Assistant does not support multi-line inputs!",  
+                          "css_code_darkmode_only": "Use the above CSS code only when 'Dark Mode' is enabled."  
                         }
                      },
                     "filter_options": {
@@ -123,14 +153,26 @@
                           "hidedestination": "If you want to hide certain directions/destinations, you must enter the EXACT names of the unwanted destinations as they appear on the connection display (card). The names should be separated by **semicolons**. Example: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
                           "onlydestination": "If you want to see only specific directions/destinations, you must enter the EXACT names of the desired destinations as they appear on the connection display (card). The names should be separated by **semicolons**. Example: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
                         }
-                     }
+                     },
+                     "proxy_options": {  
+                        "name": "PHP 'Proxy' Settings",  
+                        "data": {  
+                            "proxy_url": "URL",  
+                            "proxy_usetime": "Activation Duration (in seconds)",  
+                            "force_proxy": "Force Proxy"  
+                        },  
+                        "data_description": {  
+                            "proxy_url": "URL to the PHP file (without additional parameters) that should handle the request. The system will automatically append `?urlToOpen=` followed by the target page. A template is available on GitHub: https://github.com/Nisbo/another_mvg/blob/main/mvg.php Leave this field empty to disable this function.",  
+                            "proxy_usetime": "Time in seconds for how long the proxy should remain active after a request without a proxy has failed.",  
+                            "force_proxy": "Always use the PHP 'Proxy' (URL) specified above."  
+                        }  
+                    }
                 },
                 "title": "Edit Options for Another MVG",
                 "data": {
                     "globalid": "Global ID",
                     "name": "Name of the Card",
                     "limit": "Number of departures",
-                    "departure_format": "Formatting of the departure time",
                     "transporttypes": "Transport Types",
                     "sort_by_real_departure": "Sort by the actual departure time (instead of the scheduled departure time).",
                     "offset_in_minutes": "Offset in Minutes"
@@ -139,7 +181,6 @@
                     "globalid": "The station identifier for the stop/station/location. This entry is usually created automatically during the initial setup and is **NOT** the station name! If you wish to change this entry and don’t know the ID, close this input form and select the option **'Station (Global ID 1) - search and save'** under **'CONFIGURE.'** Alternatively, you can find the Global ID for your station here: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Simply replace the name in the query.",
                     "name": "Name to display in the Card.",
                     "limit": "By default, you will see 6 departures. If you want to see more or fewer, you can configure this setting. The API will retrieve a maximum of 80 departures. If you use filters like 'hidedestination' and it filters out 40 entries, you will only see the remaining 40 as the maximum.",
-                    "departure_format": "In the example, 16:27 is the scheduled departure time, the train has a delay of 2 minutes, and 16:29 is the current departure time. If only the current departure time (Option 3) is displayed, the time will be shown in red if there is a delay.",
                     "transporttypes": "Select the Transport Types you want to see in the card. You can also enter **'BAHN'** (and press **'ENTER'**) to additionally see departures for regular trains. However, this feature is not yet fully supported.",
                     "offset_in_minutes": "Enter the number of minutes here to adjust the displayed departure times. For example, if you enter 10 minutes, only departures that are at least 10 minutes in the future will be shown. This is useful for viewing connections you can reach on foot in time."
                 }
