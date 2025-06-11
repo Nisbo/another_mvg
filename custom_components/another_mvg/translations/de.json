@@ -1,32 +1,52 @@
 {
+    "cardeditor": {
+        "station_desc"           : "Bitte wähle eine Haltestelle aus der Liste aus.<br /><br />Wenn keine Einträge angezeigt werden, hast Du noch keine Haltestelle erstellt, alle Haltestellen wurden gelöscht/deaktiviert oder Du hast vor weniger als 1 Minute eine Änderung an der Haltestelle durchgeführt.<br /><br />Um eine Haltestelle zu erstellen, klicke auf:<br />'<b>Einstellungen</b>' &rarr; '<b>Geräte & Dienste</b>' &rarr; '<b>INTEGRATION HINZUFÜGEN</b>', suche nach '<b>Another MVG</b>' und folge den Anweisungen.",
+        "show_clock"             : "Uhr oben rechts anzeigen",
+        "hidename"               : "Den Namen der Karte (inkl. Uhr) ausblenden",
+        "hide_track"             : "Gleis ausblenden",
+        "show_type"              : "Verkehrsmittel anzeigen",
+        "departure_options"      : "Anzeigeoptionen für die Spalte 'Abfahrt'",
+        "departure_options_desc" : "Im Beispiel ist es 16:22 und 16:27 ist die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist somit die aktuelle Abfahrtszeit. Wird nur die aktuelle Abfahrtszeit (Option 3) angezeigt, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt. Option 4 zeigt die verbleibenden Minuten (abgerundet) bis zur aktuellen Abfahrt. Option 5 zeigt ebenfalls die verbleibenden Minuten (abgerundet) und zusätzlich die Verspätung in Klammern."
+    },
+    "frontend": {
+        "column_type"        : "Typ",
+        "column_line"        : "Linie",
+        "column_destination" : "Ziel",
+        "column_track"       : "Gleis",
+        "column_departure"   : "Abfahrt",
+        "cancelled"          : "Entfällt"
+    },
     "config": {
         "error": {
-            "station_not_found": "Die angegebene Station wurde nicht gefunden. Bitte überprüfen Sie den Namen und versuchen Sie es erneut."
+            "station_not_found": "Die angegebene Station wurde nicht gefunden. Bitte überprüfe den Namen und versuche es erneut."
         },
         "step": {
             "user": {
-	    	"sections": {
+            "sections": {
                     "advanced_options": {
                        "name": "Erweiterte Einstellungen",
                        "data": {
-                          "hidename": "Den Namen der Karte (inkl. Uhr) ausblenden",
-			  "show_clock": "Uhr oben rechts anzeigen",
-			  "increased_limit": "Erweitertes Limit",
+                          "increased_limit": "Erweitertes Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Zeitzone von",
                           "timezone_to": "Zeitzone nach",
-                          "alert_for": "Alarmattribute für"
+                          "alert_for": "Alarmattribute für",
+                          "stats_template": "Inhalt der Statusvariabel",
+                          "css_code": "Eigener CSS Code",
+                          "css_code_darkmode_only": "Nur im 'Dark Mode' nutzen."
                        },
                        "data_description": {
-                          "hidename": "Wenn Sie den Namen der Karte nicht sehen möchten, aktivieren Sie diese Option.",
-                          "increased_limit": "Diese Option dient dazu, fehlende Einträge nach Mitternacht zu korrigieren, falls viele Filter verwendet werden. Nutzen Sie diese Option nur, wenn abends weniger Einträge als gewünscht angezeigt werden. Tasten Sie sich langsam in 10er-Schritten vor, da diese Option zu unnötigen zusätzlichen API-Abfragen führen kann.",
-                          "globalid2": "Wenn Sie zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, können Sie beide in einer Karte kombinieren. Beachten Sie, dass Sie die Transportarten für beide Stationen auswählen müssen. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe gibt, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Sie diese Option nur für eine Karte verwenden, sollte es kein Problem sein, aber wenn Sie es für mehr verwenden, steigt das Risiko, dass die API die Anfrage blockiert. Wenn Sie die Global ID 2 nicht kennen, können Sie diese später unter **'KONFIGURIEREN'** über die Option **'Zusätzliche Station (Global ID 2) - suchen und speichern'** auswählen. Alternativ können Sie die Global ID für Ihre Station auch hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie dafür einfach den Namen in der Abfrage. Sie müssen die Global ID im Format **de:09162:2** eingeben.",
-                          "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                          "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                          "alert_for": "Wenn Sie zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchten, können Sie sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schauen Sie bitte in die Dokumentation."
+                          "increased_limit": "Diese Option dient dazu, fehlende Einträge nach Mitternacht zu korrigieren, falls viele Filter verwendet werden. Nutze diese Option nur, wenn abends weniger Einträge als gewünscht angezeigt werden. Taste Dich langsam in 10er-Schritten vor, da diese Option zu unnötigen zusätzlichen API-Abfragen führen kann.",
+                          "globalid2": "Wenn Du zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, Kannst Du beide in einer Karte kombinieren. Beachte, dass Du die Transportarten für beide Stationen auswählen musst. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe gibt, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Du diese Option nur für eine Karte verwendest, sollte es kein Problem sein, aber wenn Du es für mehr verwendest, steigt das Risiko, dass die API die Anfrage blockiert. Wenn Du die Global ID 2 nicht kennst, kannst Du diese später unter **'KONFIGURIEREN'** über die Option **'Zusätzliche Station (Global ID 2) - suchen und speichern'** auswählen. Alternativ kannst Du die Global ID für Deine Station auch hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetze dafür einfach den Namen in der Abfrage. Du musst die Global ID im Format **de:09162:2** eingeben.",
+                          "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Dein Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Du möchtest die Abfahrten in einer anderen Zeitzone sehen. Gebe die Zeitzone im Format wie Europe/Berlin oder UTC ein. Das Feld darf nicht leer sein.",
+                          "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Dein Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Du möchtest die Abfahrten in einer anderen Zeitzone sehen. Gebe die Zeitzone im Format wie Europe/Berlin oder UTC ein. Das Feld darf nicht leer sein.",
+                          "alert_for": "Wenn Du zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchtest, kannst Du sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schaue bitte in die Dokumentation.",
+                          "stats_template": "Hier kannst Du den Wert der Statusvariabel bestimmen. Dir stehen die folgenden Variabeln zur Verfügung (Mehrere zusammen sind möglich). Geplante Abfahrt: ```'{planned_departure}'```, Erwartete Abfahrt: ```'{expected_departure}'```, Gleis: ```'{track}'```, Transportmittel: ```'{transport_type}'```, Linie: ```'{label}'```, Ziel ```'{destination}'```, Verspätung: ```'{delay}'``` (in Minuten), Zugtyp: ```'{trainType}'``` (bei Bahn, außer RB und RE), Stornierung: ```'{cancelled}'```, Geplante Abfahrtszeit: ```'{plannedDepartureTime}'``` (Timestamp), Reale Abfahrtszeit: ```'{realtimeDepartureTime}'``` (Timestamp), Differenz zur realen Abfahrtszeit: ```'{realtime_departure_diff_minutes}'``` (in Minuten), Differenz zur realen Abfahrtszeit gerundet: ```'{minutes_difference}'``` (in Minuten). Wenn Du einen vorgefertigten Text in Form einer Bahnhofsdurchsage (in deutsch) wünschst, dann trage hier ```'{announcement}'``` ein. Für die englische Version trage ```'{announcementEN}'``` ein.",
+                          "css_code": "Hier kannst Du das Design der AnotherMVG-Karte individuell anpassen, indem Du CSS-Regeln für bestimmte Bereiche überschreibst. Wichtig: Der gesamte Code muss in einer einzigen Zeile stehen, da mehrzeilige Eingaben von Home Assistant leider nicht unterstützt werden!",
+                          "css_code_darkmode_only": "Den obenstehenden CSS Code nur bei aktiven 'Dark Mode' nutzen."
                         }
                      },
-		     "filter_options": {
+                    "filter_options": {
                        "name": "Filter für Linien und Ziele",
                        "data": {
                           "onlyline": "Nur diese Linien",
@@ -34,39 +54,53 @@
                           "onlydestination": "Nur diese Ziele"
                        },
                        "data_description": {
-                          "onlyline": "Wenn Sie nur bestimmte Linien sehen möchten, wie S3, S4 und S20, können Sie sie als kommagetrennte Liste konfigurieren. Beispiel: ```S3,S4,S20```",
-                          "hidedestination": "Wenn Sie bestimmte Richtungen/Ziele ausblenden möchten, müssen Sie die **GENAUEN** Namen der unerwünschten Ziele eingeben, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
-                          "onlydestination": "Wenn Sie nur bestimmte Richtungen/Ziele sehen möchten, müssen Sie die GENAUEN Namen der gewünschten Ziele eingeben, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen müssen durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
+                          "onlyline": "Wenn Du nur bestimmte Linien sehen möchtest, wie S3, S4 und S20, kannst Du sie als kommagetrennte Liste konfigurieren. Beispiel: ```S3,S4,S20```",
+                          "hidedestination": "Wenn Du bestimmte Richtungen/Ziele ausblenden möchtest, müssen die **GENAUEN** Namen der unerwünschten Ziele eingeben werden, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
+                          "onlydestination": "Wenn Du nur bestimmte Richtungen/Ziele sehen möchtest, müssen die GENAUEN Namen der gewünschten Ziele eingeben werden, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen müssen durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
+                        }
+                    },
+                    "proxy_options": {
+                       "name": "PHP 'Proxy' Einstellungen",
+                       "data": {
+                          "proxy_url": "URL",
+                          "proxy_usetime": "Aktivierungsdauer (in Sekunden)",
+                          "force_proxy": "Proxy erzwingen"
+                       },
+                       "data_description": {
+                          "proxy_url": "URL zur PHP Datei (ohne weitere Parameter), welche die Abfrage durchführen soll. Es wird an diese Datei automatisch ein ```?urlToOpen=``` und die aufzurufenden Seite angefügt. Eine Vorlage findest Du auf Github unter: https://github.com/Nisbo/another_mvg/blob/main/mvg.php Lass das Feld leer, um diese Funktion zu deaktivieren.",
+                          "proxy_usetime": "Zeit in Sekunden wie lange der Proxy aktiv sein soll, nachdem ein Aufruf ohne Proxy fehlgeschlagen ist.",
+                          "force_proxy": "Den obenstehenden PHP 'Proxy' (URL) immer benutzen."
                         }
                      }
                 },
                 "title": "Another MVG konfigurieren",
-                "description": "Bitte geben Sie die erforderlichen Informationen ein, um die Another MVG-Integration einzurichten.",
+                "description": "Bitte gib die erforderlichen Informationen ein, um Another MVG einzurichten.",
                 "data": {
                     "globalid": "Global ID",
                     "name": "Name der Karte",
                     "limit": "Anzahl der Abfahrten",
-                    "departure_format": "Formatierung der Abfahrtzeit",
                     "transporttypes": "Transportarten",
+                    "sort_by_real_departure": "Nach der tatsächlichen Abfahrtszeit sortieren (anstatt nach der geplanten Abfahrtszeit).",
+                    "offset_in_minutes": "Zeitversatz in Minuten",
                     "station_name": "Stationsname"
                 },
                 "data_description": {
-                    "globalid": "Wählen Sie Ihre Station / Haltestelle aus der obigen Liste aus.",
+                    "globalid": "Wähle Deine Station / Haltestelle aus der obigen Liste aus.",
                     "name": "Der Name, der in der Karte angezeigt werden soll.",
-                    "limit": "Standardmäßig sehen Sie 6 Abfahrten. Wenn Sie mehr oder weniger sehen möchten, können Sie diese Einstellung konfigurieren. Die API ruft maximal 80 Abfahrten ab. Wenn Sie Filter wie 'hidedestination' verwenden und 40 Einträge herausgefiltert werden, sehen Sie maximal die verbleibenden 40.",
-                    "departure_format": "In dem Beispiel ist 16:27 die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist die aktuelle Abfahrtszeit. Sollte nur die aktuelle Abfahrtszeit (Option 3) angezeigt werden, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt.",
-                    "transporttypes": "Wählen Sie die Transportarten aus, die Sie in der Karte sehen möchten. Sie können auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich die Abfahrten der normalen Züge zu sehen. Diese Funktion wird aber noch nicht zu 100% unterstützt.",
-                    "station_name": "Geben Sie den Namen der Station ein, nach der Sie suchen möchten."
+                    "limit": "Standardmäßig siehst Du 6 Abfahrten. Wenn Du mehr oder weniger sehen möchtest, kannst Du dies hier einstellen. Die API ruft maximal 80 Abfahrten ab. Wenn Du Filter wie 'hidedestination' verwendest und 40 Einträge herausgefiltert werden, siehst Du maximal die verbleibenden 40.",
+                    "transporttypes": "Wähle die Transportarten aus, die Du in der Karte sehen möchtest. Du kannst auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich die Abfahrten der normalen Züge zu sehen. Diese Funktion wird aber noch nicht zu 100% unterstützt.",
+                    "offset_in_minutes": "Trage hier die Minuten ein, um die angezeigten Abfahrten zu korrigieren. Zum Beispiel: Wenn Du 10 Minuten eingibst, werden nur Abfahrten angezeigt, die mindestens 10 Minuten in der Zukunft liegen. Dies ist nützlich, um nur die Verbindungen zu sehen, die Du rechtzeitig zu Fuß erreichen kannst.",
+                    "station_name": "Gib den Namen der Station ein, nach der Du suchen möchtest."
                 }
             },
             "station_search": {
-                "title": "Suchen Sie nach Ihrer Station / Haltestelle",
-                "description": "Bitte geben Sie die notwendigen Informationen ein, um die Another MVG-Integration einzurichten.",
+                "title": "Suche nach Deiner Station / Haltestelle",
+                "description": "Bitte gib die notwendigen Informationen ein, um Another MVG einzurichten.",
                 "data": {
                     "station_name": "Stationsname"
                 },
                 "data_description": {
-                    "station_name": "Geben Sie den Namen der Station ein, nach der Sie suchen möchten."
+                    "station_name": "Gib den Namen der Station ein, nach der Du suchen möchtest."
                 }
             }
         }
@@ -75,7 +109,7 @@
         "step": {
             "init": {
                "title": "Bearbeiten und Suchen",
-                "description": "Wählen Sie aus, ob Sie den Eintrag bearbeiten oder nach einer Station (Global ID) für diesen Eintrag suchen möchten. Die Zusätzliche Station ist optional und integriert deren Abfahrzeiten in die selbe Karte/Anzeige.",
+                "description": "Wähle aus, ob Du den Eintrag bearbeiten oder nach einer Station (Global ID) für diesen Eintrag suchen möchtest. Die Zusätzliche Station ist optional und integriert deren Abfahrzeiten in die selbe Karte/Anzeige.",
                 "menu_options": {
                     "edit": "Eintrag bearbeiten",
                     "globalid1search": "Station (Global ID 1) - suchen und speichern",
@@ -83,28 +117,31 @@
                 }
             },
             "edit": {
-	    	"sections": {
+            "sections": {
                     "advanced_options": {
                        "name": "Erweiterte Einstellungen",
                        "data": {
-                          "hidename": "Den Namen der Karte (inkl. Uhr) ausblenden",
-			  "show_clock": "Uhr oben rechts anzeigen",
-			  "increased_limit": "Erweitertes Limit",
+                          "increased_limit": "Erweitertes Limit",
                           "globalid2": "Global ID 2",
                           "timezone_from": "Zeitzone von",
                           "timezone_to": "Zeitzone nach",
-                          "alert_for": "Alarmattribute für"
+                          "alert_for": "Alarmattribute für",
+                          "stats_template": "Inhalt der Statusvariabel",
+                          "css_code": "Eigener CSS Code",
+                          "css_code_darkmode_only": "Nur im 'Dark Mode' nutzen."
                        },
                        "data_description": {
-                          "hidename": "Wenn Sie den Namen der Karte nicht sehen möchten, aktivieren Sie diese Option.",
-                          "increased_limit": "Diese Option dient dazu, fehlende Einträge nach Mitternacht zu korrigieren, falls viele Filter verwendet werden. Nutzen Sie diese Option nur, wenn abends weniger Einträge als gewünscht angezeigt werden. Tasten Sie sich langsam in 10er-Schritten vor, da diese Option zu unnötigen zusätzlichen API-Abfragen führen kann.",
-                          "globalid2": "Wenn Sie zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, können Sie beide in einer Karte kombinieren. Beachten Sie, dass Sie die Transportarten für beide Stationen auswählen müssen. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe gibt, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Sie diese Option nur für eine Karte verwenden, sollte es kein Problem sein, aber wenn Sie es für mehr verwenden, steigt das Risiko, dass die API die Anfrage blockiert. Wenn Sie die Global ID 2 ändern möchten und die ID nicht kennen, schließen Sie diese Eingabemaske und wählen Sie unter **'KONFIGURIEREN'** die Option **'Zusätzliche Station (Global ID 2) - suchen und speichern'** aus. Alternativ können Sie die Global ID für Ihre Station auch hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie dafür einfach den Namen in der Abfrage. Sie müssen die Global ID im Format **de:09162:2** eingeben.", 
-                          "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                          "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Ihr Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Sie möchten die Abfahrten in einer anderen Zeitzone sehen. Geben Sie die Zeitzone im Format wie Europe/Berlin oder UTC ein. Lassen Sie das Feld nicht leer.",
-                          "alert_for": "Wenn Sie zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchten, können Sie sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schauen Sie bitte in die Dokumentation."
+                          "increased_limit": "Diese Option dient dazu, fehlende Einträge nach Mitternacht zu korrigieren, falls viele Filter verwendet werden. Nutze diese Option nur, wenn abends weniger Einträge als gewünscht angezeigt werden. Taste Dich langsam in 10er-Schritten vor, da diese Option zu unnötigen zusätzlichen API-Abfragen führen kann.",
+                          "globalid2": "Wenn Du zwei Stationen nah beieinander (oder weit voneinander entfernt) haben, wie einen Bahnhof und eine Bushaltestelle, Kannst Du beide in einer Karte kombinieren. Beachte, dass Du die Transportarten für beide Stationen auswählen musst. Die Verwendung dieser Funktion kann zu Problemen führen, da es innerhalb einer Sekunde zwei API-Aufrufe gibt, und es ist möglich, dass die API den zweiten Aufruf blockiert. Wenn Du diese Option nur für eine Karte verwendest, sollte es kein Problem sein, aber wenn Du es für mehr verwendest, steigt das Risiko, dass die API die Anfrage blockiert. Wenn Du die Global ID 2 nicht kennst, kannst Du diese später unter **'KONFIGURIEREN'** über die Option **'Zusätzliche Station (Global ID 2) - suchen und speichern'** auswählen. Alternativ kannst Du die Global ID für Deine Station auch hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetze dafür einfach den Namen in der Abfrage. Du musst die Global ID im Format **de:09162:2** eingeben.",
+                          "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Dein Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Du möchtest die Abfahrten in einer anderen Zeitzone sehen. Gebe die Zeitzone im Format wie Europe/Berlin oder UTC ein. Das Feld darf nicht leer sein.",
+                          "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Dein Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Du möchtest die Abfahrten in einer anderen Zeitzone sehen. Gebe die Zeitzone im Format wie Europe/Berlin oder UTC ein. Das Feld darf nicht leer sein.",
+                          "alert_for": "Wenn Du zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchtest, kannst Du sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schaue bitte in die Dokumentation.",
+                          "stats_template": "Hier kannst Du den Wert der Statusvariabel bestimmen. Dir stehen die folgenden Variabeln zur Verfügung (Mehrere zusammen sind möglich). Geplante Abfahrt: ```'{planned_departure}'```, Erwartete Abfahrt: ```'{expected_departure}'```, Gleis: ```'{track}'```, Transportmittel: ```'{transport_type}'```, Linie: ```'{label}'```, Ziel ```'{destination}'```, Verspätung: ```'{delay}'``` (in Minuten), Zugtyp: ```'{trainType}'``` (bei Bahn, außer RB und RE), Stornierung: ```'{cancelled}'```, Geplante Abfahrtszeit: ```'{plannedDepartureTime}'``` (Timestamp), Reale Abfahrtszeit: ```'{realtimeDepartureTime}'``` (Timestamp), Differenz zur realen Abfahrtszeit: ```'{realtime_departure_diff_minutes}'``` (in Minuten), Differenz zur realen Abfahrtszeit gerundet: ```'{minutes_difference}'``` (in Minuten). Wenn Du einen vorgefertigten Text in Form einer Bahnhofsdurchsage (in deutsch) wünschst, dann trage hier ```'{announcement}'``` ein. Für die englische Version trage ```'{announcementEN}'``` ein.",
+                          "css_code": "Hier kannst Du das Design der AnotherMVG-Karte individuell anpassen, indem Du CSS-Regeln für bestimmte Bereiche überschreibst. Wichtig: Der gesamte Code muss in einer einzigen Zeile stehen, da mehrzeilige Eingaben von Home Assistant leider nicht unterstützt werden!",
+                          "css_code_darkmode_only": "Den obenstehenden CSS Code nur bei aktiven 'Dark Mode' nutzen."
                         }
                      },
-		     "filter_options": {
+                    "filter_options": {
                        "name": "Filter für Linien und Ziele",
                        "data": {
                           "onlyline": "Nur diese Linien",
@@ -112,9 +149,22 @@
                           "onlydestination": "Nur diese Ziele"
                        },
                        "data_description": {
-                          "onlyline": "Wenn Sie nur bestimmte Linien sehen möchten, wie S3, S4 und S20, können Sie sie als kommagetrennte Liste konfigurieren. Beispiel: ```S3,S4,S20```",
-                          "hidedestination": "Wenn Sie bestimmte Richtungen/Ziele ausblenden möchten, müssen Sie die **GENAUEN** Namen der unerwünschten Ziele eingeben, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
-                          "onlydestination": "Wenn Sie nur bestimmte Richtungen/Ziele sehen möchten, müssen Sie die **GENAUEN** Namen der gewünschten Ziele eingeben, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
+                          "onlyline": "Wenn Du nur bestimmte Linien sehen möchtest, wie S3, S4 und S20, kannst Du sie als kommagetrennte Liste konfigurieren. Beispiel: ```S3,S4,S20```",
+                          "hidedestination": "Wenn Du bestimmte Richtungen/Ziele ausblenden möchtest, müssen die **GENAUEN** Namen der unerwünschten Ziele eingeben werden, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
+                          "onlydestination": "Wenn Du nur bestimmte Richtungen/Ziele sehen möchtest, müssen die GENAUEN Namen der gewünschten Ziele eingeben werden, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen müssen durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
+                        }
+                     },
+                    "proxy_options": {
+                       "name": "PHP 'Proxy' Einstellungen",
+                       "data": {
+                          "proxy_url": "URL",
+                          "proxy_usetime": "Aktivierungsdauer (in Sekunden)",
+                          "force_proxy": "Proxy erzwingen"
+                       },
+                       "data_description": {
+                          "proxy_url": "URL zur PHP Datei (ohne weitere Parameter), welche die Abfrage durchführen soll. Es wird an diese Datei automatisch ein ```?urlToOpen=``` und die aufzurufenden Seite angefügt. Eine Vorlage findest Du auf Github unter: https://github.com/Nisbo/another_mvg/blob/main/mvg.php Lass das Feld leer, um diese Funktion zu deaktivieren.",
+                          "proxy_usetime": "Zeit in Sekunden wie lange der Proxy aktiv sein soll, nachdem ein Aufruf ohne Proxy fehlgeschlagen ist.",
+                          "force_proxy": "Den obenstehenden PHP 'Proxy' (URL) immer benutzen."
                         }
                      }
                 },
@@ -124,54 +174,56 @@
                     "name": "Name der Karte",
                     "limit": "Anzahl der Abfahrten",
                     "departure_format": "Formatierung der Abfahrtzeit",
-                    "transporttypes": "Transportarten"
+                    "transporttypes": "Transportarten",
+                    "sort_by_real_departure": "Nach der tatsächlichen Abfahrtszeit sortieren (anstatt nach der geplanten Abfahrtszeit).",
+                    "offset_in_minutes": "Zeitversatz in Minuten"
                 },
                 "data_description": {
-                    "globalid": "Die Stationskennung für die Haltestelle/Station/Ort. Dieser Eintrag wird normalerweise während der Erstkonfiguration automatisch erstellt und ist **NICHT** der Name der Station! Wenn Sie diesen Eintrag ändern möchten und die ID nicht kennen, schließen Sie diese Eingabemaske und wählen Sie unter **'KONFIGURIEREN'** die Option **'Station (Global ID 1) - suchen und speichern'** aus. Alternativ können Sie die Global ID für Ihre Station hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetzen Sie dafür einfach den Namen in der Abfrage.",
+                    "globalid": "Die Stationskennung für die Haltestelle/Station/Ort. Dieser Eintrag wird normalerweise während der Erstkonfiguration automatisch erstellt und ist **NICHT** der Name der Station! Wenn Du diesen Eintrag ändern möchtest und die ID nicht kennst, schließe diese Eingabemaske und wähle unter **'KONFIGURIEREN'** die Option **'Station (Global ID 1) - suchen und speichern'** aus. Alternativ kannst Du die Global ID für Deine Station hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetze dafür einfach den Namen in der Abfrage.",
                     "name": "Der Name, der in der Karte angezeigt werden soll.",
-                    "limit": "Standardmäßig sehen Sie 6 Abfahrten. Wenn Sie mehr oder weniger sehen möchten, können Sie diese Einstellung konfigurieren. Die API ruft maximal 80 Abfahrten ab. Wenn Sie Filter wie 'hidedestination' verwenden und 40 Einträge herausgefiltert werden, sehen Sie maximal die verbleibenden 40.",
-                    "departure_format": "In dem Beispiel ist 16:27 die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist die aktuelle Abfahrtszeit. Sollte nur die aktuelle Abfahrtszeit (Option 3) angezeigt werden, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt.",
-                    "transporttypes": "Wählen Sie die Transportarten aus, die Sie in der Karte sehen möchten. Sie können auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich die Abfahrten der normalen Züge zu sehen. Diese Funktion wird aber noch nicht zu 100% unterstützt."
+                    "limit": "Standardmäßig siehst Du 6 Abfahrten. Wenn Du mehr oder weniger sehen möchtest, kannst Du dies hier einstellen. Die API ruft maximal 80 Abfahrten ab. Wenn Du Filter wie 'hidedestination' verwendest und 40 Einträge herausgefiltert werden, siehst Du maximal die verbleibenden 40.",
+                    "transporttypes": "Wähle die Transportarten aus, die Du in der Karte sehen möchtest. Du kannst auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich die Abfahrten der normalen Züge zu sehen. Diese Funktion wird aber noch nicht zu 100% unterstützt.",
+                    "offset_in_minutes": "Trage hier die Minuten ein, um die angezeigten Abfahrten zu korrigieren. Zum Beispiel: Wenn Du 10 Minuten eingibst, werden nur Abfahrten angezeigt, die mindestens 10 Minuten in der Zukunft liegen. Dies ist nützlich, um nur die Verbindungen zu sehen, die Du rechtzeitig zu Fuß erreichen kannst."
                 }
             },
             "globalid2search": {
-                "title": "Suchen Sie nach Ihrer Station / Haltestelle für Global ID2",
-                "description": "Hier können Sie nach der Global ID2 suchen.",
+                "title": "Suche nach Deiner Station / Haltestelle für Global ID2",
+                "description": "Hier kannst Du nach der Global ID2 suchen.",
                 "data": {
                     "station_name": "Stationsname"
                 },
                 "data_description": {
-                    "station_name": "Geben Sie den Namen der Station ein, nach der Sie suchen möchten."
+                    "station_name": "Gib den Namen der Station ein, nach der Du suchen möchtest."
                 }
             },
-	    "globalid1search": {
+        "globalid1search": {
                 "title": "Suchen Sie nach Ihrer Station / Haltestelle für Global ID1",
-                "description": "Hier können Sie nach der Global ID1 suchen.",
+                "description": "Hier kannst Du nach der Global ID1 suchen.",
                 "data": {
                     "station_name": "Stationsname"
                 },
                 "data_description": {
-                    "station_name": "Geben Sie den Namen der Station ein, nach der Sie suchen möchten."
+                    "station_name": "Gib den Namen der Station ein, nach der Du suchen möchtest."
                 }
             },
             "globalid1save": {
-                "title": "Wählen Sie Ihrer Station / Haltestelle für Global ID1 aus",
+                "title": "Wähle Deine Station / Haltestelle für Global ID1 aus",
                 "description": "Gefundene Stationen / Haltestellen.",
                 "data": {
                     "globalid": "Global ID 1"
                 },
                 "data_description": {
-                    "globalid": "Wählen Sie Ihre Station / Haltestelle aus der obigen Liste aus."
+                    "globalid": "Wähle Deine Station / Haltestelle aus der obigen Liste aus."
                 }
             },
             "globalid2save": {
-                "title": "Wählen Sie Ihrer Station / Haltestelle für Global ID2 aus",
+                "title": "Wähle Deine Station / Haltestelle für Global ID2 aus",
                 "description": "Gefundene Stationen / Haltestellen.",
                 "data": {
                     "globalid2": "Global ID 2"
                 },
                 "data_description": {
-                    "globalid2": "Wählen Sie Ihre Station / Haltestelle aus der obigen Liste aus."
+                    "globalid2": "Wähle Deine Station / Haltestelle aus der obigen Liste aus."
                 }
             }
         }

@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.core import HomeAssistant
 from homeassistant.core import callback
-from homeassistant.helpers.selector import selector, SelectSelector, SelectSelectorConfig, SelectSelectorMode
+from homeassistant.helpers.selector import selector, SelectSelector, SelectSelectorConfig, SelectSelectorMode, ObjectSelector, ObjectSelectorConfig, TextSelector
 from homeassistant import data_entry_flow
 from typing import Any
 from homeassistant.const import CONF_NAME
@@ -21,26 +21,36 @@ from .const import (
     CONF_DOUBLESTATIONNUMBER, # this is deprecated, however we have to keep it in the code for the yaml import / convert to GUI
     CONF_TRANSPORTTYPES,
     CONF_GLOBALID2,
-    CONF_HIDENAME,
     CONF_TIMEZONE_FROM,
     CONF_TIMEZONE_TO,
     CONF_ALERT_FOR,
-    CONF_SHOW_CLOCK,
-    CONF_DEPARTURE_FORMAT,
+    CONF_STATS_TEMPLATE,
     CONF_INCREASED_LIMIT,
+    CONF_SORT_BY_REAL_DEPARTURE,
+    CONF_OFFSET_IN_MINUTES,
+    CONF_PROXY_URL,
+    CONF_PROXY_USETIME,
+    CONF_FORCE_PROXY,
+    CONF_CSS_CODE,
+    CONF_CSS_CODE_DARKMODE_ONLY,
     DEFAULT_ONLYLINE,
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
     DEFAULT_LIMIT,
     DEFAULT_CONF_TRANSPORTTYPES,
     DEFAULT_CONF_GLOBALID2,
-    DEFAULT_HIDENAME,
     DEFAULT_TIMEZONE_FROM,
     DEFAULT_TIMEZONE_TO,
     DEFAULT_ALERT_FOR,
-    DEFAULT_SHOW_CLOCK,
-    DEFAULT_DEPARTURE_FORMAT,
+    DEFAULT_STATS_TEMPLATE,
     DEFAULT_INCREASED_LIMIT,
+    DEFAULT_SORT_BY_REAL_DEPARTURE,
+    DEFAULT_OFFSET_IN_MINUTES,
+    DEFAULT_PROXY_URL,
+    DEFAULT_PROXY_USETIME,
+    DEFAULT_FORCE_PROXY,
+    DEFAULT_CSS_CODE,
+    DEFAULT_CSS_CODE_DARKMODE_ONLY,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -69,13 +79,18 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_DOUBLESTATIONNUMBER: import_data.get(CONF_DOUBLESTATIONNUMBER, ""),
                 CONF_TRANSPORTTYPES: import_data.get(CONF_TRANSPORTTYPES, DEFAULT_CONF_TRANSPORTTYPES).split(','),
                 CONF_GLOBALID2: import_data.get(CONF_GLOBALID2, DEFAULT_CONF_GLOBALID2),
-                CONF_HIDENAME: import_data.get(CONF_HIDENAME, DEFAULT_HIDENAME),
                 CONF_INCREASED_LIMIT: import_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT),
                 CONF_TIMEZONE_FROM: import_data.get(CONF_TIMEZONE_FROM, DEFAULT_TIMEZONE_FROM),
                 CONF_TIMEZONE_TO: import_data.get(CONF_TIMEZONE_TO, DEFAULT_TIMEZONE_TO),
                 CONF_ALERT_FOR: import_data.get(CONF_ALERT_FOR, DEFAULT_ALERT_FOR),
-                CONF_SHOW_CLOCK: import_data.get(CONF_SHOW_CLOCK, DEFAULT_SHOW_CLOCK),
-                CONF_DEPARTURE_FORMAT: import_data.get(CONF_DEPARTURE_FORMAT, DEFAULT_DEPARTURE_FORMAT),
+                CONF_STATS_TEMPLATE: import_data.get(CONF_STATS_TEMPLATE, DEFAULT_STATS_TEMPLATE),
+                CONF_SORT_BY_REAL_DEPARTURE: import_data.get(CONF_SORT_BY_REAL_DEPARTURE, DEFAULT_SORT_BY_REAL_DEPARTURE),
+                CONF_OFFSET_IN_MINUTES: import_data.get(CONF_OFFSET_IN_MINUTES, DEFAULT_OFFSET_IN_MINUTES),
+                CONF_PROXY_URL: import_data.get(CONF_PROXY_URL, DEFAULT_PROXY_URL),
+                CONF_PROXY_USETIME: import_data.get(CONF_PROXY_USETIME, DEFAULT_PROXY_USETIME),
+                CONF_FORCE_PROXY: import_data.get(CONF_FORCE_PROXY, DEFAULT_FORCE_PROXY),
+                CONF_CSS_CODE: import_data.get(CONF_CSS_CODE, DEFAULT_CSS_CODE),
+                CONF_CSS_CODE_DARKMODE_ONLY: import_data.get(CONF_CSS_CODE_DARKMODE_ONLY, DEFAULT_CSS_CODE_DARKMODE_ONLY),
             }
         )
 
@@ -110,18 +125,26 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # check advanced_options and filter_options
                 advanced_options = user_input.get("advanced_options", {})
                 filter_options   = user_input.get("filter_options", {})
+                proxy_options    = user_input.get("proxy_options", {})
                 unique_id = str(uuid.uuid4())  # Generate unique_id
                 #_LOGGER.warning("AnotherMVG: UUID prepared: %s", unique_id)
 
                 # and convert the input
                 # this is because the section function creates an dictionary and I dont want this
                 # I only want an optical "collapsing"
-                if CONF_SHOW_CLOCK in advanced_options:
-                    user_input[CONF_SHOW_CLOCK] = advanced_options[CONF_SHOW_CLOCK]
                     
                 if CONF_ALERT_FOR in advanced_options:
                     user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
-          
+                    
+                if CONF_STATS_TEMPLATE in advanced_options:
+                    user_input[CONF_STATS_TEMPLATE] = advanced_options[CONF_STATS_TEMPLATE]
+        
+                if CONF_CSS_CODE in advanced_options:
+                    user_input[CONF_CSS_CODE] = advanced_options[CONF_CSS_CODE]
+        
+                if CONF_CSS_CODE_DARKMODE_ONLY in advanced_options:
+                    user_input[CONF_CSS_CODE_DARKMODE_ONLY] = advanced_options[CONF_CSS_CODE_DARKMODE_ONLY]
+        
                 if CONF_TIMEZONE_FROM in advanced_options:
                     user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
         
@@ -131,8 +154,6 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if CONF_GLOBALID2 in advanced_options:
                     user_input[CONF_GLOBALID2] = advanced_options[CONF_GLOBALID2]
         
-                if CONF_HIDENAME in advanced_options:
-                    user_input[CONF_HIDENAME] = advanced_options[CONF_HIDENAME]
 
                 if CONF_INCREASED_LIMIT in advanced_options:
                     user_input[CONF_INCREASED_LIMIT] = advanced_options[CONF_INCREASED_LIMIT]
@@ -146,6 +167,16 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
                 if CONF_ONLYDESTINATION in filter_options:
                     user_input[CONF_ONLYDESTINATION] = filter_options[CONF_ONLYDESTINATION]
+
+
+                if CONF_PROXY_URL in proxy_options:
+                    user_input[CONF_PROXY_URL] = proxy_options[CONF_PROXY_URL]
+        
+                if CONF_PROXY_USETIME in proxy_options:
+                    user_input[CONF_PROXY_USETIME] = proxy_options[CONF_PROXY_USETIME]
+        
+                if CONF_FORCE_PROXY in proxy_options:
+                    user_input[CONF_FORCE_PROXY] = proxy_options[CONF_FORCE_PROXY]
 
 
                 if CONF_TRANSPORTTYPES in user_input:
@@ -241,28 +272,17 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             }),
             vol.Optional(CONF_LIMIT,               default=DEFAULT_LIMIT): int,
+            vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, default=DEFAULT_SORT_BY_REAL_DEPARTURE): bool,
+            vol.Optional(CONF_OFFSET_IN_MINUTES, default=DEFAULT_OFFSET_IN_MINUTES): int,
 
-			vol.Required(CONF_DEPARTURE_FORMAT, default=DEFAULT_DEPARTURE_FORMAT): SelectSelector(
-                SelectSelectorConfig(
-                    options = [
-                        {"label": "16:27 +2 (16:29)", 
-						 "value": "1"},
-                        {"label": "16:27 +2", 
-						 "value": "2"},
-                        {"label": "16:29", 
-						 "value": "3"}
-                    ], mode = SelectSelectorMode.DROPDOWN,
-                )
-            ),
-
-			# Filter
+            # Filter
             vol.Required("filter_options"): data_entry_flow.section(
                 vol.Schema(
-				    {
+                    {
                         vol.Optional(CONF_ONLYLINE,            default=DEFAULT_ONLYLINE): str,
                         vol.Optional(CONF_HIDEDESTINATION,     default=DEFAULT_HIDEDESTINATION): str,
                         vol.Optional(CONF_ONLYDESTINATION,     default=DEFAULT_ONLYDESTINATION): str,
-					}
+                    }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
                 {"collapsed": True},
@@ -270,15 +290,29 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Advanced Options
             vol.Required("advanced_options"): data_entry_flow.section(
                 vol.Schema(
-				    {
-                        vol.Optional(CONF_SHOW_CLOCK,          default=DEFAULT_SHOW_CLOCK): bool,
-                        vol.Optional(CONF_HIDENAME,            default=DEFAULT_HIDENAME): bool,
+                    {
                         vol.Optional(CONF_INCREASED_LIMIT,     default=DEFAULT_INCREASED_LIMIT): int,
                         vol.Optional(CONF_GLOBALID2,           default=DEFAULT_CONF_GLOBALID2): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       default=DEFAULT_TIMEZONE_FROM): str,
                         vol.Optional(CONF_TIMEZONE_TO,         default=DEFAULT_TIMEZONE_TO): str,
                         vol.Optional(CONF_ALERT_FOR,           default=DEFAULT_ALERT_FOR): str,
-					}
+                        #vol.Optional(CONF_STATS_TEMPLATE,      default=DEFAULT_STATS_TEMPLATE): str,
+                        vol.Optional(CONF_STATS_TEMPLATE,      default=DEFAULT_STATS_TEMPLATE): TextSelector({"type": "text", "multiline": True}),
+                        vol.Optional(CONF_CSS_CODE,            default=DEFAULT_CSS_CODE): TextSelector({"type": "text", "multiline": True}),
+                        vol.Optional(CONF_CSS_CODE_DARKMODE_ONLY, default=DEFAULT_CSS_CODE_DARKMODE_ONLY): bool,
+                    }
+                ),
+                # Whether or not the section is initially collapsed (default = False)
+                {"collapsed": True},
+            ),
+            # Proxy
+            vol.Required("proxy_options"): data_entry_flow.section(
+                vol.Schema(
+                    {
+                        vol.Optional(CONF_PROXY_URL,            default=DEFAULT_PROXY_URL): str,
+                        vol.Required(CONF_PROXY_USETIME,        default=DEFAULT_PROXY_USETIME): int,
+                        vol.Optional(CONF_FORCE_PROXY,          default=DEFAULT_FORCE_PROXY): bool,
+                    }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
                 {"collapsed": True},
@@ -454,16 +488,23 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             # check advanced_options and filter_options
             advanced_options = user_input.get("advanced_options", {})
             filter_options   = user_input.get("filter_options", {})
+            proxy_options    = user_input.get("proxy_options", {})
         
             # and convert the input
-			# this is because the section function creates an dictionary and I dont want this
-			# I only want an optical "collapsing"
-            if CONF_SHOW_CLOCK in advanced_options:
-                user_input[CONF_SHOW_CLOCK] = advanced_options[CONF_SHOW_CLOCK]
-                
+            # this is because the section function creates a dictionary and I dont want this
+            # I only want an optical "collapsing"
             if CONF_ALERT_FOR in advanced_options:
                 user_input[CONF_ALERT_FOR] = advanced_options[CONF_ALERT_FOR]
-          
+            
+            if CONF_STATS_TEMPLATE in advanced_options:
+                user_input[CONF_STATS_TEMPLATE] = advanced_options[CONF_STATS_TEMPLATE]
+                
+            if CONF_CSS_CODE in advanced_options:
+                user_input[CONF_CSS_CODE] = advanced_options[CONF_CSS_CODE]               
+            
+            if CONF_CSS_CODE_DARKMODE_ONLY in advanced_options:
+                user_input[CONF_CSS_CODE_DARKMODE_ONLY] = advanced_options[CONF_CSS_CODE_DARKMODE_ONLY]
+            
             if CONF_TIMEZONE_FROM in advanced_options:
                 user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
         
@@ -472,13 +513,9 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         
             if CONF_GLOBALID2 in advanced_options:
                 user_input[CONF_GLOBALID2] = advanced_options[CONF_GLOBALID2]
-        
-            if CONF_HIDENAME in advanced_options:
-                user_input[CONF_HIDENAME] = advanced_options[CONF_HIDENAME]
 
             if CONF_INCREASED_LIMIT in advanced_options:
                 user_input[CONF_INCREASED_LIMIT] = advanced_options[CONF_INCREASED_LIMIT]
-
 
             if CONF_ONLYLINE in filter_options:
                 user_input[CONF_ONLYLINE] = filter_options[CONF_ONLYLINE]
@@ -490,9 +527,19 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                 user_input[CONF_ONLYDESTINATION] = filter_options[CONF_ONLYDESTINATION]
 
 
+            if CONF_PROXY_URL in proxy_options:
+                user_input[CONF_PROXY_URL] = proxy_options[CONF_PROXY_URL]
+        
+            if CONF_PROXY_USETIME in proxy_options:
+                user_input[CONF_PROXY_USETIME] = proxy_options[CONF_PROXY_USETIME]
+        
+            if CONF_FORCE_PROXY in proxy_options:
+                user_input[CONF_FORCE_PROXY] = proxy_options[CONF_FORCE_PROXY]
+
+
             # Ensure that empty fields are stored as empty strings
             for key in [CONF_ONLYLINE, CONF_HIDEDESTINATION, CONF_ONLYDESTINATION, 
-                        CONF_TIMEZONE_FROM, CONF_TIMEZONE_TO, CONF_ALERT_FOR, CONF_GLOBALID2]:
+                        CONF_TIMEZONE_FROM, CONF_TIMEZONE_TO, CONF_ALERT_FOR, CONF_GLOBALID2, CONF_STATS_TEMPLATE, CONF_PROXY_USETIME, CONF_PROXY_URL, CONF_CSS_CODE]:
                 if key not in user_input:
                     user_input[key] = ""  # Explicitly set the field to an empty string if it's not in the user_input
             
@@ -526,20 +573,10 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                 }
             }),
             vol.Optional(CONF_LIMIT,            default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
-            vol.Required(CONF_DEPARTURE_FORMAT, default=current_data.get(CONF_DEPARTURE_FORMAT, "1")): SelectSelector(
-                SelectSelectorConfig(
-                    options = [
-                        {"label": "16:27 +2 (16:29)", 
-						 "value": "1"},
-                        {"label": "16:27 +2", 
-						 "value": "2"},
-                        {"label": "16:29", 
-						 "value": "3"}
-                    ], mode = SelectSelectorMode.DROPDOWN,
-                )
-            ),
+            vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, description={"suggested_value": current_data.get(CONF_SORT_BY_REAL_DEPARTURE, "")}): bool,
+            vol.Optional(CONF_OFFSET_IN_MINUTES, default=current_data.get(CONF_OFFSET_IN_MINUTES, DEFAULT_OFFSET_IN_MINUTES)): int,
 
-			# Filter
+            # Filter
             vol.Required("filter_options"): data_entry_flow.section(
                 vol.Schema(
                     {
@@ -555,13 +592,27 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             vol.Required("advanced_options"): data_entry_flow.section(
                 vol.Schema(
                     {
-                        vol.Optional(CONF_SHOW_CLOCK,          description={"suggested_value": current_data.get(CONF_SHOW_CLOCK, "")}): bool,
-                        vol.Optional(CONF_HIDENAME,            description={"suggested_value": current_data.get(CONF_HIDENAME, "")}): bool,
                         vol.Optional(CONF_INCREASED_LIMIT,     description={"suggested_value": current_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT)}): int,
                         vol.Optional(CONF_GLOBALID2,           description={"suggested_value": current_data.get(CONF_GLOBALID2, "")}): str,
                         vol.Optional(CONF_TIMEZONE_FROM,       description={"suggested_value": current_data.get(CONF_TIMEZONE_FROM, "")}): str,
                         vol.Optional(CONF_TIMEZONE_TO,         description={"suggested_value": current_data.get(CONF_TIMEZONE_TO, "")}): str,
                         vol.Optional(CONF_ALERT_FOR,           description={"suggested_value": current_data.get(CONF_ALERT_FOR, "")}): str,
+                        #vol.Optional(CONF_STATS_TEMPLATE,      description={"suggested_value": current_data.get(CONF_STATS_TEMPLATE, "")}): str,
+                        vol.Optional(CONF_STATS_TEMPLATE,      description={"suggested_value": current_data.get(CONF_STATS_TEMPLATE, "")}): TextSelector({"type": "text", "multiline": True}),
+                        vol.Optional(CONF_CSS_CODE,            description={"suggested_value": current_data.get(CONF_CSS_CODE, DEFAULT_CSS_CODE)}): TextSelector({"type": "text", "multiline": True}),
+                        vol.Optional(CONF_CSS_CODE_DARKMODE_ONLY, description={"suggested_value": current_data.get(CONF_CSS_CODE_DARKMODE_ONLY, DEFAULT_CSS_CODE_DARKMODE_ONLY)}): bool,
+                    }
+                ),
+                # Whether or not the section is initially collapsed (default = False)
+                {"collapsed": True},
+            ),
+            # Proxy
+            vol.Required("proxy_options"): data_entry_flow.section(
+                vol.Schema(
+                    {
+                        vol.Optional(CONF_PROXY_URL,           description={"suggested_value": current_data.get(CONF_PROXY_URL, "")}): str,
+                        vol.Required(CONF_PROXY_USETIME,       description={"suggested_value": current_data.get(CONF_PROXY_USETIME, DEFAULT_PROXY_USETIME)}): int,
+                        vol.Optional(CONF_FORCE_PROXY,         description={"suggested_value": current_data.get(CONF_FORCE_PROXY, DEFAULT_FORCE_PROXY)}): bool,
                     }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
