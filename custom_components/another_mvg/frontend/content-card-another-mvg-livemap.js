@@ -25,6 +25,7 @@ class ContentAnotherMVGlivemap extends HTMLElement {
       y: config.y || 1560004,
       zoom: config.zoom || 4.8,
       mode: config.mode || "schematic",
+      disruption: config.disruption || "true",
       ...config,
     };
     this.updateIframe();
@@ -33,8 +34,8 @@ class ContentAnotherMVGlivemap extends HTMLElement {
   updateIframe() {
     if (!this.content) return;
 
-    const { x, y, zoom, mode } = this.config;
-    const url = `https://s-bahn-muenchen-live.de/?mode=${mode}&showDepartures=true&x=${x}&y=${y}&z=${zoom}`;
+    const { x, y, zoom, mode, disruption } = this.config;
+    const url = `https://s-bahn-muenchen-live.de/?disruption=${disruption}&mode=${mode}&showDepartures=true&x=${x}&y=${y}&z=${zoom}`;
 
     this.content.innerHTML = `
       <iframe 
@@ -85,6 +86,7 @@ class ContentAnotherMVGlivemapEditor extends HTMLElement {
       { name: 'y',    label: 'Y - Koordinate',    type: 'number', defaultValue: 1560004, description: 'Je kleiner die Zahl, desto weiter wandert der Mittelpunkt der Ansicht nach unten.' },
       { name: 'zoom', label: 'Zoom',              type: 'number', defaultValue: 4.8, step: 0.01, description: 'Größerer Wert bedeutet weiter rangezoomt.' },
       { name: 'mode', label: 'Kartenhintergrund', type: 'dropdown', options: ['schematic', 'topographic'], defaultValue: 'schematic', description: 'Der Hintgergrund der LiveMap: schematic (MVG-Plan) oder topographic (Karte).' },
+      { name: 'disruption', label: 'Hinweise',    type: 'dropdown2', options: ['true', 'false'], defaultValue: 'true', description: 'Wähle aus ob Du Hinweise über Störungen auf der Karte als PopUp sehen möchtest.' },
     ];
 
     fields.forEach(field => {
@@ -99,6 +101,15 @@ class ContentAnotherMVGlivemapEditor extends HTMLElement {
           inputElement.appendChild(optionElement);
         });
         inputElement.value = this.config.mode || field.defaultValue;
+      } else if (field.type === 'dropdown2') {
+        inputElement = document.createElement('ha-select');
+        field.options.forEach(option => {
+          const optionElement = document.createElement('mwc-list-item');
+          optionElement.value = option;
+          optionElement.innerText = option;
+          inputElement.appendChild(optionElement);
+        });
+        inputElement.value = this.config.disruption || field.defaultValue;
       } else {
         inputElement = document.createElement('ha-textfield');
         inputElement.type = field.type;
