@@ -17,7 +17,6 @@ from homeassistant.core import HomeAssistant
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-from homeassistant.util import Throttle
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 
 from .const import (
@@ -211,7 +210,7 @@ class ConnectionInfo(SensorEntity):
         self._timezoneFrom = config_data.get(CONF_TIMEZONE_FROM)
         self._timezoneTo = config_data.get(CONF_TIMEZONE_TO)
         self._alert_for = config_data.get(CONF_ALERT_FOR)
-        self._lateConnections = ""
+        self._lateConnections = []
         self._nextDeparture = ""
         self._dataOutdated = ""
         self._maxConnectionErrorTime = 0
@@ -228,7 +227,6 @@ class ConnectionInfo(SensorEntity):
                 "css_code_darkmode_only": self._css_code_darkmode_only
             }
         }
-
 
     @property
     def name(self) -> str:
@@ -265,19 +263,25 @@ class ConnectionInfo(SensorEntity):
         """Getter-Method"""
         return self._maxConnectionErrorTime
 
-    @dataOutdated.setter
+    @maxConnectionErrorTime.setter
     def maxConnectionErrorTime(self, value):
         """Setter-Method"""
         self._maxConnectionErrorTime = value
 
     @property
     def lateConnections(self):
-        """Getter-Method"""
+        """Getter for lateConnections"""
         return self._lateConnections
 
     @lateConnections.setter
     def lateConnections(self, value):
-        """Setter-Method"""
+        if not isinstance(value, list):
+            _LOGGER.error(
+                "AnotherMVG: Unable to set lateConnections for %s - Value must be a list. Received: %s ",
+                self._name,
+                repr(value),
+            )
+            return  
         self._lateConnections = value
 
     @property
@@ -290,7 +294,6 @@ class ConnectionInfo(SensorEntity):
         """Setter-Method"""
         self._nextDeparture = value
         
-
     def set_next_departure(self, planned_departure, expected_departure, track, transport_type, label, destination, cancelled, delay, trainType, plannedDepartureTime, realtimeDepartureTime):
         template = self._stats_template
         
@@ -385,12 +388,12 @@ class ConnectionInfo(SensorEntity):
         
         self.nextDeparture = departure_info
   
-    def update(self) -> None:
-        """Fetch new state data for the sensor."""
-        self._custom_attributes["departures"] = self.get_departures()
+    async def async_update(self) -> None:
+        self._custom_attributes["departures"] = await self._hass.async_add_executor_job(
+            self.get_departures
+        )
         self._custom_attributes["dataOutdated"] = self._dataOutdated
         self._custom_attributes["maxConnectionErrorTime"] = self._maxConnectionErrorTime
-        
         self.process_late_connections()
 
     def process_late_connections(self):
@@ -455,7 +458,6 @@ class ConnectionInfo(SensorEntity):
             # If data is empty, check if there are results for the next day
             if not data or len(data) < (self._limit + self._increased_limit): 
                 data = self.fetch_additional_data_for_next_day(data, self._name, self._globalid, self._transporttypes)
-
 
         except MVGException as ex:
             # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
@@ -551,9 +553,6 @@ class ConnectionInfo(SensorEntity):
         self._dataOutdated = ""
         return self.pre_process_output(sorted_data)
 
-
-
-
     def fetch_additional_data_for_next_day(self, data, name, globalid, transporttypes):
         # wait 1 second because of 509 error
         time.sleep(1)
@@ -589,7 +588,6 @@ class ConnectionInfo(SensorEntity):
             data.extend(additional_data)
 
         return data
-
 
     def pre_process_output(self, data: dict) -> dict:
         """Preformat necessary values into list of Departure."""
@@ -780,7 +778,7 @@ class ConnectionInfo(SensorEntity):
         if not self._forceProxy and (self._maxConnectionErrorTime == 0 or (time.time() - self._maxConnectionErrorTime) > self._proxyUsetime):
             self._maxConnectionErrorTime = 0 # reset
             try:
-                req = requests.get(url, headers=headers, timeout=10, verify=False)
+                req = requests.get(url, headers=headers, timeout=10, verify=True)
                 if req.ok:
                     return req.json()
             except Timeout as ex:
