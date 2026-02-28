@@ -18,7 +18,7 @@ class ContentAnotherMVG extends HTMLElement {
             this.styleElement.textContent = `
               /* Card background */
               .amvg-container {
-                background-color: #000080;
+                                background-color: var(--amvg-card-bg-color, #000080);
                 border-radius: var(--ha-card-border-radius,12px);
                 padding-bottom: 5px;
               }
@@ -28,7 +28,7 @@ class ContentAnotherMVG extends HTMLElement {
                 font-weight: bold;
                 font-size:1.0em;
                 padding: 2px 0 2px 8px;
-                color: #FFFFFF;
+                                color: var(--amvg-text-color, #FFFFFF);
               }
               
               /* Table */
@@ -40,8 +40,8 @@ class ContentAnotherMVG extends HTMLElement {
               /* Table Header - Linie, Ziel, Gleis, Abfahrt */
               .amvg-headline {
                 font-weight: bold;
-                background-color: #FAE10C;
-                color: #000080;
+                                background-color: var(--amvg-header-bg-color, #FAE10C);
+                                color: var(--amvg-header-text-color, #000080);
                 border-width: 0;
                 text-align: left;
               }
@@ -54,18 +54,18 @@ class ContentAnotherMVG extends HTMLElement {
               .destination {
                 width: 60%;
                 text-wrap: wrap;
-                color: #FFFFFF;
+                                color: var(--amvg-text-color, #FFFFFF);
               }
               .track {
                 padding: 0 5px;
                 width: fit-content;
-                color: #FFFFFF;
+                                color: var(--amvg-text-color, #FFFFFF);
               }
               .time {
                 padding-right: 5px;
                 width: fit-content;
                 white-space: nowrap;
-                color: #FFFFFF;
+                                color: var(--amvg-text-color, #FFFFFF);
               }
               .labelHL {
                 width: 10%;
@@ -165,6 +165,10 @@ class ContentAnotherMVG extends HTMLElement {
         const showType         = this.config.showType  ?? false; // false as default
         const showClock        = this.config.showClock ?? false; // false as default
         const hideName         = this.config.hideName  ?? false; // false as default
+        const cardBackgroundColor   = this.config.cardBackgroundColor || "#000080";
+        const textColor             = this.config.textColor || "#FFFFFF";
+        const headerBackgroundColor = this.config.headerBackgroundColor || "#FAE10C";
+        const headerTextColor       = this.config.headerTextColor || "#000080";
         const transportTypeMap = {
             "REGIONAL_BUS" : "R-Bus",
             "BUS"          : "Bus",
@@ -173,6 +177,11 @@ class ContentAnotherMVG extends HTMLElement {
             "TRAM"         : "Tram",
             "BAHN"         : "Bahn"
         };
+
+        this.style.setProperty("--amvg-card-bg-color", cardBackgroundColor);
+        this.style.setProperty("--amvg-text-color", textColor);
+        this.style.setProperty("--amvg-header-bg-color", headerBackgroundColor);
+        this.style.setProperty("--amvg-header-text-color", headerTextColor);
       
         if (state?.attributes?.config?.css_code?.trim() && !this.cssCodeApplied) {
             const onlyDarkMode = state.attributes.config.css_code_darkmode_only;
@@ -459,6 +468,47 @@ class ContentAnotherMVGEditor extends HTMLElement {
         displayOptionsSelectLabel2.innerText = this.hass.localize("component.another_mvg.cardeditor.departure_options_desc");
         displayOptionsSelectLabel2.style.marginTop = "10px";
         container.appendChild(displayOptionsSelectLabel2);
+
+        /* Color options */
+        const cardBackgroundColorInput = document.createElement('ha-textfield');
+        cardBackgroundColorInput.label = this.hass.localize("component.another_mvg.cardeditor.card_bg_color");
+        cardBackgroundColorInput.value = this.config.cardBackgroundColor || "#000080";
+        cardBackgroundColorInput.style.marginTop = "10px";
+        cardBackgroundColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, cardBackgroundColor: event.target.value.trim() || "#000080" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(cardBackgroundColorInput);
+
+        const textColorInput = document.createElement('ha-textfield');
+        textColorInput.label = this.hass.localize("component.another_mvg.cardeditor.text_color");
+        textColorInput.value = this.config.textColor || "#FFFFFF";
+        textColorInput.style.marginTop = "10px";
+        textColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, textColor: event.target.value.trim() || "#FFFFFF" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(textColorInput);
+
+        const headerBackgroundColorInput = document.createElement('ha-textfield');
+        headerBackgroundColorInput.label = this.hass.localize("component.another_mvg.cardeditor.header_bg_color");
+        headerBackgroundColorInput.value = this.config.headerBackgroundColor || "#FAE10C";
+        headerBackgroundColorInput.style.marginTop = "10px";
+        headerBackgroundColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, headerBackgroundColor: event.target.value.trim() || "#FAE10C" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(headerBackgroundColorInput);
+
+        const headerTextColorInput = document.createElement('ha-textfield');
+        headerTextColorInput.label = this.hass.localize("component.another_mvg.cardeditor.header_text_color");
+        headerTextColorInput.value = this.config.headerTextColor || "#000080";
+        headerTextColorInput.style.marginTop = "10px";
+        headerTextColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, headerTextColor: event.target.value.trim() || "#000080" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(headerTextColorInput);
         
         /* Checkbox for showClock */
         const showClockCheckbox = document.createElement('ha-switch');

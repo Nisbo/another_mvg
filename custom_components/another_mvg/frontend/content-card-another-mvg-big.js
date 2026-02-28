@@ -18,8 +18,8 @@ class ContentAnotherMVGbig extends HTMLElement {
 
             this.styleElement.textContent = `
               .amvg-table-big {
-                background-color: #000080;
-                color: #FFFFFF;
+                                background-color: var(--amvg-card-bg-color, #000080);
+                                color: var(--amvg-text-color, #FFFFFF);
                 width: 100%;
                 border-spacing: 0px;
                 border-collapse: separate;
@@ -80,9 +80,9 @@ class ContentAnotherMVGbig extends HTMLElement {
               /* Table Header - Linie, Ziel, Gleis, Abfahrt */
               .amvg-headline {
                 font-weight: bold;
-                background-color: #FAE10C;
+                                background-color: var(--amvg-header-bg-color, #FAE10C);
                 font-size:3.9em;
-                color: #000080;
+                                color: var(--amvg-header-text-color, #000080);
                 vertical-align: middle;
                 height:50px;
               }
@@ -92,7 +92,7 @@ class ContentAnotherMVGbig extends HTMLElement {
                 height: auto;
                 font-size: 3.9em;
                 vertical-align: top;
-                color: #FFFFFF;
+                                color: var(--amvg-text-color, #FFFFFF);
                 word-wrap: break-word;
                 white-space: normal;
               }
@@ -101,7 +101,7 @@ class ContentAnotherMVGbig extends HTMLElement {
               .amvg-cardname {
                 font-weight: bold;
                 font-size:1.0em;
-                color: #FFFFFF;
+                                color: var(--amvg-text-color, #FFFFFF);
               }
 
               .cancelled {
@@ -173,6 +173,10 @@ class ContentAnotherMVGbig extends HTMLElement {
         const showType         = this.config.showType  ?? false; // false as default
         const showClock        = this.config.showClock ?? false; // false as default
         const hideName         = this.config.hideName  ?? false; // false as default
+        const cardBackgroundColor   = this.config.cardBackgroundColor || "#000080";
+        const textColor             = this.config.textColor || "#FFFFFF";
+        const headerBackgroundColor = this.config.headerBackgroundColor || "#FAE10C";
+        const headerTextColor       = this.config.headerTextColor || "#000080";
         const transportTypeMap = {
             "REGIONAL_BUS" : "R-Bus",
             "BUS"          : "Bus",
@@ -181,6 +185,11 @@ class ContentAnotherMVGbig extends HTMLElement {
             "TRAM"         : "Tram",
             "BAHN"         : "Bahn"
         };
+
+        this.style.setProperty("--amvg-card-bg-color", cardBackgroundColor);
+        this.style.setProperty("--amvg-text-color", textColor);
+        this.style.setProperty("--amvg-header-bg-color", headerBackgroundColor);
+        this.style.setProperty("--amvg-header-text-color", headerTextColor);
 
         let colspawn = 4;
         if (hideTrack) colspawn -= 1;
@@ -460,6 +469,47 @@ class ContentAnotherMVGEditorBig extends HTMLElement {
         displayOptionsSelectLabel2.innerText = this.hass.localize("component.another_mvg.cardeditor.departure_options_desc");
         displayOptionsSelectLabel2.style.marginTop = "10px";
         container.appendChild(displayOptionsSelectLabel2);
+
+        /* Color options */
+        const cardBackgroundColorInput = document.createElement('ha-textfield');
+        cardBackgroundColorInput.label = this.hass.localize("component.another_mvg.cardeditor.card_bg_color");
+        cardBackgroundColorInput.value = this.config.cardBackgroundColor || "#000080";
+        cardBackgroundColorInput.style.marginTop = "10px";
+        cardBackgroundColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, cardBackgroundColor: event.target.value.trim() || "#000080" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(cardBackgroundColorInput);
+
+        const textColorInput = document.createElement('ha-textfield');
+        textColorInput.label = this.hass.localize("component.another_mvg.cardeditor.text_color");
+        textColorInput.value = this.config.textColor || "#FFFFFF";
+        textColorInput.style.marginTop = "10px";
+        textColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, textColor: event.target.value.trim() || "#FFFFFF" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(textColorInput);
+
+        const headerBackgroundColorInput = document.createElement('ha-textfield');
+        headerBackgroundColorInput.label = this.hass.localize("component.another_mvg.cardeditor.header_bg_color");
+        headerBackgroundColorInput.value = this.config.headerBackgroundColor || "#FAE10C";
+        headerBackgroundColorInput.style.marginTop = "10px";
+        headerBackgroundColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, headerBackgroundColor: event.target.value.trim() || "#FAE10C" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(headerBackgroundColorInput);
+
+        const headerTextColorInput = document.createElement('ha-textfield');
+        headerTextColorInput.label = this.hass.localize("component.another_mvg.cardeditor.header_text_color");
+        headerTextColorInput.value = this.config.headerTextColor || "#000080";
+        headerTextColorInput.style.marginTop = "10px";
+        headerTextColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, headerTextColor: event.target.value.trim() || "#000080" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(headerTextColorInput);
         
         /* Checkbox for showClock */
         const showClockCheckbox = document.createElement('ha-switch');
