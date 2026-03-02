@@ -1,17 +1,114 @@
 class ContentAnotherMVG extends HTMLElement {
+    static get MIN_RENDER_INTERVAL_MS() {
+        return 30000;
+    }
+
+    updateContent(html) {
+        if (this._lastRenderedHtml === html) {
+            return;
+        }
+        this.content.innerHTML = html;
+        this._lastRenderedHtml = html;
+    }
+
+    requestRender(hass, state, renderKey, force = false) {
+        const now = Date.now();
+        const lastRenderTimestamp = this._lastRenderTimestamp || 0;
+        const timeSinceLastRender = now - lastRenderTimestamp;
+
+        if (!force && timeSinceLastRender < ContentAnotherMVG.MIN_RENDER_INTERVAL_MS) {
+            this._pendingRender = { hass, state, renderKey };
+
+            if (!this._renderTimer) {
+                const waitTime = ContentAnotherMVG.MIN_RENDER_INTERVAL_MS - timeSinceLastRender;
+                this._renderTimer = setTimeout(() => {
+                    this._renderTimer = null;
+                    if (!this._pendingRender) {
+                        return;
+                    }
+
+                    const pendingRender = this._pendingRender;
+                    this._pendingRender = null;
+                    this._lastEntityId = this.config?.entity;
+                    this._lastRenderKey = pendingRender.renderKey;
+                    this._lastRenderTimestamp = Date.now();
+                    this.render(pendingRender.hass, pendingRender.state);
+                }, waitTime);
+            }
+            return;
+        }
+
+        this._lastEntityId = this.config?.entity;
+        this._lastRenderKey = renderKey;
+        this._lastRenderTimestamp = now;
+        this.render(hass, state);
+    }
+
+    normalizeDataOutdated(value) {
+        if (typeof value !== "string") {
+            return value;
+        }
+        return value.replace(/(\d{1,2}:\d{2}):\d{2}/g, "$1");
+    }
+
+    buildRenderKey(hass, entityId, state) {
+        const configSnapshot = {
+            entity: entityId,
+            displayOptions: this.config?.displayOptions ?? "1",
+            hideTrack: this.config?.hideTrack ?? false,
+            showType: this.config?.showType ?? false,
+            showClock: this.config?.showClock ?? false,
+            hideName: this.config?.hideName ?? false,
+            cardBackgroundColor: this.config?.cardBackgroundColor || "#000080",
+            textColor: this.config?.textColor || "#FFFFFF",
+            headerBackgroundColor: this.config?.headerBackgroundColor || "#FAE10C",
+            headerTextColor: this.config?.headerTextColor || "#000080",
+            darkMode: hass?.themes?.darkMode ?? false,
+            language: hass?.locale?.language || "",
+        };
+
+        if (!state) {
+            return JSON.stringify({ config: configSnapshot, state: "undefined" });
+        }
+
+        const departures = Array.isArray(state.attributes?.departures)
+            ? state.attributes.departures.map((departure) => ({
+                transport_type: departure.transport_type,
+                label: departure.label,
+                trainType: departure.trainType,
+                destination: departure.destination,
+                track: departure.track,
+                planned_departure: departure.planned_departure,
+                expected_departure: departure.expected_departure,
+                cancelled: !!departure.cancelled,
+                delay: departure.delay,
+                time_diff_min: Math.floor((departure.time_diff || 0) / 60),
+            }))
+            : [];
+
+        return JSON.stringify({
+            config: configSnapshot,
+            state: state.state,
+            name: state.attributes?.config?.name || "",
+            dataOutdated: this.normalizeDataOutdated(state.attributes?.dataOutdated),
+            cssCode: state.attributes?.config?.css_code || "",
+            cssDarkOnly: !!state.attributes?.config?.css_code_darkmode_only,
+            departures,
+        });
+    }
+
     set hass(hass) {
         this._hass = hass;
         if (!this.content) this.loadTranslations(hass);
 
         const entityId = this.config?.entity;
         const state = entityId ? hass.states[entityId] : undefined;
-        if (this._lastEntityId === entityId && this._lastEntityState === state) {
+        const renderKey = this.buildRenderKey(hass, entityId, state);
+        if (this._lastRenderKey === renderKey) {
             return;
         }
 
-        this._lastEntityId = entityId;
-        this._lastEntityState = state;
-        this.render(hass);
+        this.requestRender(hass, state, renderKey);
     }
     
     async loadTranslations(hass) {
@@ -19,7 +116,7 @@ class ContentAnotherMVG extends HTMLElement {
         console.log("AnotherMVG - custom translations should be loaded");
     }
 
-    render(hass) {
+    render(hass, providedState) {
         if (!this.content) {
             const card        = document.createElement('ha-card');
             this.content      = document.createElement('div');
@@ -30,14 +127,14 @@ class ContentAnotherMVG extends HTMLElement {
               .amvg-container {
                                 background-color: var(--amvg-card-bg-color, #000080);
                 border-radius: var(--ha-card-border-radius,12px);
-                padding-bottom: 5px;
+                                padding: 8px 16px 12px 16px;
               }
               
               /* Name of the card - from name parameter */
               .amvg-cardname {
                 font-weight: bold;
                 font-size:1.0em;
-                padding: 2px 0 2px 8px;
+                                padding: 0 0 8px 0;
                                 color: var(--amvg-text-color, #FFFFFF);
               }
               
@@ -59,38 +156,40 @@ class ContentAnotherMVG extends HTMLElement {
               /* Column widths and spacing */
               .label {
                 width: 10%;
-                padding: 0 6px;
+                                padding: 6px 8px;
               }
               .destination {
                 width: 60%;
+                                padding: 6px 8px;
                 text-wrap: wrap;
                                 color: var(--amvg-text-color, #FFFFFF);
               }
               .track {
-                padding: 0 5px;
+                                padding: 6px 8px;
                 width: fit-content;
                                 color: var(--amvg-text-color, #FFFFFF);
               }
               .time {
-                padding-right: 5px;
+                                padding: 6px 8px;
                 width: fit-content;
                 white-space: nowrap;
                                 color: var(--amvg-text-color, #FFFFFF);
               }
               .labelHL {
                 width: 10%;
-                padding: 0 6px;
+                                padding: 8px 8px;
               }
               .destinationHL {
                 width: 60%;
+                                padding: 8px 8px;
                 text-wrap: wrap;
               }
               .trackHL {
-                padding: 0 5px;
+                                padding: 8px 8px;
                 width: fit-content;
               }
               .timeHL {
-                padding-right: 5px;
+                                padding: 8px 8px;
                 width: fit-content;
                 white-space: nowrap;
               }
@@ -113,7 +212,7 @@ class ContentAnotherMVG extends HTMLElement {
                 display: block;
                 text-align: center;
                 width: 35px;
-                margin: 2px 0;
+                                margin: 4px 0;
               }
               
               /* BUS */
@@ -168,7 +267,7 @@ class ContentAnotherMVG extends HTMLElement {
         }
       
         const entityId         = this.config.entity;
-        const state            = hass.states[entityId];
+        const state            = providedState ?? hass.states[entityId];
         const stateStr         = state ? state.state : "unavailable";
         const departureFormat  = this.config.displayOptions && ["1", "2", "3", "4", "5"].includes(this.config.displayOptions) ? this.config.displayOptions : "1"; // 1 as default
         const hideTrack        = this.config.hideTrack ?? false; // false as default
@@ -179,6 +278,7 @@ class ContentAnotherMVG extends HTMLElement {
         const textColor             = this.config.textColor || "#FFFFFF";
         const headerBackgroundColor = this.config.headerBackgroundColor || "#FAE10C";
         const headerTextColor       = this.config.headerTextColor || "#000080";
+        const dataOutdated          = this.normalizeDataOutdated(state?.attributes?.dataOutdated);
         const transportTypeMap = {
             "REGIONAL_BUS" : "R-Bus",
             "BUS"          : "Bus",
@@ -213,7 +313,7 @@ class ContentAnotherMVG extends HTMLElement {
         /* state undefined */
         if (!state || state === "undefined") {
             let html = "<b><u>Another MVG:</u></b><br>The entity <b>" + entityId + "</b> is undefined!<br>Maybe only a typo ?<br>Or did you delete the stop ?";
-            this.content.innerHTML = html;
+            this.updateContent(html);
         } else {
             // Function, to show the current time
             function getCurrentTime() {
@@ -224,7 +324,7 @@ class ContentAnotherMVG extends HTMLElement {
 
             let html = `
             <div class="amvg-container">
-                ${!hideName ? `<div class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right; margin-right: 5px;">${showClock ? ` ${getCurrentTime()} ` : ""}</span></div>` : ""}
+                ${!hideName ? `<div class="amvg-cardname">${state.attributes.config.name}${dataOutdated !== undefined ? ` ${dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right;">${showClock ? ` ${getCurrentTime()} ` : ""}</span></div>` : ""}
                 <table class="amvg-table">
                     <tr class="amvg-headline">
                         ${showType ? `<th class="labelHL">${hass.localize("component.another_mvg.frontend.column_type")}</th>` : ""}
@@ -321,7 +421,7 @@ class ContentAnotherMVG extends HTMLElement {
             }
             
             html += `</table></div>`; 
-            this.content.innerHTML = html;
+            this.updateContent(html);
         }
     }
     
@@ -333,9 +433,19 @@ class ContentAnotherMVG extends HTMLElement {
         }
         this.config = config;
         this._lastEntityId = undefined;
-        this._lastEntityState = undefined;
+        this._lastRenderKey = undefined;
+        this._lastRenderTimestamp = 0;
+        this._pendingRender = null;
+        if (this._renderTimer) {
+            clearTimeout(this._renderTimer);
+            this._renderTimer = null;
+        }
+        this._lastRenderedHtml = undefined;
         if (this._hass) {
-            this.render(this._hass);
+            const entityId = this.config?.entity;
+            const state = entityId ? this._hass.states[entityId] : undefined;
+            const renderKey = this.buildRenderKey(this._hass, entityId, state);
+            this.requestRender(this._hass, state, renderKey, true);
         }
     }
     

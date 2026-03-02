@@ -1,17 +1,114 @@
 class ContentAnotherMVGbig extends HTMLElement {
+    static get MIN_RENDER_INTERVAL_MS() {
+        return 30000;
+    }
+
+    updateContent(html) {
+        if (this._lastRenderedHtml === html) {
+            return;
+        }
+        this.content.innerHTML = html;
+        this._lastRenderedHtml = html;
+    }
+
+    requestRender(hass, state, renderKey, force = false) {
+        const now = Date.now();
+        const lastRenderTimestamp = this._lastRenderTimestamp || 0;
+        const timeSinceLastRender = now - lastRenderTimestamp;
+
+        if (!force && timeSinceLastRender < ContentAnotherMVGbig.MIN_RENDER_INTERVAL_MS) {
+            this._pendingRender = { hass, state, renderKey };
+
+            if (!this._renderTimer) {
+                const waitTime = ContentAnotherMVGbig.MIN_RENDER_INTERVAL_MS - timeSinceLastRender;
+                this._renderTimer = setTimeout(() => {
+                    this._renderTimer = null;
+                    if (!this._pendingRender) {
+                        return;
+                    }
+
+                    const pendingRender = this._pendingRender;
+                    this._pendingRender = null;
+                    this._lastEntityId = this.config?.entity;
+                    this._lastRenderKey = pendingRender.renderKey;
+                    this._lastRenderTimestamp = Date.now();
+                    this.render(pendingRender.hass, pendingRender.state);
+                }, waitTime);
+            }
+            return;
+        }
+
+        this._lastEntityId = this.config?.entity;
+        this._lastRenderKey = renderKey;
+        this._lastRenderTimestamp = now;
+        this.render(hass, state);
+    }
+
+    normalizeDataOutdated(value) {
+        if (typeof value !== "string") {
+            return value;
+        }
+        return value.replace(/(\d{1,2}:\d{2}):\d{2}/g, "$1");
+    }
+
+    buildRenderKey(hass, entityId, state) {
+        const configSnapshot = {
+            entity: entityId,
+            displayOptions: this.config?.displayOptions ?? "1",
+            hideTrack: this.config?.hideTrack ?? false,
+            showType: this.config?.showType ?? false,
+            showClock: this.config?.showClock ?? false,
+            hideName: this.config?.hideName ?? false,
+            cardBackgroundColor: this.config?.cardBackgroundColor || "#000080",
+            textColor: this.config?.textColor || "#FFFFFF",
+            headerBackgroundColor: this.config?.headerBackgroundColor || "#FAE10C",
+            headerTextColor: this.config?.headerTextColor || "#000080",
+            darkMode: hass?.themes?.darkMode ?? false,
+            language: hass?.locale?.language || "",
+        };
+
+        if (!state) {
+            return JSON.stringify({ config: configSnapshot, state: "undefined" });
+        }
+
+        const departures = Array.isArray(state.attributes?.departures)
+            ? state.attributes.departures.map((departure) => ({
+                transport_type: departure.transport_type,
+                label: departure.label,
+                trainType: departure.trainType,
+                destination: departure.destination,
+                track: departure.track,
+                planned_departure: departure.planned_departure,
+                expected_departure: departure.expected_departure,
+                cancelled: !!departure.cancelled,
+                delay: departure.delay,
+                time_diff_min: Math.floor((departure.time_diff || 0) / 60),
+            }))
+            : [];
+
+        return JSON.stringify({
+            config: configSnapshot,
+            state: state.state,
+            name: state.attributes?.config?.name || "",
+            dataOutdated: this.normalizeDataOutdated(state.attributes?.dataOutdated),
+            cssCode: state.attributes?.config?.css_code || "",
+            cssDarkOnly: !!state.attributes?.config?.css_code_darkmode_only,
+            departures,
+        });
+    }
+
     set hass(hass) {
         this._hass = hass;
         if (!this.content) this.loadTranslations(hass);
 
         const entityId = this.config?.entity;
         const state = entityId ? hass.states[entityId] : undefined;
-        if (this._lastEntityId === entityId && this._lastEntityState === state) {
+        const renderKey = this.buildRenderKey(hass, entityId, state);
+        if (this._lastRenderKey === renderKey) {
             return;
         }
 
-        this._lastEntityId = entityId;
-        this._lastEntityState = state;
-        this.render(hass);
+        this.requestRender(hass, state, renderKey);
     }
 
     async loadTranslations(hass) {
@@ -19,7 +116,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         console.log("AnotherMVG - custom translations should be loaded");
     }
 
-    render(hass) {
+    render(hass, providedState) {
         // Initialize the content if it's not there yet.
         if (!this.content) {
             const card        = document.createElement('ha-card');
@@ -33,7 +130,7 @@ class ContentAnotherMVGbig extends HTMLElement {
                 width: 100%;
                 border-spacing: 0px;
                 border-collapse: separate;
-                border-radius: 10px;
+                                border-radius: var(--ha-card-border-radius, 12px);
               }
 
               table tr {
@@ -41,7 +138,7 @@ class ContentAnotherMVGbig extends HTMLElement {
               }
 
               table td {
-                padding: 2px;
+                                padding: 8px 12px;
                 vertical-align: top; /* or middle */
                 word-wrap: break-word;
                 line-height: normal;
@@ -72,7 +169,7 @@ class ContentAnotherMVGbig extends HTMLElement {
               }
 
               table tr:last-child td {
-                padding-bottom: 10px;
+                                padding-bottom: 12px;
               }
 
               /* General formatting for the labels */
@@ -82,7 +179,7 @@ class ContentAnotherMVGbig extends HTMLElement {
                 background-color: #000000;
                 border: 1px solid #FFFFFF;
                 font-size:0.9em;
-                padding:2px 8px 2px 8px;
+                                padding:4px 10px;
                 margin-right:0.5em;
                 margin-left:0.1em;
               }
@@ -111,6 +208,7 @@ class ContentAnotherMVGbig extends HTMLElement {
               .amvg-cardname {
                 font-weight: bold;
                 font-size:1.0em;
+                                padding: 8px 12px;
                                 color: var(--amvg-text-color, #FFFFFF);
               }
 
@@ -125,13 +223,13 @@ class ContentAnotherMVGbig extends HTMLElement {
               /* BUS */
               span.BUS {
                 background-color: #00586A;
-                padding:2px 4px 2px 4px;
+                                padding:4px 8px;
               }
 
               /* REGIONAL_BUS */
               span.REGIONAL_BUS {
                 background-color: #4682B4;
-                padding:2px 4px 2px 4px;
+                                padding:4px 8px;
               }
 
               /* BAHN */
@@ -176,7 +274,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         }
 
         const entityId         = this.config.entity;
-        const state            = hass.states[entityId];
+        const state            = providedState ?? hass.states[entityId];
         const stateStr         = state ? state.state : "unavailable";
         const departureFormat  = this.config.displayOptions && ["1", "2", "3", "4", "5"].includes(this.config.displayOptions) ? this.config.displayOptions : "1"; // 1 as default
         const hideTrack        = this.config.hideTrack ?? false; // false as default
@@ -187,6 +285,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         const textColor             = this.config.textColor || "#FFFFFF";
         const headerBackgroundColor = this.config.headerBackgroundColor || "#FAE10C";
         const headerTextColor       = this.config.headerTextColor || "#000080";
+        const dataOutdated          = this.normalizeDataOutdated(state?.attributes?.dataOutdated);
         const transportTypeMap = {
             "REGIONAL_BUS" : "R-Bus",
             "BUS"          : "Bus",
@@ -225,7 +324,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         /* state undefined */
         if (!state || state === "undefined") {
             var html = "<b><u>Another MVG:</u></b><br>The entity <b>" + entityId + "</b> is undefined!<br>Maybe only a typo ?<br>Or did you delete the stop ?";
-            this.content.innerHTML = html;
+            this.updateContent(html);
         } else {
             // Function, to show the current time
             function getCurrentTime() {
@@ -238,7 +337,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         <table class="amvg-table-big">
             ${!hideName ? `
             <tr>
-                <td colspan="${colspawn}" class="amvg-cardname">${state.attributes.config.name}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right; margin-right: 5px;">${showClock ? ` ${getCurrentTime()} ` : ""}</span></td>
+                <td colspan="${colspawn}" class="amvg-cardname">${state.attributes.config.name}${dataOutdated !== undefined ? ` ${dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right;">${showClock ? ` ${getCurrentTime()} ` : ""}</span></td>
             </tr>` : ""}
             <tr>
                 ${showType ? `<td class="amvg-headline">${hass.localize("component.another_mvg.frontend.column_type")}</td>` : ""}
@@ -324,7 +423,7 @@ class ContentAnotherMVGbig extends HTMLElement {
             }
             
             html += `</table>`;
-            this.content.innerHTML = html;
+            this.updateContent(html);
         }
     }
 
@@ -336,9 +435,19 @@ class ContentAnotherMVGbig extends HTMLElement {
       }
       this.config = config;
             this._lastEntityId = undefined;
-            this._lastEntityState = undefined;
+            this._lastRenderKey = undefined;
+        this._lastRenderTimestamp = 0;
+        this._pendingRender = null;
+        if (this._renderTimer) {
+            clearTimeout(this._renderTimer);
+            this._renderTimer = null;
+        }
+        this._lastRenderedHtml = undefined;
             if (this._hass) {
-                    this.render(this._hass);
+                    const entityId = this.config?.entity;
+                    const state = entityId ? this._hass.states[entityId] : undefined;
+                    const renderKey = this.buildRenderKey(this._hass, entityId, state);
+                    this.requestRender(this._hass, state, renderKey, true);
             }
     }
 
