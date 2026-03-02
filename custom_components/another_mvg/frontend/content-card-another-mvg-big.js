@@ -1,6 +1,16 @@
 class ContentAnotherMVGbig extends HTMLElement {
     set hass(hass) {
+        this._hass = hass;
         if (!this.content) this.loadTranslations(hass);
+
+        const entityId = this.config?.entity;
+        const state = entityId ? hass.states[entityId] : undefined;
+        if (this._lastEntityId === entityId && this._lastEntityState === state) {
+            return;
+        }
+
+        this._lastEntityId = entityId;
+        this._lastEntityState = state;
         this.render(hass);
     }
 
@@ -325,6 +335,11 @@ class ContentAnotherMVGbig extends HTMLElement {
           throw new Error("You need to define an entity");
       }
       this.config = config;
+            this._lastEntityId = undefined;
+            this._lastEntityState = undefined;
+            if (this._hass) {
+                    this.render(this._hass);
+            }
     }
 
     // The height of your card. Home Assistant uses this to automatically
