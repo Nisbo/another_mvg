@@ -175,19 +175,19 @@ class ContentAnotherMVG extends HTMLElement {
               }
               .labelHL {
                 width: 10%;
-                padding: 8px 8px;
+                padding: 4px 8px;
               }
               .destinationHL {
                 width: 60%;
-                padding: 8px 8px;
+                padding: 4px 8px;
                 text-wrap: wrap;
               }
               .trackHL {
-                padding: 8px 8px;
+                padding: 4px 8px;
                 width: fit-content;
               }
               .timeHL {
-                padding: 8px 8px;
+                padding: 4px 8px;
                 width: fit-content;
                 white-space: nowrap;
               }
