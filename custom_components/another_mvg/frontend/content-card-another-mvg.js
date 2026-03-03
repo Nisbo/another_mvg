@@ -203,7 +203,7 @@ class ContentAnotherMVG extends HTMLElement {
                 font-weight: bold;
                 color: #FFFFFF;
                 background-color: #000000;
-                border: 1px solid #FFFFFF;
+                border: 1px solid #ffffff44;
                 font-size:0.8em;
                 margin-right:0.5em;
                 margin-left:0.1em;
