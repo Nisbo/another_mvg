@@ -125,17 +125,16 @@ class ContentAnotherMVG extends HTMLElement {
             this.styleElement.textContent = `
               /* Card background */
               .amvg-container {
-                                background-color: var(--amvg-card-bg-color, #000080);
+                background-color: var(--amvg-card-bg-color, #000080);
                 border-radius: var(--ha-card-border-radius,12px);
-                                padding: 8px 16px 12px 16px;
+                padding: 8px 16px 12px 16px;
               }
               
               /* Name of the card - from name parameter */
               .amvg-cardname {
                 font-weight: bold;
                 font-size:1.0em;
-                                padding: 0 0 8px 0;
-                                color: var(--amvg-text-color, #FFFFFF);
+                color: var(--amvg-text-color, #FFFFFF);
               }
               
               /* Table */
@@ -147,8 +146,8 @@ class ContentAnotherMVG extends HTMLElement {
               /* Table Header - Linie, Ziel, Gleis, Abfahrt */
               .amvg-headline {
                 font-weight: bold;
-                                background-color: var(--amvg-header-bg-color, #FAE10C);
-                                color: var(--amvg-header-text-color, #000080);
+                background-color: var(--amvg-header-bg-color, #FAE10C);
+                color: var(--amvg-header-text-color, #000080);
                 border-width: 0;
                 text-align: left;
               }
@@ -156,40 +155,39 @@ class ContentAnotherMVG extends HTMLElement {
               /* Column widths and spacing */
               .label {
                 width: 10%;
-                                padding: 6px 8px;
               }
               .destination {
                 width: 60%;
-                                padding: 6px 8px;
+                padding: 0px 8px;
                 text-wrap: wrap;
-                                color: var(--amvg-text-color, #FFFFFF);
+                color: var(--amvg-text-color, #FFFFFF);
               }
               .track {
-                                padding: 6px 8px;
+                padding: 0px 8px;
                 width: fit-content;
-                                color: var(--amvg-text-color, #FFFFFF);
+                color: var(--amvg-text-color, #FFFFFF);
               }
               .time {
-                                padding: 6px 8px;
+                padding: 0px 8px;
                 width: fit-content;
                 white-space: nowrap;
-                                color: var(--amvg-text-color, #FFFFFF);
+                color: var(--amvg-text-color, #FFFFFF);
               }
               .labelHL {
                 width: 10%;
-                                padding: 8px 8px;
+                padding: 8px 8px;
               }
               .destinationHL {
                 width: 60%;
-                                padding: 8px 8px;
+                padding: 8px 8px;
                 text-wrap: wrap;
               }
               .trackHL {
-                                padding: 8px 8px;
+                padding: 8px 8px;
                 width: fit-content;
               }
               .timeHL {
-                                padding: 8px 8px;
+                padding: 8px 8px;
                 width: fit-content;
                 white-space: nowrap;
               }
@@ -206,13 +204,15 @@ class ContentAnotherMVG extends HTMLElement {
                 color: #FFFFFF;
                 background-color: #000000;
                 border: 1px solid #FFFFFF;
-                font-size:0.9em;
+                font-size:0.8em;
                 margin-right:0.5em;
                 margin-left:0.1em;
                 display: block;
                 text-align: center;
                 width: 35px;
-                                margin: 4px 0;
+                margin: 0px 0;
+                padding: 0 2px;
+                border-radius: 8px;
               }
               
               /* BUS */
