@@ -68,7 +68,7 @@ class AnotherMvgCardRegistration:
                             card.get("name"),
                             card.get("version"),
                         )
-                        await self.hass.data["lovelace"]["resources"].async_update_item(
+                        await self.hass.data["lovelace"].resources.async_update_item(
                             res.get("id"),
                             {
                                 "res_type": "module",
@@ -90,7 +90,7 @@ class AnotherMvgCardRegistration:
                     card.get("name"),
                     card.get("version"),
                 )
-                await self.hass.data["lovelace"]["resources"].async_create_item(
+                await self.hass.data["lovelace"].resources.async_create_item(
                     {"res_type": "module", "url": url + "?v=" + card.get("version")}
                 )
 
@@ -105,18 +105,16 @@ class AnotherMvgCardRegistration:
 
     async def async_unregister(self):
         # Unload lovelace module resource
-        if self.hass.data["lovelace"]["mode"] == "storage":
+        if self.hass.data["lovelace"].mode == "storage":
             for card in ANOTHER_MVG_CARDS:
                 url = f"{URL_BASE}/{card.get('filename')}"
                 another_mvg_resources = [
                     resource
-                    for resource in self.hass.data["lovelace"][
-                        "resources"
-                    ].async_items()
+                    for resource in self.hass.data["lovelace"].resources.async_items()
                     if str(resource["url"]).startswith(url)
                 ]
                 for resource in another_mvg_resources:
-                    await self.hass.data["lovelace"]["resources"].async_delete_item(
+                    await self.hass.data["lovelace"].resources.async_delete_item(
                         resource.get("id")
                     )
 
