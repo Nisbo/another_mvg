@@ -17,10 +17,10 @@ class AnotherMvgCardRegistration:
     async def async_register(self):
         await self.async_register_another_mvg_path()
         try:
-            lovelace_config = self.hass.config["lovelace"]
-            if lovelace_config.get("mode") == "storage":
+            lovelace_config = getattr(self.hass.config, 'lovelace', None)
+            if lovelace_config and isinstance(lovelace_config, dict) and lovelace_config.get("mode") == "storage":
                 await self.async_wait_for_lovelace_resources()
-        except (KeyError, AttributeError):
+        except (AttributeError, TypeError):
             # If lovelace config is not available or not in expected format
             pass
 
@@ -111,8 +111,8 @@ class AnotherMvgCardRegistration:
     async def async_unregister(self):
         # Unload lovelace module resource
         try:
-            lovelace_config = self.hass.config["lovelace"]
-            if lovelace_config.get("mode") == "storage":
+            lovelace_config = getattr(self.hass.config, 'lovelace', None)
+            if lovelace_config and isinstance(lovelace_config, dict) and lovelace_config.get("mode") == "storage":
                 for card in ANOTHER_MVG_CARDS:
                     url = f"{URL_BASE}/{card.get('filename')}"
                     another_mvg_resources = [
