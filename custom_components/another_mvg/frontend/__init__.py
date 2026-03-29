@@ -16,8 +16,13 @@ class AnotherMvgCardRegistration:
 
     async def async_register(self):
         await self.async_register_another_mvg_path()
-        if self.hass.config.get("lovelace", {}).get("mode") == "storage":
-            await self.async_wait_for_lovelace_resources()
+        try:
+            lovelace_config = self.hass.config["lovelace"]
+            if lovelace_config.get("mode") == "storage":
+                await self.async_wait_for_lovelace_resources()
+        except (KeyError, AttributeError):
+            # If lovelace config is not available or not in expected format
+            pass
 
     # install card resources
     async def async_register_another_mvg_path(self):
@@ -105,18 +110,23 @@ class AnotherMvgCardRegistration:
 
     async def async_unregister(self):
         # Unload lovelace module resource
-        if self.hass.config.get("lovelace", {}).get("mode") == "storage":
-            for card in ANOTHER_MVG_CARDS:
-                url = f"{URL_BASE}/{card.get('filename')}"
-                another_mvg_resources = [
-                    resource
-                    for resource in self.hass.data["lovelace"].resources.async_items()
-                    if str(resource["url"]).startswith(url)
-                ]
-                for resource in another_mvg_resources:
-                    await self.hass.data["lovelace"].resources.async_delete_item(
-                        resource.get("id")
-                    )
+        try:
+            lovelace_config = self.hass.config["lovelace"]
+            if lovelace_config.get("mode") == "storage":
+                for card in ANOTHER_MVG_CARDS:
+                    url = f"{URL_BASE}/{card.get('filename')}"
+                    another_mvg_resources = [
+                        resource
+                        for resource in self.hass.data["lovelace"].resources.async_items()
+                        if str(resource["url"]).startswith(url)
+                    ]
+                    for resource in another_mvg_resources:
+                        await self.hass.data["lovelace"].resources.async_delete_item(
+                            resource.get("id")
+                        )
+        except (KeyError, AttributeError):
+            # If lovelace config is not available or not in expected format
+            pass
 
     async def async_remove_gzip_files(self):
         path = self.hass.config.path("custom_components/another_mvg/frontend")
