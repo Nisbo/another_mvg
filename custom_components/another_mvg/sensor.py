@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
+import aiohttp
+import asyncio
 import logging
 import time
-import requests
-from requests import HTTPError, Timeout
 import urllib.parse
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
@@ -265,7 +265,7 @@ class ConnectionInfo(SensorEntity):
         """Getter-Method"""
         return self._maxConnectionErrorTime
 
-    @dataOutdated.setter
+    @maxConnectionErrorTime.setter
     def maxConnectionErrorTime(self, value):
         """Setter-Method"""
         self._maxConnectionErrorTime = value
@@ -311,11 +311,11 @@ class ConnectionInfo(SensorEntity):
         readable_transport_type = transport_map.get(transport_type, transport_type)
         
         # make date objects
-        planned_departure_datetime = datetime.utcfromtimestamp(plannedDepartureTime / 1000)
-        realtime_departure_datetime = datetime.utcfromtimestamp(realtimeDepartureTime / 1000)
+        planned_departure_datetime = datetime.fromtimestamp(plannedDepartureTime / 1000, tz=timezone.utc)
+        realtime_departure_datetime = datetime.fromtimestamp(realtimeDepartureTime / 1000, tz=timezone.utc)
 
         # calculate time diff in minues
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         time_diff =  realtime_departure_datetime - current_time
         realtime_departure_diff_minutes = time_diff.total_seconds() / 60  # minutes with decimals
         minutes_difference = int(realtime_departure_diff_minutes)         # round, "cut" the decimals with int
@@ -385,9 +385,9 @@ class ConnectionInfo(SensorEntity):
         
         self.nextDeparture = departure_info
   
-    def update(self) -> None:
+    async def async_update(self) -> None:
         """Fetch new state data for the sensor."""
-        self._custom_attributes["departures"] = self.get_departures()
+        self._custom_attributes["departures"] = await self.get_departures()
         self._custom_attributes["dataOutdated"] = self._dataOutdated
         self._custom_attributes["maxConnectionErrorTime"] = self._maxConnectionErrorTime
         
@@ -421,7 +421,7 @@ class ConnectionInfo(SensorEntity):
         
         return dt_converted
         
-    def get_departures(self) -> str:
+    async def get_departures(self) -> str:
         """Get departure data."""
 
         # check if self._custom_attributes is set to avoid undefined messages if the API is down or if there is an error
@@ -448,13 +448,13 @@ class ConnectionInfo(SensorEntity):
 
         # 1st API call for globalid1
         try:
-            data = self.get_api_for_globalid(
+            data = await self.get_api_for_globalid(
                 self._name, self._globalid, self._offsetInMinutes, self._transporttypes
             )
 
             # If data is empty, check if there are results for the next day
             if not data or len(data) < (self._limit + self._increased_limit): 
-                data = self.fetch_additional_data_for_next_day(data, self._name, self._globalid, self._transporttypes)
+                data = await self.fetch_additional_data_for_next_day(data, self._name, self._globalid, self._transporttypes)
 
 
         except MVGException as ex:
@@ -485,15 +485,15 @@ class ConnectionInfo(SensorEntity):
         # 2nd API call for globalid2
         if self._globalid2:
             # wait 1 second because of 509 error
-            time.sleep(1)
+            await asyncio.sleep(1)
             try:
-                data2 = self.get_api_for_globalid(
+                data2 = await self.get_api_for_globalid(
                     self._name, self._globalid2, self._offsetInMinutes, self._transporttypes
                 )
 
                 # If data2 is empty, check if there are results for the next day
                 if not data2 or len(data2) < (self._limit + self._increased_limit):  # Überprüft, ob die Liste leer ist
-                    data2 = self.fetch_additional_data_for_next_day(data2, self._name, self._globalid2, self._transporttypes)
+                    data2 = await self.fetch_additional_data_for_next_day(data2, self._name, self._globalid2, self._transporttypes)
 
             except MVGException as ex:
                 # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
@@ -554,7 +554,7 @@ class ConnectionInfo(SensorEntity):
 
 
 
-    def fetch_additional_data_for_next_day(self, data, name, globalid, transporttypes):
+    async def fetch_additional_data_for_next_day(self, data, name, globalid, transporttypes):
         # wait 1 second because of 509 error
         time.sleep(1)
 
@@ -582,7 +582,7 @@ class ConnectionInfo(SensorEntity):
             )
 
         # get additional data from API
-        additional_data = self.get_api_for_globalid(name, globalid, minutes_to_midnight, transporttypes)
+        additional_data = await self.get_api_for_globalid(name, globalid, minutes_to_midnight, transporttypes)
 
         # merge it
         if additional_data:
@@ -668,8 +668,8 @@ class ConnectionInfo(SensorEntity):
             
             #if counter == 1:
                 
-            current_time = datetime.utcnow()
-            time_diff    = datetime.utcfromtimestamp(departure["realtimeDepartureTime"] / 1000) - current_time
+            current_time = datetime.now(timezone.utc)
+            time_diff    = datetime.fromtimestamp(departure["realtimeDepartureTime"] / 1000, tz=timezone.utc) - current_time
             
             # already departured
             if time_diff.total_seconds() < 0:
@@ -765,7 +765,7 @@ class ConnectionInfo(SensorEntity):
         
         return departures
 
-    def get_api_for_globalid(self, name: str, global_id: str, offsetInMinutes: int, transport_types: str) -> dict:
+    async def get_api_for_globalid(self, name: str, global_id: str, offsetInMinutes: int, transport_types: str) -> dict:
         """Get departure data from API, fallback to proxy server if needed."""
         url = URL.format(global_id, offsetInMinutes, transport_types)
         headers = {"User-Agent": USER_AGENT}
@@ -773,20 +773,18 @@ class ConnectionInfo(SensorEntity):
         if self._proxyURL:
             proxy_url = f"{self._proxyURL}?urlToOpen={urllib.parse.quote(url, safe='')}"
 
-        #_LOGGER.error("AnotherMVG: Test for %s - %s value: %s", global_id, name, self._proxyUsetime)
-    
         # check if _maxConnectionErrorTime 0 or older than 10 minutes (default)
-        #if self._maxConnectionErrorTime == 0 or (time.time() - self._maxConnectionErrorTime) > self._proxyUsetime:
         if not self._forceProxy and (self._maxConnectionErrorTime == 0 or (time.time() - self._maxConnectionErrorTime) > self._proxyUsetime):
             self._maxConnectionErrorTime = 0 # reset
             try:
-                req = requests.get(url, headers=headers, timeout=10, verify=False)
-                if req.ok:
-                    return req.json()
-            except Timeout as ex:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url, headers=headers, timeout=10) as req:
+                        if req.status == 200:
+                            return await req.json()
+            except asyncio.TimeoutError as ex:
                 _LOGGER.error("AnotherMVG: Timeout while connecting to the MVG API for globalid %s - %s - This usually happens if MVG API not available or your internet connection is down. We can do nothing. Normally it will be fixed by its own.", global_id, name)
                 raise MVGException(f"AnotherMVG: Timeout while connecting to the MVG API for globalid {global_id} - {name} - This usually happens if MVG API not available or your internet connection is down. We can do nothing. Normally it will be fixed by its own.") from ex
-            except HTTPError as ex:
+            except aiohttp.ClientError as ex:
                 _LOGGER.error("AnotherMVG: HTTP Connection Problem for globalid %s - %s - %s - This usually happens if MVG API is rejecting the request. We can do nothing. Normally it will be fixed by its own.", global_id, name, str(ex))
                 raise MVGException(f"AnotherMVG: HTTP Connection Problem for globalid {global_id} - {name} - This usually happens if MVG API is rejecting your request. We can do nothing. Normally it will be fixed by its own.") from ex
             except Exception as ex:
@@ -803,11 +801,12 @@ class ConnectionInfo(SensorEntity):
                 else:
                     _LOGGER.warning("AnotherMVG: Proxy due to settings as fallback used for %s - %s", global_id, name)
 
-                proxy_req = requests.get(proxy_url, headers=headers, timeout=10, verify=False)
-                if not self._forceProxy and self._maxConnectionErrorTime == 0:
-                    self._maxConnectionErrorTime = int(time.time())  # set UNIX-Timestamp
-                if proxy_req.ok:
-                    return proxy_req.json()
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(proxy_url, headers=headers, timeout=10) as proxy_req:
+                        if not self._forceProxy and self._maxConnectionErrorTime == 0:
+                            self._maxConnectionErrorTime = int(time.time())  # set UNIX-Timestamp
+                        if proxy_req.status == 200:
+                            return await proxy_req.json()
             except Exception as ex:
                 _LOGGER.error("AnotherMVG: Proxy request failed for %s - %s - %s", global_id, name, str(ex))
                 raise MVGException(f"API and proxy failed for {global_id} - {name}") from ex
