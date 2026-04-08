@@ -51,6 +51,24 @@ class ContentAnotherMVG extends HTMLElement {
         return value.replace(/(\d{1,2}:\d{2}):\d{2}/g, "$1");
     }
 
+    getConfiguredCss(state) {
+        const cardCss = this.config?.customCss;
+        if (typeof cardCss === "string" && cardCss.trim()) {
+            return cardCss;
+        }
+
+        return state?.attributes?.config?.css_code || "";
+    }
+
+    applyCustomCss(state) {
+        const cssCode = this.getConfiguredCss(state);
+        const nextStyleContent = this.baseStyleElementText + (cssCode?.trim() ? `\n${cssCode}` : "");
+
+        if (this.styleElement.textContent !== nextStyleContent) {
+            this.styleElement.textContent = nextStyleContent;
+        }
+    }
+
     buildRenderKey(hass, entityId, state) {
         const configSnapshot = {
             entity: entityId,
@@ -63,7 +81,7 @@ class ContentAnotherMVG extends HTMLElement {
             textColor: this.config?.textColor || "#FFFFFF",
             headerBackgroundColor: this.config?.headerBackgroundColor || "#FAE10C",
             headerTextColor: this.config?.headerTextColor || "#000080",
-            darkMode: hass?.themes?.darkMode ?? false,
+            customCss: this.config?.customCss || "",
             language: hass?.locale?.language || "",
         };
 
@@ -92,7 +110,6 @@ class ContentAnotherMVG extends HTMLElement {
             name: state.attributes?.config?.name || "",
             dataOutdated: this.normalizeDataOutdated(state.attributes?.dataOutdated),
             cssCode: state.attributes?.config?.css_code || "",
-            cssDarkOnly: !!state.attributes?.config?.css_code_darkmode_only,
             departures,
         });
     }
@@ -212,7 +229,7 @@ class ContentAnotherMVG extends HTMLElement {
                 width: 35px;
                 margin: 0px 0;
                 padding: 0 2px;
-                border-radius: 8px;
+                /* border-radius: 8px; */
               }
               
               /* BUS */
@@ -261,6 +278,7 @@ class ContentAnotherMVG extends HTMLElement {
               span.U7 {background: linear-gradient(322deg, #C40C37 50%, #438136 50%);}
               span.U8 {background: linear-gradient(322deg, #F36E31 50%, #C40C37 50%);}
               `
+                        this.baseStyleElementText = this.styleElement.textContent;
             card.appendChild(this.styleElement);
             card.appendChild(this.content);
             this.appendChild(card);
@@ -292,23 +310,7 @@ class ContentAnotherMVG extends HTMLElement {
         this.style.setProperty("--amvg-text-color", textColor);
         this.style.setProperty("--amvg-header-bg-color", headerBackgroundColor);
         this.style.setProperty("--amvg-header-text-color", headerTextColor);
-      
-        if (state?.attributes?.config?.css_code?.trim() && !this.cssCodeApplied) {
-            const onlyDarkMode = state.attributes.config.css_code_darkmode_only;
-            const isDarkMode   = hass.themes.darkMode;
-          
-            if ((onlyDarkMode && isDarkMode) || !onlyDarkMode) {
-                this.styleElement.textContent += state.attributes.config.css_code;
-                this.cssCodeApplied = true; // Apply only ones
-                //console.log("AnotherMVG - own CSS Code added:", state.attributes.config.css_code);
-                //console.log(`AnotherMVG - own CSS Code added (DarkModeOnly: ${onlyDarkMode}, DarkMode: ${isDarkMode})`);
-            } else {
-                //console.log(`AnotherMVG - Skipping CSS Code (DarkModeOnly: ${onlyDarkMode}, DarkMode: ${isDarkMode})`);
-            }
-        }
-        //else if (!state?.attributes?.config?.css_code?.trim() && !this.cssCodeApplied) {
-        //    console.log("AnotherMVG - no CSS Code available or empty.");
-        //}
+        this.applyCustomCss(state);
 
         /* state undefined */
         if (!state || state === "undefined") {
@@ -634,6 +636,16 @@ class ContentAnotherMVGEditor extends HTMLElement {
             this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
         });
         container.appendChild(headerTextColorInput);
+
+        const customCssInput = document.createElement('ha-textfield');
+        customCssInput.label = this.hass.localize("component.another_mvg.cardeditor.custom_css");
+        customCssInput.value = this.config.customCss || "";
+        customCssInput.style.marginTop = "10px";
+        customCssInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, customCss: event.target.value };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(customCssInput);
         
         /* Checkbox for showClock */
         const showClockCheckbox = document.createElement('ha-switch');

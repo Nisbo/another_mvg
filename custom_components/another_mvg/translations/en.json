@@ -10,7 +10,8 @@
         "card_bg_color"          : "Card background color",
         "text_color"             : "Text color",
         "header_bg_color"        : "Header background color",
-        "header_text_color"      : "Header text color"
+        "header_text_color"      : "Header text color",
+        "custom_css"             : "Custom CSS for this card"
     },
     "frontend": {
         "column_type"        : "Type",

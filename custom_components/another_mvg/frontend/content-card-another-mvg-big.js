@@ -63,7 +63,6 @@ class ContentAnotherMVGbig extends HTMLElement {
             textColor: this.config?.textColor || "#FFFFFF",
             headerBackgroundColor: this.config?.headerBackgroundColor || "#FAE10C",
             headerTextColor: this.config?.headerTextColor || "#000080",
-            darkMode: hass?.themes?.darkMode ?? false,
             language: hass?.locale?.language || "",
         };
 
@@ -92,7 +91,6 @@ class ContentAnotherMVGbig extends HTMLElement {
             name: state.attributes?.config?.name || "",
             dataOutdated: this.normalizeDataOutdated(state.attributes?.dataOutdated),
             cssCode: state.attributes?.config?.css_code || "",
-            cssDarkOnly: !!state.attributes?.config?.css_code_darkmode_only,
             departures,
         });
     }
@@ -305,17 +303,9 @@ class ContentAnotherMVGbig extends HTMLElement {
         if (showType)  colspawn += 1;
 
         if (state?.attributes?.config?.css_code?.trim() && !this.cssCodeApplied) {
-            const onlyDarkMode = state.attributes.config.css_code_darkmode_only;
-            const isDarkMode   = hass.themes.darkMode;
-          
-            if ((onlyDarkMode && isDarkMode) || !onlyDarkMode) {
-                this.styleElement.textContent += state.attributes.config.css_code;
-                this.cssCodeApplied = true; // Apply only ones
-                //console.log("AnotherMVG - own CSS Code added:", state.attributes.config.css_code);
-                //console.log(`AnotherMVG - own CSS Code added (DarkModeOnly: ${onlyDarkMode}, DarkMode: ${isDarkMode})`);
-            } else {
-                //console.log(`AnotherMVG - Skipping CSS Code (DarkModeOnly: ${onlyDarkMode}, DarkMode: ${isDarkMode})`);
-            }
+            this.styleElement.textContent += state.attributes.config.css_code;
+            this.cssCodeApplied = true; // Apply only ones
+            //console.log("AnotherMVG - own CSS Code added:", state.attributes.config.css_code);
         }
         //else if (!state?.attributes?.config?.css_code?.trim() && !this.cssCodeApplied) {
         //    console.log("AnotherMVG - no CSS Code available or empty.");

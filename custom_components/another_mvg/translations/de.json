@@ -10,7 +10,8 @@
         "card_bg_color"          : "Hintergrundfarbe der Karte",
         "text_color"             : "Textfarbe",
         "header_bg_color"        : "Hintergrundfarbe der Kopfzeile",
-        "header_text_color"      : "Textfarbe der Kopfzeile"
+        "header_text_color"      : "Textfarbe der Kopfzeile",
+        "custom_css"             : "Eigener CSS-Code fuer diese Karte"
     },
     "frontend": {
         "column_type"        : "Typ",
