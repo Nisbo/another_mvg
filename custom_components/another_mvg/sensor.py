@@ -8,6 +8,8 @@ from zoneinfo import ZoneInfo
 import logging
 import time
 import requests
+import asyncio
+import aiohttp
 from requests import HTTPError, Timeout
 import urllib.parse
 import voluptuous as vol
@@ -17,7 +19,6 @@ from homeassistant.core import HomeAssistant
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-from homeassistant.util import Throttle
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 
 from .const import (
@@ -165,6 +166,22 @@ class Departure:
     trainType: str
     time_diff: int
 
+    def to_dict(self):
+        """Convert Departure object to a dictionary for JSON serialization."""
+        return {
+            "transport_type": self.transport_type,
+            "label": self.label,
+            "destination": self.destination,
+            "track": self.track,
+            "planned_departure": self.planned_departure,
+            "expected_departure": self.expected_departure,
+            "cancelled": self.cancelled,
+            "delay": self.delay,
+            "trainType": self.trainType,
+            "time_diff": self.time_diff,
+        }
+
+
 @dataclass
 class DepartureAlarms:
     """Class to hold departure alarm data."""
@@ -211,7 +228,7 @@ class ConnectionInfo(SensorEntity):
         self._timezoneFrom = config_data.get(CONF_TIMEZONE_FROM)
         self._timezoneTo = config_data.get(CONF_TIMEZONE_TO)
         self._alert_for = config_data.get(CONF_ALERT_FOR)
-        self._lateConnections = ""
+        self._lateConnections = []
         self._nextDeparture = ""
         self._dataOutdated = ""
         self._maxConnectionErrorTime = 0
@@ -228,7 +245,6 @@ class ConnectionInfo(SensorEntity):
                 "css_code_darkmode_only": self._css_code_darkmode_only
             }
         }
-
 
     @property
     def name(self) -> str:
@@ -265,19 +281,25 @@ class ConnectionInfo(SensorEntity):
         """Getter-Method"""
         return self._maxConnectionErrorTime
 
-    @dataOutdated.setter
+    @maxConnectionErrorTime.setter
     def maxConnectionErrorTime(self, value):
         """Setter-Method"""
         self._maxConnectionErrorTime = value
 
     @property
     def lateConnections(self):
-        """Getter-Method"""
+        """Getter for lateConnections"""
         return self._lateConnections
 
     @lateConnections.setter
     def lateConnections(self, value):
-        """Setter-Method"""
+        if not isinstance(value, list):
+            _LOGGER.error(
+                "AnotherMVG: Unable to set lateConnections for %s - Value must be a list. Received: %s ",
+                self._name,
+                repr(value),
+            )
+            return  
         self._lateConnections = value
 
     @property
@@ -290,7 +312,6 @@ class ConnectionInfo(SensorEntity):
         """Setter-Method"""
         self._nextDeparture = value
         
-
     def set_next_departure(self, planned_departure, expected_departure, track, transport_type, label, destination, cancelled, delay, trainType, plannedDepartureTime, realtimeDepartureTime):
         template = self._stats_template
         
@@ -385,12 +406,14 @@ class ConnectionInfo(SensorEntity):
         
         self.nextDeparture = departure_info
   
-    def update(self) -> None:
-        """Fetch new state data for the sensor."""
-        self._custom_attributes["departures"] = self.get_departures()
+    async def async_update(self) -> None:
+        self._custom_attributes["departures"] = [
+            departure.to_dict() if isinstance(departure, Departure) else departure
+            for departure in await self.get_departures()
+        ]
+        
         self._custom_attributes["dataOutdated"] = self._dataOutdated
         self._custom_attributes["maxConnectionErrorTime"] = self._maxConnectionErrorTime
-        
         self.process_late_connections()
 
     def process_late_connections(self):
@@ -421,7 +444,7 @@ class ConnectionInfo(SensorEntity):
         
         return dt_converted
         
-    def get_departures(self) -> str:
+    async def get_departures(self) -> str:
         """Get departure data."""
 
         # check if self._custom_attributes is set to avoid undefined messages if the API is down or if there is an error
@@ -448,14 +471,13 @@ class ConnectionInfo(SensorEntity):
 
         # 1st API call for globalid1
         try:
-            data = self.get_api_for_globalid(
+            data = await self.get_api_for_globalid(
                 self._name, self._globalid, self._offsetInMinutes, self._transporttypes
             )
 
             # If data is empty, check if there are results for the next day
             if not data or len(data) < (self._limit + self._increased_limit): 
-                data = self.fetch_additional_data_for_next_day(data, self._name, self._globalid, self._transporttypes)
-
+                data = await self.fetch_additional_data_for_next_day(data, self._name, self._globalid, self._transporttypes)
 
         except MVGException as ex:
             # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
@@ -485,15 +507,15 @@ class ConnectionInfo(SensorEntity):
         # 2nd API call for globalid2
         if self._globalid2:
             # wait 1 second because of 509 error
-            time.sleep(1)
+            await asyncio.sleep(1)
             try:
-                data2 = self.get_api_for_globalid(
+                data2 = await self.get_api_for_globalid(
                     self._name, self._globalid2, self._offsetInMinutes, self._transporttypes
                 )
 
                 # If data2 is empty, check if there are results for the next day
                 if not data2 or len(data2) < (self._limit + self._increased_limit):  # Überprüft, ob die Liste leer ist
-                    data2 = self.fetch_additional_data_for_next_day(data2, self._name, self._globalid2, self._transporttypes)
+                    data2 = await self.fetch_additional_data_for_next_day(data2, self._name, self._globalid2, self._transporttypes)
 
             except MVGException as ex:
                 # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
@@ -551,12 +573,9 @@ class ConnectionInfo(SensorEntity):
         self._dataOutdated = ""
         return self.pre_process_output(sorted_data)
 
-
-
-
-    def fetch_additional_data_for_next_day(self, data, name, globalid, transporttypes):
+    async def fetch_additional_data_for_next_day(self, data, name, globalid, transporttypes):
         # wait 1 second because of 509 error
-        time.sleep(1)
+        await asyncio.sleep(1)
 
         # calculate minutes till midnight
         now = datetime.now()
@@ -582,7 +601,7 @@ class ConnectionInfo(SensorEntity):
             )
 
         # get additional data from API
-        additional_data = self.get_api_for_globalid(name, globalid, minutes_to_midnight, transporttypes)
+        additional_data = await self.get_api_for_globalid(name, globalid, minutes_to_midnight, transporttypes)
 
         # merge it
         if additional_data:
@@ -590,8 +609,7 @@ class ConnectionInfo(SensorEntity):
 
         return data
 
-
-    def pre_process_output(self, data: dict) -> dict:
+    def pre_process_output(self, data: list) -> list:
         """Preformat necessary values into list of Departure."""
         
         # sort by 'realtimeDepartureTime' asc
@@ -599,7 +617,7 @@ class ConnectionInfo(SensorEntity):
             sorted_data = sorted(data, key=lambda x: x["realtimeDepartureTime"], reverse=False)
         else:
             sorted_data = data
-
+    
         connectioninfos = []
         verbindungen_list = self._alert_for.split(",")
         counter_dict = {wert: 0 for wert in verbindungen_list}
@@ -611,9 +629,7 @@ class ConnectionInfo(SensorEntity):
         
         for departure in sorted_data:
             # if self._onlyline is set, check if it is the correct line
-            if self._onlyline != "" and departure["label"] not in self._onlyline.split(
-                ","
-            ):
+            if self._onlyline != "" and departure["label"] not in self._onlyline.split(","):
                 continue
             
             # if self._hidedestination is set, check if it is the "NOT correct" destination
@@ -642,41 +658,40 @@ class ConnectionInfo(SensorEntity):
                 # If there is no platform available, assume that the departure is from Gleis 2a
                 track = "2a"
             else:
-                # the key 'platform' doesnt exist in Dictionary user
                 track = "---"
-                
+            
             planned_departure = self.convert_timestamp_timezone(
-                        departure["plannedDepartureTime"] / 1000,
-                        self._timezoneFrom,
-                        self._timezoneTo,
-                        "%H:%M",
-                    )
-
-            expected_departure=self.convert_timestamp_timezone(
-                        departure["realtimeDepartureTime"] / 1000,
-                        self._timezoneFrom,
-                        self._timezoneTo,
-                        "%H:%M",
-                    )
+                departure["plannedDepartureTime"] / 1000,
+                self._timezoneFrom,
+                self._timezoneTo,
+                "%H:%M",
+            )
+    
+            expected_departure = self.convert_timestamp_timezone(
+                departure["realtimeDepartureTime"] / 1000,
+                self._timezoneFrom,
+                self._timezoneTo,
+                "%H:%M",
+            )
             
             transport_type = departure["transportType"]
-            label          = departure["label"]
-            destination    = departure["destination"]
-            cancelled      = departure["cancelled"]
-            delay          = departure.get("delayInMinutes", 0)
-            trainType      = departure["trainType"]
+            label = departure["label"]
+            destination = departure["destination"]
+            cancelled = departure["cancelled"]
+            delay = departure.get("delayInMinutes", 0)
+            trainType = departure["trainType"]
             
-            #if counter == 1:
-                
             current_time = datetime.utcnow()
-            time_diff    = datetime.utcfromtimestamp(departure["realtimeDepartureTime"] / 1000) - current_time
+            time_diff = datetime.utcfromtimestamp(departure["realtimeDepartureTime"] / 1000) - current_time
             
-            # already departured
+            # already departed
             if time_diff.total_seconds() < 0:
                 continue
             
-            #if lastRealtimeDepartureTime == 0 or departure["realtimeDepartureTime"] < lastRealtimeDepartureTime:
-            if ((lastRealtimeDepartureTime == 0 and time_diff.total_seconds() > 0) or (departure["realtimeDepartureTime"] < lastRealtimeDepartureTime and time_diff.total_seconds() > 0)):
+            if (
+                (lastRealtimeDepartureTime == 0 and time_diff.total_seconds() > 0) or
+                (departure["realtimeDepartureTime"] < lastRealtimeDepartureTime and time_diff.total_seconds() > 0)
+            ):
                 lastRealtimeDepartureTime = departure["realtimeDepartureTime"]
                 final_departure = {
                     'planned_departure': planned_departure,
@@ -706,38 +721,32 @@ class ConnectionInfo(SensorEntity):
                     time_diff=round(time_diff.total_seconds()),
                 )
             )
-
-            if departure['label'] in counter_dict:
-              counter_dict[departure['label']] += 1
-              label = departure['label']
-
-              # alarm 1, 2, 3
-              if counter_dict[label] in (1, 2, 3):
-                  # in time
-                  #connectioninfos[f'notifyLateMvgConnection{counter_dict[label]}_{label}'] = 0
-                  alarmStatus = 0
-
-                  # Delay
-                  if 'delayInMinutes' in departure and departure['delayInMinutes'] is not None and departure['delayInMinutes'] > 0:
-                      #connectioninfos[f'notifyLateMvgConnection{counter_dict[label]}_{label}'] = departure['delayInMinutes']
-                      alarmStatus = departure.get("delayInMinutes", 0)
-
-                  # Cancelled
-                  if not departure['cancelled']:
-                      # not cancelled
-                      pass
-                  else:
-                      # connectioninfos[f'notifyLateMvgConnection{counter_dict[label]}_{label}'] = -1
-                      alarmStatus = -1
-                  
-                  connectioninfos.append(
-                    DepartureAlarms(
-                      # notifyLateMvgConnectionS4_1
-                      label=departure["label"],
-                      number=counter_dict[label],
-                      delayInMinutes=alarmStatus,
+    
+            if departure["label"] in counter_dict:
+                counter_dict[departure["label"]] += 1
+                label = departure["label"]
+    
+                # alarm 1, 2, 3
+                if counter_dict[label] in (1, 2, 3):
+                    alarmStatus = 0
+    
+                    # Delay
+                    if "delayInMinutes" in departure and departure["delayInMinutes"] is not None and departure["delayInMinutes"] > 0:
+                        alarmStatus = departure.get("delayInMinutes", 0)
+    
+                    # Cancelled
+                    if not departure["cancelled"]:
+                        pass
+                    else:
+                        alarmStatus = -1
+                    
+                    connectioninfos.append(
+                        DepartureAlarms(
+                            label=departure["label"],
+                            number=counter_dict[label],
+                            delayInMinutes=alarmStatus,
+                        )
                     )
-                  )
             
             if len(departures) >= self._limit:
                 break
@@ -765,7 +774,8 @@ class ConnectionInfo(SensorEntity):
         
         return departures
 
-    def get_api_for_globalid(self, name: str, global_id: str, offsetInMinutes: int, transport_types: str) -> dict:
+
+    async def get_api_for_globalid(self, name: str, global_id: str, offsetInMinutes: int, transport_types: str) -> dict:
         """Get departure data from API, fallback to proxy server if needed."""
         url = URL.format(global_id, offsetInMinutes, transport_types)
         headers = {"User-Agent": USER_AGENT}
@@ -780,17 +790,24 @@ class ConnectionInfo(SensorEntity):
         if not self._forceProxy and (self._maxConnectionErrorTime == 0 or (time.time() - self._maxConnectionErrorTime) > self._proxyUsetime):
             self._maxConnectionErrorTime = 0 # reset
             try:
-                req = requests.get(url, headers=headers, timeout=10, verify=False)
-                if req.ok:
-                    return req.json()
-            except Timeout as ex:
-                _LOGGER.error("AnotherMVG: Timeout while connecting to the MVG API for globalid %s - %s - This usually happens if MVG API not available or your internet connection is down. We can do nothing. Normally it will be fixed by its own.", global_id, name)
-                raise MVGException(f"AnotherMVG: Timeout while connecting to the MVG API for globalid {global_id} - {name} - This usually happens if MVG API not available or your internet connection is down. We can do nothing. Normally it will be fixed by its own.") from ex
-            except HTTPError as ex:
-                _LOGGER.error("AnotherMVG: HTTP Connection Problem for globalid %s - %s - %s - This usually happens if MVG API is rejecting the request. We can do nothing. Normally it will be fixed by its own.", global_id, name, str(ex))
-                raise MVGException(f"AnotherMVG: HTTP Connection Problem for globalid {global_id} - {name} - This usually happens if MVG API is rejecting your request. We can do nothing. Normally it will be fixed by its own.") from ex
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url, headers=headers, timeout=10) as req:
+                        if req.ok:
+                            return await req.json()
+
+            except asyncio.CancelledError:
+                raise
+
+            except asyncio.TimeoutError as ex:
+                _LOGGER.error("AnotherMVG: Timeout while connecting to the MVG API for globalid %s - %s - This usually happens if MVG API not available or your internet connection is down. This can also happens if MVG API is rejecting your request. We can do nothing. Normally it will be fixed by its own.", global_id, name)
+                raise MVGException(f"AnotherMVG: Timeout while connecting to the MVG API for globalid {global_id} - {name} - This usually happens if MVG API not available or your internet connection is down. This can also happens if MVG API is rejecting your request. We can do nothing. Normally it will be fixed by its own.") from ex
+
+            except aiohttp.ClientError as ex:
+                _LOGGER.error("AnotherMVG: HTTP Connection Problem (ClientError) for globalid %s - %s - %s - This usually happens if MVG API is rejecting the request. We can do nothing. Normally it will be fixed by its own.", global_id, name, str(ex))
+                raise MVGException(f"AnotherMVG: HTTP Connection Problem (ClientError) for globalid {global_id} - {name} - This usually happens if MVG API is rejecting your request. We can do nothing. Normally it will be fixed by its own.") from ex
+
             except Exception as ex:
-                _LOGGER.error("AnotherMVG: Other problem while connecting to the MVG API for %s - %s - %s", global_id, name, str(ex))
+                _LOGGER.exception("AnotherMVG: 2. Other problem while connecting to the MVG API for %s - %s", global_id, name)
                 if not self._proxyURL:
                     raise MVGException(f"AnotherMVG: Other problem while connecting to the MVG API for {global_id} - {name}") from ex
                 # no `raise`, to use the fallback via `mvg.php`
@@ -803,13 +820,18 @@ class ConnectionInfo(SensorEntity):
                 else:
                     _LOGGER.warning("AnotherMVG: Proxy due to settings as fallback used for %s - %s", global_id, name)
 
-                proxy_req = requests.get(proxy_url, headers=headers, timeout=10, verify=False)
-                if not self._forceProxy and self._maxConnectionErrorTime == 0:
-                    self._maxConnectionErrorTime = int(time.time())  # set UNIX-Timestamp
-                if proxy_req.ok:
-                    return proxy_req.json()
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(proxy_url, headers=headers, timeout=10) as proxy_req:
+                        if not self._forceProxy and self._maxConnectionErrorTime == 0:
+                            self._maxConnectionErrorTime = int(time.time())  # set UNIX-Timestamp
+                        if proxy_req.ok:
+                            return await proxy_req.json()
+
+            except asyncio.CancelledError:
+                raise
+
             except Exception as ex:
-                _LOGGER.error("AnotherMVG: Proxy request failed for %s - %s - %s", global_id, name, str(ex))
+                _LOGGER.exception("AnotherMVG: Proxy request failed for %s - %s - %s - Looks like also the Proxy can not reach the API. Maybe the API or the Proxy is down.", global_id, name, str(ex))
                 raise MVGException(f"API and proxy failed for {global_id} - {name}") from ex
     
             raise MVGException(f"AnotherMVG: API and proxy failed for {global_id} - {name}")

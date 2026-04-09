@@ -6,7 +6,12 @@
         "hide_track"             : "Gleis ausblenden",
         "show_type"              : "Verkehrsmittel anzeigen",
         "departure_options"      : "Anzeigeoptionen für die Spalte 'Abfahrt'",
-        "departure_options_desc" : "Im Beispiel ist es 16:22 und 16:27 ist die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist somit die aktuelle Abfahrtszeit. Wird nur die aktuelle Abfahrtszeit (Option 3) angezeigt, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt. Option 4 zeigt die verbleibenden Minuten (abgerundet) bis zur aktuellen Abfahrt. Option 5 zeigt ebenfalls die verbleibenden Minuten (abgerundet) und zusätzlich die Verspätung in Klammern."
+        "departure_options_desc" : "Im Beispiel ist es 16:22 und 16:27 ist die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist somit die aktuelle Abfahrtszeit. Wird nur die aktuelle Abfahrtszeit (Option 3) angezeigt, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt. Option 4 zeigt die verbleibenden Minuten (abgerundet) bis zur aktuellen Abfahrt. Option 5 zeigt ebenfalls die verbleibenden Minuten (abgerundet) und zusätzlich die Verspätung in Klammern.",
+        "card_bg_color"          : "Hintergrundfarbe der Karte",
+        "text_color"             : "Textfarbe",
+        "header_bg_color"        : "Hintergrundfarbe der Kopfzeile",
+        "header_text_color"      : "Textfarbe der Kopfzeile",
+        "custom_css"             : "Eigener CSS-Code für diese Karte"
     },
     "frontend": {
         "column_type"        : "Typ",

@@ -1,12 +1,70 @@
+/* AnotherMVG */
+const version = "2.2.0-BETA-6";
+
 class ContentAnotherMVG extends HTMLElement {
+    constructor(){
+        super();
+
+        console.log(
+            "%cAnotherMVG %cv" + version,
+            "color:#fff;background:#2196f3;padding:2px 6px;border-radius:3px;",
+            "color:#fff;background:#4caf50;padding:2px 6px;border-radius:3px;"
+        );
+    }
+
     set hass(hass) {
-        if (!this.content) this.loadTranslations(hass);
+        const state = hass.states[this.config.entity];
+        const newData = state?.attributes?.departures;
+
+        if (this._lastData === newData && this._translationsLoaded) return;
+
+        this._lastData = newData;
+
+        // load translations only once
+        if (!this._translationsRequested) {
+            this._translationsRequested = true;
+            this.loadTranslations(hass);
+        }
+
+        // check if translations are loaded
+        if (!this._translationsLoaded) {
+            const test = hass.localize("component.another_mvg.frontend.column_type");
+            if (test) {
+                this._translationsLoaded = true;
+                console.log("AnotherMVG - translations ready.");
+            }
+        }
+
+        //console.log("AnotherMVG - Data Update received for: ", this.config.entity);
+
         this.render(hass);
     }
-    
+
     async loadTranslations(hass) {
-        await hass.loadBackendTranslation("frontend", "another_mvg");
-        console.log("AnotherMVG - custom translations should be loaded");
+        try {
+            await hass.loadBackendTranslation("frontend", "another_mvg");
+            // console.log("AnotherMVG - translations requested");
+        } catch (e) {
+            console.warn("AnotherMVG - translation load failed", e);
+        }
+    }
+
+    getConfiguredCss(state) {
+        const cardCss = this.config?.customCss;
+        if (typeof cardCss === "string" && cardCss.trim()) {
+            return cardCss;
+        }
+
+        return state?.attributes?.config?.css_code || "";
+    }
+
+    applyCustomCss(state) {
+        const cssCode = this.getConfiguredCss(state);
+        const nextStyleContent = this.baseStyleElementText + (cssCode?.trim() ? `\n${cssCode}` : "");
+
+        if (this.styleElement.textContent !== nextStyleContent) {
+            this.styleElement.textContent = nextStyleContent;
+        }
     }
 
     render(hass) {
@@ -18,7 +76,7 @@ class ContentAnotherMVG extends HTMLElement {
             this.styleElement.textContent = `
               /* Card background */
               .amvg-container {
-                background-color: #000080;
+                background-color: var(--amvg-card-bg-color, #000080);
                 border-radius: var(--ha-card-border-radius,12px);
                 padding-bottom: 5px;
               }
@@ -28,7 +86,7 @@ class ContentAnotherMVG extends HTMLElement {
                 font-weight: bold;
                 font-size:1.0em;
                 padding: 2px 0 2px 8px;
-                color: #FFFFFF;
+                color: var(--amvg-text-color, #FFFFFF);
               }
               
               /* Table */
@@ -40,8 +98,8 @@ class ContentAnotherMVG extends HTMLElement {
               /* Table Header - Linie, Ziel, Gleis, Abfahrt */
               .amvg-headline {
                 font-weight: bold;
-                background-color: #FAE10C;
-                color: #000080;
+                background-color: var(--amvg-header-bg-color, #FAE10C);
+                color: var(--amvg-header-text-color, #000080);
                 border-width: 0;
                 text-align: left;
               }
@@ -54,18 +112,19 @@ class ContentAnotherMVG extends HTMLElement {
               .destination {
                 width: 60%;
                 text-wrap: wrap;
-                color: #FFFFFF;
+                color: var(--amvg-text-color, #FFFFFF);
+
               }
               .track {
                 padding: 0 5px;
                 width: fit-content;
-                color: #FFFFFF;
+                color: var(--amvg-text-color, #FFFFFF);
               }
               .time {
                 padding-right: 5px;
                 width: fit-content;
                 white-space: nowrap;
-                color: #FFFFFF;
+                color: var(--amvg-text-color, #FFFFFF);
               }
               .labelHL {
                 width: 10%;
@@ -152,6 +211,7 @@ class ContentAnotherMVG extends HTMLElement {
               span.U7 {background: linear-gradient(322deg, #C40C37 50%, #438136 50%);}
               span.U8 {background: linear-gradient(322deg, #F36E31 50%, #C40C37 50%);}
               `
+            this.baseStyleElementText = this.styleElement.textContent;
             card.appendChild(this.styleElement);
             card.appendChild(this.content);
             this.appendChild(card);
@@ -159,12 +219,16 @@ class ContentAnotherMVG extends HTMLElement {
       
         const entityId         = this.config.entity;
         const state            = hass.states[entityId];
-        const stateStr         = state ? state.state : "unavailable";
         const departureFormat  = this.config.displayOptions && ["1", "2", "3", "4", "5"].includes(this.config.displayOptions) ? this.config.displayOptions : "1"; // 1 as default
         const hideTrack        = this.config.hideTrack ?? false; // false as default
         const showType         = this.config.showType  ?? false; // false as default
         const showClock        = this.config.showClock ?? false; // false as default
         const hideName         = this.config.hideName  ?? false; // false as default
+        const cardBackgroundColor   = this.config.cardBackgroundColor   || "#000080";
+        const textColor             = this.config.textColor             || "#FFFFFF";
+        const headerBackgroundColor = this.config.headerBackgroundColor || "#FAE10C";
+        const headerTextColor       = this.config.headerTextColor       || "#000080";
+
         const transportTypeMap = {
             "REGIONAL_BUS" : "R-Bus",
             "BUS"          : "Bus",
@@ -174,6 +238,12 @@ class ContentAnotherMVG extends HTMLElement {
             "BAHN"         : "Bahn"
         };
       
+        this.style.setProperty("--amvg-card-bg-color", cardBackgroundColor);
+        this.style.setProperty("--amvg-text-color", textColor);
+        this.style.setProperty("--amvg-header-bg-color", headerBackgroundColor);
+        this.style.setProperty("--amvg-header-text-color", headerTextColor);
+        this.applyCustomCss(state);
+
         if (state?.attributes?.config?.css_code?.trim() && !this.cssCodeApplied) {
             const onlyDarkMode = state.attributes.config.css_code_darkmode_only;
             const isDarkMode   = hass.themes.darkMode;
@@ -327,8 +397,6 @@ class ContentAnotherMVG extends HTMLElement {
 }
 
 
-
-
 class ContentAnotherMVGEditor extends HTMLElement {
     constructor() {
         super();
@@ -336,14 +404,43 @@ class ContentAnotherMVGEditor extends HTMLElement {
     }
 
     async connectedCallback() {
-        //await Promise.resolve({});
-        await this.loadTranslations();
+        // load translations only once
+        if (!this._translationsRequested) {
+            this._translationsRequested = true;
+            await this.loadTranslations(this.hass);
+        }
+
+        // check if translations are loaded
+        if (!this._translationsLoaded) {
+            const test = this.hass.localize("component.another_mvg.cardeditor.card_bg_color");
+            if (test) {
+                this._translationsLoaded = true;
+                console.log("AnotherMVG EDITOR - translations ready.");
+            } else {
+                console.warn("AnotherMVG EDITOR - translations not loaded yet. Will try to load it again.");
+                // Try to load it again
+                await this.loadTranslations(this.hass);
+
+                const testAgain = this.hass.localize("component.another_mvg.cardeditor.card_bg_color");
+                if (testAgain) {
+                    this._translationsLoaded = true;
+                    console.log("AnotherMVG EDITOR - translations ready.");
+                } else {
+                    console.warn("AnotherMVG EDITOR - translations not loaded after 2nd try. Try to refresh the page or open the editor again. If the problem persists, there might be an issue with the translation files.");
+                }
+            }
+        }
+
         this.render();
     }
 
     async loadTranslations() {
-        console.log("AnotherMVG - load custom translation - cardeditor");
-        await this.hass.loadBackendTranslation("cardeditor", "another_mvg");
+        try {
+            await this.hass.loadBackendTranslation("cardeditor", "another_mvg");
+            //console.log("AnotherMVG EDITOR - translations requested");
+        } catch (e) {
+            console.warn("AnotherMVG EDITOR - translation load failed", e);
+        }
     }
 
     setConfig(config) {
@@ -459,6 +556,57 @@ class ContentAnotherMVGEditor extends HTMLElement {
         displayOptionsSelectLabel2.innerText = this.hass.localize("component.another_mvg.cardeditor.departure_options_desc");
         displayOptionsSelectLabel2.style.marginTop = "10px";
         container.appendChild(displayOptionsSelectLabel2);
+
+        /* Color options */
+        const cardBackgroundColorInput = document.createElement('ha-textfield');
+        cardBackgroundColorInput.label = this.hass.localize("component.another_mvg.cardeditor.card_bg_color");
+        cardBackgroundColorInput.value = this.config.cardBackgroundColor || "#000080";
+        cardBackgroundColorInput.style.marginTop = "10px";
+        cardBackgroundColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, cardBackgroundColor: event.target.value.trim() || "#000080" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(cardBackgroundColorInput);
+
+        const textColorInput = document.createElement('ha-textfield');
+        textColorInput.label = this.hass.localize("component.another_mvg.cardeditor.text_color");
+        textColorInput.value = this.config.textColor || "#FFFFFF";
+        textColorInput.style.marginTop = "10px";
+        textColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, textColor: event.target.value.trim() || "#FFFFFF" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(textColorInput);
+
+        const headerBackgroundColorInput = document.createElement('ha-textfield');
+        headerBackgroundColorInput.label = this.hass.localize("component.another_mvg.cardeditor.header_bg_color");
+        headerBackgroundColorInput.value = this.config.headerBackgroundColor || "#FAE10C";
+        headerBackgroundColorInput.style.marginTop = "10px";
+        headerBackgroundColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, headerBackgroundColor: event.target.value.trim() || "#FAE10C" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(headerBackgroundColorInput);
+
+        const headerTextColorInput = document.createElement('ha-textfield');
+        headerTextColorInput.label = this.hass.localize("component.another_mvg.cardeditor.header_text_color");
+        headerTextColorInput.value = this.config.headerTextColor || "#000080";
+        headerTextColorInput.style.marginTop = "10px";
+        headerTextColorInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, headerTextColor: event.target.value.trim() || "#000080" };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(headerTextColorInput);
+
+        const customCssInput = document.createElement('ha-textfield');
+        customCssInput.label = this.hass.localize("component.another_mvg.cardeditor.custom_css");
+        customCssInput.value = this.config.customCss || "";
+        customCssInput.style.marginTop = "10px";
+        customCssInput.addEventListener('change', (event) => {
+            this.config = { ...this.config, customCss: event.target.value };
+            this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
+        });
+        container.appendChild(customCssInput);
         
         /* Checkbox for showClock */
         const showClockCheckbox = document.createElement('ha-switch');
@@ -573,43 +721,6 @@ class AnotherMVGCustomSelect extends HTMLElement {
 customElements.define('another-mvg-custom-select', AnotherMVGCustomSelect);
 customElements.define("content-card-another-mvg", ContentAnotherMVG);
 customElements.define("content-card-another-mvg-editor", ContentAnotherMVGEditor);
-
-for (var state of Object.values(document.querySelector("home-assistant").hass.states)) {
-  //if (state.attributes["run_state"] !== undefined) {
-    //return { entity: state.entity_id };
-//console.log("AnotherMVG - test: ", state.entity_id);
-  //}
-}
-
-async function loadTranslations() {
-    var hass = document.querySelector("home-assistant")?.hass;
-    
-    if (!hass) {
-        console.error("Home Assistant not found!");
-        return;
-    }
-
-    await hass.loadBackendTranslation("frontend", "another_mvg");
-    await Promise.resolve({});
-    console.log("Loaded Resources:", hass.resources);
-
-    // Wait if it last longer (max. 5 seconds)
-    const startTime = Date.now();
-    while (Date.now() - startTime < 5000) {
-        const columnTypeLabel = hass.localize("component.another_mvg.frontend.column_type");
-        if (columnTypeLabel && columnTypeLabel !== "") {
-            console.log("Translation for column_type:", columnTypeLabel);
-            return;
-        }
-        await new Promise(resolve => setTimeout(resolve, 200)); // Warte 200ms und prüfe erneut
-        console.log("2nd Test for Translation for column_type:", columnTypeLabel);
-
-    }
-
-    console.warn("Translation not found after waiting.");
-}
-
-loadTranslations();
 
 // add the card to the list of custom cards for the card picker
 window.customCards = window.customCards || []; // Create the list if it doesn't exist.

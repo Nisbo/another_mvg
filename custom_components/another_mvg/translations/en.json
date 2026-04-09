@@ -6,7 +6,12 @@
         "hide_track"             : "Hide track",
         "show_type"              : "Show transport type",
         "departure_options"      : "Display options for the 'Departure' column",
-        "departure_options_desc" : "In the example it is 16:22 and 16:27 is the scheduled departure time, the train is delayed by 2 minutes and 16:29 is therefore the actual departure time. If only the actual departure time (Option 3) is shown, the time will appear in red if there is a delay. Option 4 shows the remaining minutes (rounded down) until the actual departure. Option 5 also shows the remaining minutes (rounded down) and the delay in parentheses."
+        "departure_options_desc" : "In the example it is 16:22 and 16:27 is the scheduled departure time, the train is delayed by 2 minutes and 16:29 is therefore the actual departure time. If only the actual departure time (Option 3) is shown, the time will appear in red if there is a delay. Option 4 shows the remaining minutes (rounded down) until the actual departure. Option 5 also shows the remaining minutes (rounded down) and the delay in parentheses.",
+        "card_bg_color"          : "Card background color",
+        "text_color"             : "Text color",
+        "header_bg_color"        : "Header background color",
+        "header_text_color"      : "Header text color",
+        "custom_css"             : "Custom CSS for this card"
     },
     "frontend": {
         "column_type"        : "Type",
@@ -191,40 +196,40 @@
                 "data": {
                     "station_name": "Station Name"
                 },
-        "data_description": {
-            "station_name": "Enter the name of the station you want to search for."
-        }
-	    },
-	    "globalid1search": {
-		"title": "Search for your Station / Stop for Global ID1",
-		"description": "Here you can search for the Global ID1.",
-		"data": {
-		    "station_name": "Station Name"
-		},
-		"data_description": {
-		    "station_name": "Enter the name of the station you want to search for."
-		}
-	    },
-	    "globalid1save": {
-		"title": "Select your Station / Stop for Global ID1",
-		"description": "Found Stations / Stops.",
-		"data": {
-		    "globalid": "Global ID 1"
-		},
-		"data_description": {
-		    "globalid": "Select your station / stop from the list above."
-		}
-	    },
-	    "globalid2save": {
-		"title": "Select your Station / Stop for Global ID2",
-		"description": "Found Stations / Stops.",
-		"data": {
-		    "globalid2": "Global ID 2"
-		},
-		"data_description": {
-		    "globalid2": "Select your station / stop from the list above."
-		}
-	    }
+                "data_description": {
+                    "station_name": "Enter the name of the station you want to search for."
+                }
+            },
+            "globalid1search": {
+                "title": "Search for your Station / Stop for Global ID1",
+                "description": "Here you can search for the Global ID1.",
+                "data": {
+                    "station_name": "Station Name"
+                },
+                "data_description": {
+                    "station_name": "Enter the name of the station you want to search for."
+                }
+            },
+            "globalid1save": {
+                "title": "Select your Station / Stop for Global ID1",
+                "description": "Found Stations / Stops.",
+                "data": {
+                    "globalid": "Global ID 1"
+                },
+                "data_description": {
+                    "globalid": "Select your station / stop from the list above."
+                }
+            },
+            "globalid2save": {
+                "title": "Select your Station / Stop for Global ID2",
+                "description": "Found Stations / Stops.",
+                "data": {
+                    "globalid2": "Global ID 2"
+                },
+                "data_description": {
+                    "globalid2": "Select your station / stop from the list above."
+                }
+            }
         }
     }
 }
