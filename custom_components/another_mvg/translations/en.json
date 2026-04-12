@@ -1,17 +1,61 @@
 {
     "cardeditor": {
-        "station_desc"           : "Please select a station from the list.<br /><br />If no entries are displayed, you have not yet created a station, all stations have been deleted/deactivated, or you made changes to the station less than one minute ago.<br /><br />To create a station, click on:<br />'<b>Settings</b>' &rarr; '<b>Devices & Services</b>' &rarr; '<b>ADD INTEGRATION</b>', search for '<b>Another MVG</b>' and follow the instructions.",
+        "station_desc"           : "Please select a station from the list. If no entries are displayed, you have not yet created a station, all stations have been deleted/deactivated, or you made changes to the station less than one minute ago. To create a station, click on: 'Settings' --> 'Devices & Services' --> 'ADD INTEGRATION', search for 'Another MVG' and follow the instructions.",
+
         "show_clock"             : "Show clock at top right",
+        "show_clock_desc"        : "Displays the current time in the top right corner of the card.",
+
+        "clock_with_seconds"     : "Show seconds",
+        "clock_with_seconds_desc": "When showing the current time, also display the seconds.",
+
         "hidename"               : "Hide the card name (including clock)",
+        "hidename_desc"          : "Hides the card title. If the clock is enabled, it will also be hidden.",
+
         "hide_track"             : "Hide track",
+        "hide_track_desc"        : "Hides the track/platform information in the table.",
+
         "show_type"              : "Show transport type",
+        "show_type_desc"         : "Adds an additional column showing the transport type (e.g., bus, subway, tram).",
+
+        "max_departures"         : "Maximum departures",
+        "max_departures_desc"    : "Sets the maximum number of departures to be displayed. It is not possible to show more departures than configured in the entity setup. For example, if you have configured 10 departures in the entity settings, the maximum value you can select here is 10. This allows you to retrieve, for example, 20 departures with a single station and then display them in one card with 5, in another with 10, and in a third with 15 departures.",
+
+        "max_departures_fixed"      : "Maximum number with placeholders",
+        "max_departures_fixed_desc" : "If fewer departures are available than the maximum number of departures, a placeholder display will be used to fill the remaining space. This ensures the card always has the same height, regardless of the number of available departures. If this option is disabled, the card will automatically become smaller if fewer departures are available.",
+
         "departure_options"      : "Display options for the 'Departure' column",
         "departure_options_desc" : "In the example it is 16:22 and 16:27 is the scheduled departure time, the train is delayed by 2 minutes and 16:29 is therefore the actual departure time. If only the actual departure time (Option 3) is shown, the time will appear in red if there is a delay. Option 4 shows the remaining minutes (rounded down) until the actual departure. Option 5 also shows the remaining minutes (rounded down) and the delay in parentheses.",
+
+        "transport_type"          : "Transport type",
+        "transport_type_desc"     : "Here you can select the transport types to be displayed in the card. If you only want to display the subway, select 'U-Bahn' here. If you want to display multiple transport types, select them one by one. If you don't select anything here, all available transport types will be displayed. Please note that the card can only display transport types that have been selected in the entity configuration. If you have only selected 'Bus' in the entity configuration, you cannot select 'U-Bahn' here, as this information is not available in the sensor (entity). However, if you have selected both 'Bus' and 'U-Bahn' in the entity configuration, you can select either only 'Bus', only 'U-Bahn' or both to display the corresponding transport types in the card.",
+
+        "name"                   : "Station name",
+        "name_desc"              : "The name to be displayed for this station in the card. If nothing is entered here, the name from the entity configuration will be used. It is also possible to enter a different name here than in the entity configuration to distinguish between two stations with the same name in a single card. For example, if you have two stations named 'Main Station', you can enter 'Main Station - S-Bahn' and 'Main Station - U-Bahn' here to display them differently in the card.",
+
+        "otherstations"          : "Other stations",
+        "otherstations_desc"     : "Here you can specify up to 4 additional stops that will be displayed on the same card. You can add more stops in the YAML configuration by following the pattern entity6, entity7, etc. The pattern also applies to the display options (displayOptions6, displayOptions7, etc.), the transport types (transportTypes6, transportTypes7, etc.), the maximum number of departures (maxDepartures6, maxDepartures7, etc.), and the name of the stop (name6, name7, etc.).",
+        "entity"                 : "Station",
+        "entity2"                : "Station 2",
+        "entity3"                : "Station 3",
+        "entity4"                : "Station 4",
+        "entity5"                : "Station 5",
+        "colors"                 : "Colors",
+        "options"                : "Display Options",
+
         "card_bg_color"          : "Card background color",
+        "card_bg_color_desc"     : "Sets the background color of the entire card. Hex or rgba color code for standard chips, e.g. '#2196f3' or 'rgba(100,100,255,0.3)'.",
+
         "text_color"             : "Text color",
+        "text_color_desc"        : "Defines the color of all text within the card. Hex or rgba color code for standard chips, e.g. '#2196f3' or 'rgba(100,100,255,0.3)'.",
+
         "header_bg_color"        : "Header background color",
+        "header_bg_color_desc"   : "Sets the background color of the table header row. Hex or rgba color code for standard chips, e.g. '#2196f3' or 'rgba(100,100,255,0.3)'.",
+
         "header_text_color"      : "Header text color",
-        "custom_css"             : "Custom CSS for this card"
+        "header_text_color_desc" : "Defines the text color within the header row. Hex or rgba color code for standard chips, e.g. '#2196f3' or 'rgba(100,100,255,0.3)'.",
+
+        "custom_css"             : "Custom CSS for this card",
+        "custom_css_desc"        : "Here you can enter your own CSS code to customize the card. For multi-line CSS entries, use the pipe symbol '|' in the first line without any additional code. If you want to write the CSS code in a single line, use double \"quotation marks\" before and after the code. Warning: Incorrect CSS code can cause the card to not display correctly. Keep in mind that there is also a CSS option in the entity settings that applies to all cards for this entity. If you want to use the same CSS for all cards, it’s better to use the global CSS option in the entity settings instead of entering the same code in each card. Dont use both options at the same time."
     },
     "frontend": {
         "column_type"        : "Type",
