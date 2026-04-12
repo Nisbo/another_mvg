@@ -1,17 +1,61 @@
 {
     "cardeditor": {
-        "station_desc"           : "Bitte wähle eine Haltestelle aus der Liste aus.<br /><br />Wenn keine Einträge angezeigt werden, hast Du noch keine Haltestelle erstellt, alle Haltestellen wurden gelöscht/deaktiviert oder Du hast vor weniger als 1 Minute eine Änderung an der Haltestelle durchgeführt.<br /><br />Um eine Haltestelle zu erstellen, klicke auf:<br />'<b>Einstellungen</b>' &rarr; '<b>Geräte & Dienste</b>' &rarr; '<b>INTEGRATION HINZUFÜGEN</b>', suche nach '<b>Another MVG</b>' und folge den Anweisungen.",
+        "station_desc"           : "Bitte wähle eine Haltestelle aus der Liste aus. Wenn keine Einträge angezeigt werden, hast Du noch keine Haltestelle erstellt, alle Haltestellen wurden gelöscht/deaktiviert oder Du hast vor weniger als 1 Minute eine Änderung an der Haltestelle durchgeführt. Um eine Haltestelle zu erstellen, klicke auf: `Einstellungen` --> `Geräte & Dienste` --> `INTEGRATION HINZUFÜGEN`, suche nach `Another MVG` und folge den Anweisungen.",
+
         "show_clock"             : "Uhr oben rechts anzeigen",
+        "show_clock_desc"        : "Blendet die aktuelle Uhrzeit oben rechts in der Karte ein.",
+
+        "clock_with_seconds"     : "Sekunden anzeigen",
+        "clock_with_seconds_desc": "Zeigt bei der aktuellen Uhrzeit auch die Sekunden an.",
+
         "hidename"               : "Den Namen der Karte (inkl. Uhr) ausblenden",
+        "hidename_desc"          : "Blendet den Titel der Karte aus. Falls die Uhr aktiviert ist, wird diese ebenfalls ausgeblendet.",
+
         "hide_track"             : "Gleis ausblenden",
+        "hide_track_desc"        : "Blendet die Gleis-/Steig-Information in der Tabelle aus.",
+
         "show_type"              : "Verkehrsmittel anzeigen",
+        "show_type_desc"         : "Zeigt eine zusätzliche Spalte mit dem Verkehrsmittel (z. B. Bus, U-Bahn, Tram) an.",
+
+        "max_departures"         : "Maximale Anzahl der Abfahrten",
+        "max_departures_desc"    : "Legt die maximale Anzahl der anzuzeigenden Abfahrten fest. Es können nicht mehr Abfahrten angezeigt werden, als Du bei der Sensorkonfiguration eingegeben hast. Wenn Du z. B. 10 Abfahrten in der Sensorkonfiguration eingestellt hast, kannst Du hier maximal 10 auswählen. Somit kannst Du mit nur einem Sensor z. B. 20 Abfahrten abrufen und diese dann in einer Karte mit 5, in einer anderen mit 10 und in einer dritten mit 15 Abfahrten anzeigen lassen.",
+
+        "max_departures_fixed"      : "Maximale Anzahl mit Platzhalter",
+        "max_departures_fixed_desc" : "Wenn weniger Abfahrten verfügbar sind als die maximale Anzahl der Abfahrten, wird eine Platzhalter-Anzeige verwendet um den verbleibenden Platz zu füllen. Somit sollte die Karte immer die gleiche Höhe haben, unabhängig von der Anzahl der verfügbaren Abfahrten. Wenn diese Option deaktiviert ist, wird die Karte automatisch kleiner, wenn weniger Abfahrten verfügbar sind.",
+
         "departure_options"      : "Anzeigeoptionen für die Spalte 'Abfahrt'",
         "departure_options_desc" : "Im Beispiel ist es 16:22 und 16:27 ist die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist somit die aktuelle Abfahrtszeit. Wird nur die aktuelle Abfahrtszeit (Option 3) angezeigt, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt. Option 4 zeigt die verbleibenden Minuten (abgerundet) bis zur aktuellen Abfahrt. Option 5 zeigt ebenfalls die verbleibenden Minuten (abgerundet) und zusätzlich die Verspätung in Klammern.",
+
+        "transport_type"          : "Transportart",
+        "transport_type_desc"     : "Hier kannst Du die Transportarten auswählen, die in der Karte angezeigt werden sollen. Wenn Du z. B. nur die U-Bahn anzeigen möchtest, wähle hier 'U-Bahn' aus. Wenn Du mehrere Transportarten anzeigen möchtest, wähle diese nacheinander aus. Wenn Du hier nichts auswählst, werden alle verfügbaren Transportarten angezeigt. Bitte beachte, dass die Karte nur die Transportarten anzeigen kann, die auch in der Entitätskonfiguration ausgewählt wurden. Wenn Du z. B. in der Entitätskonfiguration nur 'Bus' ausgewählt hast, kannst Du hier nicht 'U-Bahn' auswählen, da diese Informationen nicht im Sensor (Entität) verfügbar sind. Wenn Du jedoch in der Entitätskonfiguration sowohl 'Bus' als auch 'U-Bahn' ausgewählt hast, kannst Du hier entweder nur 'Bus', nur 'U-Bahn' oder beide auswählen, um die entsprechenden Transportarten in der Karte anzuzeigen.",
+
+        "name"                   : "Name der Haltestelle",
+        "name_desc"              : "Der Name, der in der Karte für diese Haltestelle angezeigt werden soll. Wird hier nichts eingegeben, wird der Name aus der Entitätskonfiguration verwendet. Es ist auch möglich, hier einen anderen Namen als in der Entitätskonfiguration einzugeben, um z. B. zwei Haltestellen mit demselben Namen in einer Karte zu unterscheiden. Wenn Du z. B. zwei Haltestellen namens 'Hauptbahnhof' hast, kannst Du hier für die eine 'Hauptbahnhof - S-Bahn' und für die andere 'Hauptbahnhof - U-Bahn' eingeben, damit sie in der Karte unterschiedlich angezeigt werden.",
+
+        "otherstations"          : "Weitere Haltestellen",
+        "otherstations_desc"     : "Hier kannst Du bis zu 4 zusätzliche Haltestellen angeben, die in derselben Karte angezeigt werden. Du kannst weitere Haltestellen in der YAML-Konfiguration hinzufügen, indem Du das Muster entity6, entity7, etc. befolgst. Das Muster gilt auch für die Anzeigeoptionen (displayOptions6, displayOptions7, etc.) die Transportmittel (transportTypes6, transportTypes7, etc.) die Anzahl an Abfahrten (maxDepartures6, maxDepartures7, etc.) und den Namen der Haltestelle (name6, name7, etc.).",
+        "entity"                 : "Haltestelle",
+        "entity2"                : "Haltestelle 2",
+        "entity3"                : "Haltestelle 3",
+        "entity4"                : "Haltestelle 4",
+        "entity5"                : "Haltestelle 5",
+        "colors"                 : "Farbeinstellungen",
+        "options"                : "Anzeigeoptionen",
+
         "card_bg_color"          : "Hintergrundfarbe der Karte",
+        "card_bg_color_desc"     : "Legt die Hintergrundfarbe der gesamten Karte fest. Hex- oder rgba-Farbcode eingeben, z. B. ‘#2196f3’, '#6464644D' oder ‘rgba(100,100,100,0.3)’",
+
         "text_color"             : "Textfarbe",
+        "text_color_desc"        : "Bestimmt die Farbe aller Texte innerhalb der Karte. Hex- oder rgba-Farbcode eingeben, z. B. ‘#2196f3’, '#6464644D' oder ‘rgba(100,100,100,0.3)’",
+
         "header_bg_color"        : "Hintergrundfarbe der Kopfzeile",
+        "header_bg_color_desc"   : "Legt die Hintergrundfarbe der Tabellenkopfzeile fest. Hex- oder rgba-Farbcode eingeben, z. B. ‘#2196f3’, '#6464644D' oder ‘rgba(100,100,100,0.3)’",
+
         "header_text_color"      : "Textfarbe der Kopfzeile",
-        "custom_css"             : "Eigener CSS-Code für diese Karte"
+        "header_text_color_desc" : "Bestimmt die Textfarbe innerhalb der Kopfzeile. Hex- oder rgba-Farbcode eingeben, z. B. ‘#2196f3’, '#6464644D' oder ‘rgba(100,100,100,0.3)’",
+
+        "custom_css"             : "Eigener CSS-Code für diese Karte",
+        "custom_css_desc"        : "Hier kannst du eigenen CSS Code eingeben, um die Karte individuell anzupassen. Für Mehrzeilige CSS Eingaben, verwende in der ersten Zeile das Pipe Symbol '|' ohne weiteren Code. Wenn Du den CSS Code nur in eine Zeile schreiben möchtest, verwende die doppelten \"Anführungszeichen\" vor und nach dem Code. Achtung: Falscher CSS Code kann dazu führen, dass die Karte nicht mehr korrekt angezeigt wird. Denke daran, dass es auch eine CSS Option in den Entity Einstellungen gibt, die für alle Karten für diese Entity gilt. Wenn Du den selben CSS Code für alle Karten verwenden möchtest, ist es besser die globale CSS Option in den Entity Einstellungen zu nutzen, anstatt den selben Code in jeder Karte einzugeben. Nutze beide Optionen nicht gleichzeitig."
     },
     "frontend": {
         "column_type"        : "Typ",
