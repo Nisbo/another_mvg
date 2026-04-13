@@ -1,5 +1,5 @@
 /* AnotherMVG */
-const version = "3.0.0-BETA-1";
+const version = "3.0.0-BETA-2";
 let debug = false;
 
 class ContentAnotherMVG extends HTMLElement {
@@ -11,9 +11,13 @@ class ContentAnotherMVG extends HTMLElement {
             "color:#fff;background:#2196f3;padding:2px 6px;border-radius:3px;",
             "color:#fff;background:#4caf50;padding:2px 6px;border-radius:3px;"
         );
+
+        this._showAllDepartures = {};
     }
 
     set hass(hass) {
+        this._hass = hass;
+
         // only update if there is a change in the data of the monitored entities and if translations are loaded
         const entities = Object.keys(this.config)
             .filter((key) => key === "entity" || key.startsWith("entity"))
@@ -166,6 +170,11 @@ class ContentAnotherMVG extends HTMLElement {
         }
     }
 
+    toggleShowAll(entity) {
+        this._showAllDepartures[entity] = !this._showAllDepartures[entity];
+        this.render(this._hass);
+    }
+
     connectedCallback() {
         if (this.config?.showClock) {
             const clockWithSeconds = this.config.clockWithSeconds ?? false;
@@ -264,7 +273,14 @@ class ContentAnotherMVG extends HTMLElement {
               .delay {
                 color: red;
               }
-              
+              .amvg-headline.clickable {
+                cursor: pointer;
+              }
+              .amvg-headline.expanded {
+                background-color: #ffd54f !important;
+                color: #000;
+              }
+
               /* General formatting for the labels */
               span.line {
                 font-weight: bold;
@@ -461,7 +477,7 @@ class ContentAnotherMVG extends HTMLElement {
                     }
 
                     html += `
-                        <tr class="amvg-headline">
+                        <tr class="amvg-headline clickable ${this._showAllDepartures[ccc] ? 'expanded' : ''}" data-entity="${ccc}">
                             ${showType ? `<th class="labelHL">${hass.localize("component.another_mvg.frontend.column_type")}</th>` : ""}
                             <th class="labelHL">${hass.localize("component.another_mvg.frontend.column_line")}</th>
                             <th class="destinationHL">${hass.localize("component.another_mvg.frontend.column_destination")}</th>
@@ -501,9 +517,15 @@ class ContentAnotherMVG extends HTMLElement {
                             });
                         }
 
-                        const list2 = (maxDepartures ?? globalMax)
-                            ? filtered.slice(0, maxDepartures ?? globalMax)
-                            : filtered;
+                        let list2;
+
+                        if (this._showAllDepartures[ccc]) {
+                            list2 = filtered;
+                        } else {
+                            list2 = (maxDepartures ?? globalMax)
+                                ? filtered.slice(0, maxDepartures ?? globalMax)
+                                : filtered;
+                        }
 
                         let rowCount = 0;
                         list2.forEach((departure) => {
@@ -606,6 +628,13 @@ class ContentAnotherMVG extends HTMLElement {
                     </table>
                 </div>
                 `;
+
+            this.content.querySelectorAll('[data-entity]').forEach(el => {
+                el.addEventListener("click", (e) => {
+                    const entity = e.currentTarget.dataset.entity;
+                    this.toggleShowAll(entity);
+                });
+            });
         }
     }
     
