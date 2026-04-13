@@ -56,7 +56,7 @@ ANOTHER_MVG_CARDS = [
     {
         "name": "Another MVG Card",
         "filename": "content-card-another-mvg.js",
-        "version": "3.0.0-BETA-1",
+        "version": "3.0.0-BETA-2",
     },
     {
         "name": "Another MVG Big Card",
