@@ -1,5 +1,5 @@
 /* AnotherMVG-Livemap */
-const version = "2.2.0-BETA-6";
+const version = "3.0.0-BETA-3";
 
 class ContentAnotherMVGlivemap extends HTMLElement {
     constructor(){
@@ -47,8 +47,14 @@ class ContentAnotherMVGlivemap extends HTMLElement {
     updateIframe() {
         if (!this.content) return;
 
+        //const { x, y, zoom, mode, disruption } = this.config;
+        //const url = `https://s-bahn-muenchen-live.de/?disruption=${disruption}&mode=${mode}&showDepartures=true&x=${x}&y=${y}&z=${zoom}`;
+
         const { x, y, zoom, mode, disruption } = this.config;
-        const url = `https://s-bahn-muenchen-live.de/?disruption=${disruption}&mode=${mode}&showDepartures=true&x=${x}&y=${y}&z=${zoom}`;
+        const query = `disruption=${disruption}&mode=${mode}&showDepartures=true&x=${x}&y=${y}&z=${zoom}`;
+        const url = disruption === "false"
+          ? `/another_mvg_livemap?${query}`
+          : `https://s-bahn-muenchen-live.de/?${query}`;
 
         this.content.innerHTML = `
           <iframe 
