@@ -8,9 +8,11 @@ class MVGException(Exception):
 DOMAIN = "another_mvg"  # name of the integration, dont change
 SCAN_INTERVAL = timedelta(seconds=60)  # updateinterval in seconds
 
-URL = "https://www.mvg.de/api/bgw-pt/v3/departures?globalId={}&limit=80&offsetInMinutes={}&transportTypes={}"
+URL = "https://www.mvg.de/api/bgw-pt/v3/departures?globalId={}&limit={}&offsetInMinutes={}&transportTypes={}"
+URL_EFA_ARRIVALS = "https://m.mvv-muenchen.de/efa/XML_DM_REQUEST"
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.10 Safari/605.1.1"
 
+CONF_MONITOR_TYPE = "monitor_type"  # departure or arrival
 CONF_GLOBALID = "globalid"  # required
 CONF_GLOBALID2 = "globalid2"  # optional but not recommened because of 2 API calls
 CONF_ONLYLINE = "onlyline"  # optional
@@ -35,8 +37,11 @@ CONF_CSS_CODE_DARKMODE_ONLY = "css_code_darkmode_only" # optional
 DEFAULT_HIDEDESTINATION = ""
 DEFAULT_ONLYDESTINATION = ""
 DEFAULT_ONLYLINE = ""
-DEFAULT_LIMIT = 6
+DEFAULT_LIMIT = 40
 DEFAULT_CONF_TRANSPORTTYPES = "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS"
+DEFAULT_MONITOR_TYPE = "departure"
+MONITOR_TYPE_DEPARTURE = "departure"
+MONITOR_TYPE_ARRIVAL = "arrival"
 DEFAULT_CONF_GLOBALID2 = ""
 DEFAULT_TIMEZONE_FROM = "Europe/Berlin"  # or UTC
 DEFAULT_TIMEZONE_TO = "Europe/Berlin"
@@ -56,12 +61,12 @@ ANOTHER_MVG_CARDS = [
     {
         "name": "Another MVG Card",
         "filename": "content-card-another-mvg.js",
-        "version": "3.0.0-BETA-1",
+        "version": "3.0.0-BETA-6",
     },
     {
         "name": "Another MVG Big Card",
         "filename": "content-card-another-mvg-big.js",
-        "version": "2.2.0-BETA-6",
+        "version": "3.0.0-BETA-6",
     },
     {
         "name": "Another MVG LiveMap Card",

@@ -23,6 +23,7 @@ from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 
 from .const import (
     DOMAIN,
+    CONF_MONITOR_TYPE,
     CONF_ALERT_FOR,
     CONF_STATS_TEMPLATE,
     CONF_DOUBLESTATIONNUMBER,
@@ -44,8 +45,11 @@ from .const import (
     CONF_CSS_CODE,
     CONF_CSS_CODE_DARKMODE_ONLY,
     URL,
+    URL_EFA_ARRIVALS,
     USER_AGENT,
     MVGException,
+    DEFAULT_MONITOR_TYPE,
+    MONITOR_TYPE_ARRIVAL,
     DEFAULT_ONLYLINE,
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
@@ -76,6 +80,7 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_GLOBALID): cv.string,
+        vol.Optional(CONF_MONITOR_TYPE, default=DEFAULT_MONITOR_TYPE): cv.string,
         vol.Required(CONF_NAME): cv.string,
         vol.Optional(CONF_ONLYLINE, default=DEFAULT_ONLYLINE): cv.string,
         vol.Optional(CONF_HIDEDESTINATION, default=DEFAULT_HIDEDESTINATION): cv.string,
@@ -214,7 +219,8 @@ class ConnectionInfo(SensorEntity):
         #_LOGGER.warning("Complete Config Entry: %s", config)
 
         self._onlyline = config_data.get(CONF_ONLYLINE)
-        self._limit = config_data.get(CONF_LIMIT)
+        self._monitor_type = config_data.get(CONF_MONITOR_TYPE, DEFAULT_MONITOR_TYPE)
+        self._limit = self.normalize_api_limit(config_data.get(CONF_LIMIT, DEFAULT_LIMIT))
         self._hidedestination = config_data.get(CONF_HIDEDESTINATION)
         self._onlydestination = config_data.get(CONF_ONLYDESTINATION)
         self._globalid = config_data.get(CONF_GLOBALID)
@@ -236,20 +242,47 @@ class ConnectionInfo(SensorEntity):
         self._proxyURL = config_data.get(CONF_PROXY_URL, DEFAULT_PROXY_URL)
         self._proxyUsetime = config_data.get(CONF_PROXY_USETIME, DEFAULT_PROXY_USETIME)
         self._forceProxy = config_data.get(CONF_FORCE_PROXY, DEFAULT_FORCE_PROXY)
-        self._increased_limit = config_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT)
+        self._increased_limit = self.normalize_non_negative_int(
+            config_data.get(CONF_INCREASED_LIMIT, DEFAULT_INCREASED_LIMIT),
+            DEFAULT_INCREASED_LIMIT,
+        )
         self._custom_attributes = {
             "config": {
                 "name": self._name, 
                 "unique_id": self._unique_id,
+                "monitor_type": self._monitor_type,
                 "css_code": self._css_code,
                 "css_code_darkmode_only": self._css_code_darkmode_only
             }
         }
+        self._custom_attributes["monitor_type"] = self._monitor_type
 
     @property
     def name(self) -> str:
         """Return the name."""
         return self._name
+
+    @staticmethod
+    def normalize_api_limit(value, default: int = DEFAULT_LIMIT) -> int:
+        """Return an API request limit clamped to the supported range."""
+        try:
+            limit = int(value)
+        except (TypeError, ValueError):
+            limit = default
+        return max(1, min(80, limit))
+
+    @staticmethod
+    def normalize_non_negative_int(value, default: int = 0) -> int:
+        """Return a non-negative integer from config values."""
+        try:
+            number = int(value)
+        except (TypeError, ValueError):
+            number = default
+        return max(0, number)
+
+    def get_request_limit(self) -> int:
+        """Return the effective API request limit, including the optional buffer."""
+        return self.normalize_api_limit(self._limit + self._increased_limit, self._limit)
 
     @property
     def extra_state_attributes(self):
@@ -407,6 +440,8 @@ class ConnectionInfo(SensorEntity):
         self.nextDeparture = departure_info
   
     async def async_update(self) -> None:
+        self._custom_attributes["monitor_type"] = self._monitor_type
+        self._custom_attributes["config"]["monitor_type"] = self._monitor_type
         self._custom_attributes["departures"] = [
             departure.to_dict() if isinstance(departure, Departure) else departure
             for departure in await self.get_departures()
@@ -446,6 +481,8 @@ class ConnectionInfo(SensorEntity):
         
     async def get_departures(self) -> str:
         """Get departure data."""
+        if self._monitor_type == MONITOR_TYPE_ARRIVAL:
+            return await self.get_arrivals()
 
         # check if self._custom_attributes is set to avoid undefined messages if the API is down or if there is an error
         # or for the first call by the frontend when there is no data available in departures
@@ -471,13 +508,14 @@ class ConnectionInfo(SensorEntity):
 
         # 1st API call for globalid1
         try:
+            request_limit = self.get_request_limit()
             data = await self.get_api_for_globalid(
-                self._name, self._globalid, self._offsetInMinutes, self._transporttypes
+                self._name, self._globalid, self._offsetInMinutes, self._transporttypes, request_limit
             )
 
             # If data is empty, check if there are results for the next day
-            if not data or len(data) < (self._limit + self._increased_limit): 
-                data = await self.fetch_additional_data_for_next_day(data, self._name, self._globalid, self._transporttypes)
+            if not data or len(data) < request_limit:
+                data = await self.fetch_additional_data_for_next_day(data, self._name, self._globalid, self._transporttypes, request_limit)
 
         except MVGException as ex:
             # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
@@ -509,13 +547,14 @@ class ConnectionInfo(SensorEntity):
             # wait 1 second because of 509 error
             await asyncio.sleep(1)
             try:
+                request_limit = self.get_request_limit()
                 data2 = await self.get_api_for_globalid(
-                    self._name, self._globalid2, self._offsetInMinutes, self._transporttypes
+                    self._name, self._globalid2, self._offsetInMinutes, self._transporttypes, request_limit
                 )
 
                 # If data2 is empty, check if there are results for the next day
-                if not data2 or len(data2) < (self._limit + self._increased_limit):  # Überprüft, ob die Liste leer ist
-                    data2 = await self.fetch_additional_data_for_next_day(data2, self._name, self._globalid2, self._transporttypes)
+                if not data2 or len(data2) < request_limit:  # Überprüft, ob die Liste leer ist
+                    data2 = await self.fetch_additional_data_for_next_day(data2, self._name, self._globalid2, self._transporttypes, request_limit)
 
             except MVGException as ex:
                 # return the old departures self._custom_attributes["departures"] and set a variable with the info that the departures are outdated
@@ -573,7 +612,7 @@ class ConnectionInfo(SensorEntity):
         self._dataOutdated = ""
         return self.pre_process_output(sorted_data)
 
-    async def fetch_additional_data_for_next_day(self, data, name, globalid, transporttypes):
+    async def fetch_additional_data_for_next_day(self, data, name, globalid, transporttypes, request_limit):
         # wait 1 second because of 509 error
         await asyncio.sleep(1)
 
@@ -601,7 +640,7 @@ class ConnectionInfo(SensorEntity):
             )
 
         # get additional data from API
-        additional_data = await self.get_api_for_globalid(name, globalid, minutes_to_midnight, transporttypes)
+        additional_data = await self.get_api_for_globalid(name, globalid, minutes_to_midnight, transporttypes, request_limit)
 
         # merge it
         if additional_data:
@@ -774,10 +813,424 @@ class ConnectionInfo(SensorEntity):
         
         return departures
 
+    async def get_arrivals(self) -> list:
+        """Get arrival data from the MVV/EFA API and normalize it for the cards."""
+        if not self._custom_attributes or not self._custom_attributes.get("departures"):
+            self._custom_attributes["departures"] = [
+                Departure(
+                    transport_type="BUS",
+                    label="ERROR",
+                    destination="Try to connect to the MVV/EFA API. If this message remains longer, maybe mvv-muenchen.de is down.",
+                    track="---",
+                    planned_departure="---",
+                    expected_departure="---",
+                    cancelled=False,
+                    delay=0,
+                    trainType="",
+                    time_diff=0,
+                )
+            ]
 
-    async def get_api_for_globalid(self, name: str, global_id: str, offsetInMinutes: int, transport_types: str) -> dict:
+        try:
+            request_limit = self.get_request_limit()
+            data = await self.get_efa_arrivals_for_globalid(
+                self._name,
+                self._globalid,
+                request_limit,
+            )
+        except MVGException:
+            self._dataOutdated = " - nicht aktuell"
+            _LOGGER.debug("AnotherMVG: Reusing previous arrival data for %s after EFA request failed", self._name)
+            return self._custom_attributes["departures"]
+
+        if self._globalid2:
+            await asyncio.sleep(1)
+            try:
+                data2 = await self.get_efa_arrivals_for_globalid(
+                    self._name,
+                    self._globalid2,
+                    request_limit,
+                )
+            except MVGException:
+                self._dataOutdated = " - nicht aktuell"
+                _LOGGER.debug(
+                    "AnotherMVG: Reusing previous arrival data for %s after second EFA request failed",
+                    self._name,
+                )
+                return self._custom_attributes["departures"]
+
+            if data:
+                try:
+                    data.extend(data2)
+                    _LOGGER.debug(
+                        "AnotherMVG: Combined EFA arrivals for %s from globalid1 %s and globalid2 %s",
+                        self._name,
+                        self._globalid,
+                        self._globalid2,
+                    )
+                except Exception as ex:
+                    _LOGGER.error(
+                        "AnotherMVG: Unable to combine EFA arrival data from globalid1 with globalid2 for %s - %s",
+                        self._name,
+                        str(ex),
+                    )
+                    self._dataOutdated = " - nicht aktuell"
+                    return self._custom_attributes["departures"]
+            elif data2:
+                data = list(data2)
+
+        try:
+            sorted_data = sorted(
+                data,
+                key=lambda x: x.get("arrivalTimeEstimated") or x.get("arrivalTimePlanned") or "",
+            )
+        except Exception as ex:
+            _LOGGER.error(
+                "AnotherMVG: Unable to sort EFA arrivals for %s - %s",
+                self._name,
+                str(ex),
+            )
+            self._dataOutdated = " - nicht aktuell"
+            return self._custom_attributes["departures"]
+
+        self._dataOutdated = ""
+        return self.pre_process_arrival_output(sorted_data)
+
+    def pre_process_arrival_output(self, data: list) -> list:
+        """Normalize EFA stopEvents into the existing departure card payload."""
+        departures = []
+        connectioninfos = []
+        verbindungen_list = self._alert_for.split(",") if self._alert_for else []
+        counter_dict = {wert: 0 for wert in verbindungen_list}
+        final_departure = None
+
+        transport_types = [
+            item.strip().upper()
+            for item in (self._transporttypes or DEFAULT_CONF_TRANSPORTTYPES).split(",")
+            if item.strip()
+        ]
+
+        for event in data:
+            transportation = event.get("transportation") or {}
+            location = event.get("location") or {}
+            product = transportation.get("product") or {}
+
+            transport_type = self.map_efa_transport_type(product, transportation)
+            label = transportation.get("number") or transportation.get("name") or ""
+            origin = self.get_efa_origin(event, transportation)
+            display_destination = origin or "---"
+            track = self.get_efa_track(location, transport_type)
+
+            if transport_types and transport_type not in transport_types:
+                continue
+
+            if self._onlyline != "" and label not in self._onlyline.split(","):
+                continue
+
+            if (
+                self._hidedestination != ""
+                and display_destination.lower() in self._hidedestination.lower()
+            ):
+                continue
+
+            if (
+                self._onlydestination != ""
+                and display_destination.lower() not in self._onlydestination.lower()
+            ):
+                continue
+
+            planned_ms = self.efa_time_to_ms(event.get("arrivalTimePlanned"))
+            expected_ms = self.efa_time_to_ms(
+                event.get("arrivalTimeEstimated") or event.get("arrivalTimePlanned")
+            )
+
+            if not planned_ms or not expected_ms:
+                _LOGGER.debug(
+                    "AnotherMVG: Skipping EFA arrival for %s because planned/expected time is missing: %s",
+                    self._name,
+                    event,
+                )
+                continue
+
+            planned_departure = self.convert_timestamp_timezone(
+                planned_ms / 1000,
+                "UTC",
+                self._timezoneTo,
+                "%H:%M",
+            )
+            expected_departure = self.convert_timestamp_timezone(
+                expected_ms / 1000,
+                "UTC",
+                self._timezoneTo,
+                "%H:%M",
+            )
+
+            current_time = datetime.utcnow()
+            time_diff = datetime.utcfromtimestamp(expected_ms / 1000) - current_time
+            if time_diff.total_seconds() < 0:
+                continue
+
+            delay = max(0, round((expected_ms - planned_ms) / 60000))
+            realtime_status = event.get("realtimeStatus") or []
+            if isinstance(realtime_status, str):
+                realtime_status = [realtime_status]
+            cancelled = "TRIP_CANCELLED" in realtime_status or "ARRIVAL_CANCELLED" in realtime_status
+            trainType = ""
+
+            if final_departure is None:
+                final_departure = {
+                    "planned_departure": planned_departure,
+                    "expected_departure": expected_departure,
+                    "track": track,
+                    "transport_type": transport_type,
+                    "label": label,
+                    "destination": display_destination,
+                    "cancelled": cancelled,
+                    "delay": delay,
+                    "trainType": trainType,
+                    "plannedDepartureTime": planned_ms,
+                    "realtimeDepartureTime": expected_ms,
+                }
+
+            departures.append(
+                Departure(
+                    transport_type=transport_type,
+                    label=label,
+                    destination=display_destination,
+                    track=track,
+                    planned_departure=planned_departure,
+                    expected_departure=expected_departure,
+                    cancelled=cancelled,
+                    delay=delay,
+                    trainType=trainType,
+                    time_diff=round(time_diff.total_seconds()),
+                )
+            )
+
+            if label in counter_dict:
+                counter_dict[label] += 1
+                if counter_dict[label] in (1, 2, 3):
+                    alarm_status = -1 if cancelled else delay
+                    connectioninfos.append(
+                        DepartureAlarms(
+                            label=label,
+                            number=counter_dict[label],
+                            delayInMinutes=alarm_status,
+                        )
+                    )
+
+            if len(departures) >= self._limit:
+                break
+
+        if final_departure:
+            self.set_next_departure(
+                final_departure["planned_departure"],
+                final_departure["expected_departure"],
+                final_departure["track"],
+                final_departure["transport_type"],
+                final_departure["label"],
+                final_departure["destination"],
+                final_departure["cancelled"],
+                final_departure["delay"],
+                final_departure["trainType"],
+                final_departure["plannedDepartureTime"],
+                final_departure["realtimeDepartureTime"],
+            )
+
+        self.lateConnections = connectioninfos
+
+        if "departures" in self._custom_attributes and len(departures) == 0:
+            self._dataOutdated = " - nicht aktuell"
+            return self._custom_attributes["departures"]
+
+        _LOGGER.debug("AnotherMVG: Normalized %s EFA arrivals for %s", len(departures), self._name)
+        return departures
+
+    def efa_time_to_ms(self, value: str | None) -> int | None:
+        """Convert an EFA ISO timestamp to epoch milliseconds."""
+        if not value:
+            return None
+        try:
+            dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            return round(dt.timestamp() * 1000)
+        except ValueError:
+            _LOGGER.debug("AnotherMVG: Unable to parse EFA timestamp %s", value)
+            return None
+
+    def get_efa_track(self, location: dict, transport_type: str) -> str:
+        """Return platform information from an EFA location."""
+        properties = location.get("properties") or {}
+        track = (
+            properties.get("platformName")
+            or properties.get("plannedPlatformName")
+            or properties.get("platform")
+            or ""
+        )
+        if isinstance(track, str):
+            normalized_track = (
+                track.replace("Bstg.", "")
+                .replace("Bstg", "")
+                .replace("Steig", "")
+                .strip()
+            )
+            if normalized_track:
+                return normalized_track
+        elif track:
+            return str(track)
+
+        if transport_type in ["BUS", "REGIONAL_BUS"]:
+            return "Bus"
+
+        return "---"
+
+    def get_efa_origin(self, event: dict, transportation: dict | None = None) -> str:
+        """Return the first known stop of an EFA journey."""
+        origin = (transportation or {}).get("origin") or {}
+        if isinstance(origin, dict) and origin.get("name"):
+            return origin.get("name", "")
+
+        previous_locations = event.get("previousLocations") or []
+        if previous_locations:
+            return previous_locations[0].get("name", "")
+        return ""
+
+    def map_efa_transport_type(self, product: dict, transportation: dict) -> str:
+        """Map EFA product information to the existing Another MVG transport types."""
+        product_name = (product.get("name") or "").lower()
+        line_name = (transportation.get("name") or "").lower()
+        product_class = product.get("class")
+        label = (
+            transportation.get("number")
+            or transportation.get("disassembledName")
+            or transportation.get("name")
+            or ""
+        ).upper()
+
+        if product_class == 17 or "sev" in product_name or "sev" in line_name:
+            if label.startswith("S"):
+                return "SBAHN"
+            if label.startswith("U"):
+                return "UBAHN"
+            return "BUS"
+        if product_class == 1:
+            return "SBAHN"
+        if product_class == 2:
+            return "UBAHN"
+        if product_class == 4:
+            return "TRAM"
+        if product_class == 5:
+            return "BUS"
+        if product_class == 6:
+            return "REGIONAL_BUS"
+        if product_class in [7, 10]:
+            return "BUS"
+        if product_class in [0, 13, 14, 16]:
+            return "BAHN"
+        if "s-bahn" in product_name or "s-bahn" in line_name:
+            return "SBAHN"
+        if "u-bahn" in product_name or "u-bahn" in line_name:
+            return "UBAHN"
+        if "tram" in product_name or "tram" in line_name:
+            return "TRAM"
+        if "regional" in product_name and "bus" in product_name:
+            return "REGIONAL_BUS"
+        if "bus" in product_name or "bus" in line_name:
+            return "BUS"
+        return "BAHN"
+
+    def get_efa_mot_params(self) -> dict:
+        """Build EFA inclMOT parameters from the configured transport types."""
+        mot_by_transport_type = {
+            "SBAHN": ["1", "17"],
+            "UBAHN": ["2", "17"],
+            "TRAM": ["4"],
+            "BUS": ["5", "7", "10"],
+            "REGIONAL_BUS": ["6"],
+            "BAHN": ["0", "13"],
+        }
+        configured_transport_types = [
+            item.strip().upper()
+            for item in (self._transporttypes or DEFAULT_CONF_TRANSPORTTYPES).split(",")
+            if item.strip()
+        ]
+        mot_values = []
+        for transport_type in configured_transport_types:
+            mot_values.extend(mot_by_transport_type.get(transport_type, []))
+
+        if not mot_values:
+            mot_values = ["0", "1", "2", "4", "5", "6", "7", "10", "13", "17"]
+
+        return {f"inclMOT_{mot}": "true" for mot in sorted(set(mot_values), key=int)}
+
+    async def get_efa_arrivals_for_globalid(self, name: str, global_id: str, limit: int) -> list:
+        """Get arrival stopEvents from the MVV/EFA API."""
+        headers = {"User-Agent": USER_AGENT}
+        dep_sequence = max(1, min(80, limit or DEFAULT_LIMIT))
+        params = {
+            "calcOneDirection": "1",
+            "coordOutputFormat": "WGS84[dd.ddddd]",
+            "deleteAssignedStops_dm": "1",
+            "depSequence": str(dep_sequence),
+            "depType": "stopEvents",
+            "doNotSearchForStops": "1",
+            "genMaps": "0",
+            "imparedOptionsActive": "1",
+            "includeCompleteStopSeq": "0",
+            "includedMeans": "checkbox",
+            "itOptionsActive": "1",
+            "itdDateTimeDepArr": "arr",
+            "language": "de",
+            "locationServerActive": "1",
+            "maxTimeLoop": "1",
+            "mode": "direct",
+            "name_dm": global_id,
+            "outputFormat": "rapidJSON",
+            "ptOptionsActive": "1",
+            "serverInfo": "1",
+            "sl3plusDMMacro": "1",
+            "type_dm": "any",
+            "useAllStops": "1",
+            "useProxFootSearch": "0",
+            "useRealtime": "1",
+            "version": "10.5.17.3",
+        }
+        params.update(self.get_efa_mot_params())
+
+        _LOGGER.debug(
+            "AnotherMVG: Requesting EFA arrivals for %s - %s with limit %s and MOTs %s",
+            global_id,
+            name,
+            dep_sequence,
+            {key: value for key, value in params.items() if key.startswith("inclMOT_")},
+        )
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(URL_EFA_ARRIVALS, params=params, headers=headers, timeout=10) as req:
+                    if req.ok:
+                        data = await req.json()
+                        events = data.get("stopEvents") or []
+                        _LOGGER.debug(
+                            "AnotherMVG: EFA returned %s arrivals for %s - %s",
+                            len(events),
+                            global_id,
+                            name,
+                        )
+                        return events
+                    raise MVGException(f"AnotherMVG: EFA request failed with status {req.status} for {global_id} - {name}")
+        except asyncio.CancelledError:
+            raise
+        except asyncio.TimeoutError as ex:
+            _LOGGER.error("AnotherMVG: Timeout while connecting to the MVV/EFA API for globalid %s - %s", global_id, name)
+            raise MVGException(f"AnotherMVG: Timeout while connecting to the MVV/EFA API for {global_id} - {name}") from ex
+        except aiohttp.ClientError as ex:
+            _LOGGER.error("AnotherMVG: HTTP problem while connecting to the MVV/EFA API for globalid %s - %s - %s", global_id, name, str(ex))
+            raise MVGException(f"AnotherMVG: HTTP problem while connecting to the MVV/EFA API for {global_id} - {name}") from ex
+
+
+    async def get_api_for_globalid(self, name: str, global_id: str, offsetInMinutes: int, transport_types: str, limit: int) -> dict:
         """Get departure data from API, fallback to proxy server if needed."""
-        url = URL.format(global_id, offsetInMinutes, transport_types)
+        request_limit = self.normalize_api_limit(limit)
+        url = URL.format(global_id, request_limit, offsetInMinutes, transport_types)
         headers = {"User-Agent": USER_AGENT}
 
         if self._proxyURL:
@@ -835,4 +1288,3 @@ class ConnectionInfo(SensorEntity):
                 raise MVGException(f"API and proxy failed for {global_id} - {name}") from ex
     
             raise MVGException(f"AnotherMVG: API and proxy failed for {global_id} - {name}")
-

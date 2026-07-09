@@ -17,17 +17,26 @@
         "show_type"              : "Verkehrsmittel anzeigen",
         "show_type_desc"         : "Zeigt eine zusätzliche Spalte mit dem Verkehrsmittel (z. B. Bus, U-Bahn, Tram) an.",
 
-        "max_departures"         : "Maximale Anzahl der Abfahrten",
-        "max_departures_desc"    : "Legt die maximale Anzahl der anzuzeigenden Abfahrten fest. Es können nicht mehr Abfahrten angezeigt werden, als Du bei der Sensorkonfiguration eingegeben hast. Wenn Du z. B. 10 Abfahrten in der Sensorkonfiguration eingestellt hast, kannst Du hier maximal 10 auswählen. Somit kannst Du mit nur einem Sensor z. B. 20 Abfahrten abrufen und diese dann in einer Karte mit 5, in einer anderen mit 10 und in einer dritten mit 15 Abfahrten anzeigen lassen.",
+        "max_departures"         : "Maximale Anzahl der Einträge",
+        "max_departures_desc"    : "Legt die maximale Anzahl der anzuzeigenden Einträge fest. Es können nicht mehr Abfahrten angezeigt werden, als Du bei der Sensorkonfiguration eingegeben hast. Wenn Du z. B. 10 Abfahrten in der Sensorkonfiguration eingestellt hast, kannst Du hier maximal 10 auswählen. Somit kannst Du mit nur einem Sensor z. B. 20 Abfahrten abrufen und diese dann in einer Karte mit 5, in einer anderen mit 10 und in einer dritten mit 15 Abfahrten anzeigen lassen.",
 
         "max_departures_fixed"      : "Maximale Anzahl mit Platzhalter",
-        "max_departures_fixed_desc" : "Wenn weniger Abfahrten verfügbar sind als die maximale Anzahl der Abfahrten, wird eine Platzhalter-Anzeige verwendet um den verbleibenden Platz zu füllen. Somit sollte die Karte immer die gleiche Höhe haben, unabhängig von der Anzahl der verfügbaren Abfahrten. Wenn diese Option deaktiviert ist, wird die Karte automatisch kleiner, wenn weniger Abfahrten verfügbar sind.",
+        "max_departures_fixed_desc" : "Wenn weniger Abfahrten verfügbar sind als die maximale Anzahl der Einträge, wird eine Platzhalter-Anzeige verwendet um den verbleibenden Platz zu füllen. Somit sollte die Karte immer die gleiche Höhe haben, unabhängig von der Anzahl der verfügbaren Abfahrten. Wenn diese Option deaktiviert ist, wird die Karte automatisch kleiner, wenn weniger Abfahrten verfügbar sind.",
 
-        "departure_options"      : "Anzeigeoptionen für die Spalte 'Abfahrt'",
+        "departure_options"      : "Anzeigeoptionen für die Zeitspalte",
         "departure_options_desc" : "Im Beispiel ist es 16:22 und 16:27 ist die geplante Abfahrtszeit, der Zug hat 2 Minuten Verspätung und 16:29 ist somit die aktuelle Abfahrtszeit. Wird nur die aktuelle Abfahrtszeit (Option 3) angezeigt, wird die Zeit, sofern eine Verspätung vorliegt, in Rot angezeigt. Option 4 zeigt die verbleibenden Minuten (abgerundet) bis zur aktuellen Abfahrt. Option 5 zeigt ebenfalls die verbleibenden Minuten (abgerundet) und zusätzlich die Verspätung in Klammern.",
 
         "transport_type"          : "Transportart",
         "transport_type_desc"     : "Hier kannst Du die Transportarten auswählen, die in der Karte angezeigt werden sollen. Wenn Du z. B. nur die U-Bahn anzeigen möchtest, wähle hier 'U-Bahn' aus. Wenn Du mehrere Transportarten anzeigen möchtest, wähle diese nacheinander aus. Wenn Du hier nichts auswählst, werden alle verfügbaren Transportarten angezeigt. Bitte beachte, dass die Karte nur die Transportarten anzeigen kann, die auch in der Entitätskonfiguration ausgewählt wurden. Wenn Du z. B. in der Entitätskonfiguration nur 'Bus' ausgewählt hast, kannst Du hier nicht 'U-Bahn' auswählen, da diese Informationen nicht im Sensor (Entität) verfügbar sind. Wenn Du jedoch in der Entitätskonfiguration sowohl 'Bus' als auch 'U-Bahn' ausgewählt hast, kannst Du hier entweder nur 'Bus', nur 'U-Bahn' oder beide auswählen, um die entsprechenden Transportarten in der Karte anzuzeigen.",
+
+        "only_line"               : "Nur diese Linie",
+        "only_line_desc"          : "Zeigt nur Einträge dieser Linie an. Mehrere Linien können mit Komma oder Semikolon getrennt werden, z. B. S3;S4;860.",
+
+        "only_direction"          : "Nur diese Richtung / Herkunft",
+        "only_direction_desc"     : "Bei Abfahrten wird nach Ziel gefiltert, bei Ankünften nach Herkunft. Mehrere Werte müssen mit Semikolon getrennt werden. Der Text muss in der angezeigten Richtung/Herkunft vorkommen.",
+
+        "hide_direction"          : "Diese Richtung / Herkunft ausblenden",
+        "hide_direction_desc"     : "Bei Abfahrten werden Ziele ausgeblendet, bei Ankünften Herkünfte. Mehrere Werte müssen mit Semikolon getrennt werden. Der Text muss in der angezeigten Richtung/Herkunft vorkommen.",
 
         "name"                   : "Name der Haltestelle",
         "name_desc"              : "Der Name, der in der Karte für diese Haltestelle angezeigt werden soll. Wird hier nichts eingegeben, wird der Name aus der Entitätskonfiguration verwendet. Es ist auch möglich, hier einen anderen Namen als in der Entitätskonfiguration einzugeben, um z. B. zwei Haltestellen mit demselben Namen in einer Karte zu unterscheiden. Wenn Du z. B. zwei Haltestellen namens 'Hauptbahnhof' hast, kannst Du hier für die eine 'Hauptbahnhof - S-Bahn' und für die andere 'Hauptbahnhof - U-Bahn' eingeben, damit sie in der Karte unterschiedlich angezeigt werden.",
@@ -61,9 +70,21 @@
         "column_type"        : "Typ",
         "column_line"        : "Linie",
         "column_destination" : "Ziel",
+        "column_origin"      : "Aus",
         "column_track"       : "Gleis",
         "column_departure"   : "Abfahrt",
+        "column_arrival"     : "Ankunft",
+        "items_departures"   : "Abfahrten",
+        "items_arrivals"     : "Ankünfte",
         "cancelled"          : "Entfällt"
+    },
+    "selector": {
+        "monitor_type": {
+            "options": {
+                "departure": "Abfahrtsmonitor",
+                "arrival": "Ankunftsmonitor"
+            }
+        }
     },
     "config": {
         "error": {
@@ -96,17 +117,17 @@
                         }
                      },
                     "filter_options": {
-                       "name": "Filter für Linien und Ziele",
+                       "name": "Sensor-Vorfilter: Linien und Richtungen",
                        "data": {
                           "onlyline": "Nur diese Linien",
-                          "hidedestination": "Diese Ziele ausblenden",
-                          "onlydestination": "Nur diese Ziele"
+                          "hidedestination": "Diese Richtung / Herkunft ausblenden",
+                          "onlydestination": "Nur diese Richtung / Herkunft"
                        },
                        "data_description": {
-                          "onlyline": "Wenn Du nur bestimmte Linien sehen möchtest, wie S3, S4 und S20, kannst Du sie als kommagetrennte Liste konfigurieren. Beispiel: ```S3,S4,S20```",
-                          "hidedestination": "Wenn Du bestimmte Richtungen/Ziele ausblenden möchtest, müssen die **GENAUEN** Namen der unerwünschten Ziele eingeben werden, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
-                          "onlydestination": "Wenn Du nur bestimmte Richtungen/Ziele sehen möchtest, müssen die GENAUEN Namen der gewünschten Ziele eingeben werden, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen müssen durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
-                        }
+                          "onlyline": "Sensor-Vorfilter: Wenn Du hier Linien einträgst, werden andere Linien bereits im Sensor entfernt. Dadurch kommen weniger Einträge in den Karten an und es werden weniger Daten in den Home-Assistant-Sensorattributen gespeichert. Für unterschiedliche Ansichten pro Dashboard nutze bevorzugt die Linienfilter in der Karte. Mehrere Linien können mit Komma getrennt werden. Beispiel: ```S3,S4,S20```",
+                          "hidedestination": "Sensor-Vorfilter: Bei Abfahrten werden Ziele ausgeblendet, bei Ankünften Herkünfte. Diese Filterung passiert bereits im Sensor; die Karte erhält diese Einträge nicht mehr. Für unterschiedliche Ansichten pro Dashboard nutze bevorzugt die Richtungs-/Herkunftsfilter in der Karte. Mehrere Werte müssen durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
+                          "onlydestination": "Sensor-Vorfilter: Bei Abfahrten wird nach Ziel gefiltert, bei Ankünften nach Herkunft. Diese Filterung passiert bereits im Sensor; die Karte erhält nur noch passende Einträge. Für unterschiedliche Ansichten pro Dashboard nutze bevorzugt die Richtungs-/Herkunftsfilter in der Karte. Mehrere Werte müssen durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
+                       }
                     },
                     "proxy_options": {
                        "name": "PHP 'Proxy' Einstellungen",
@@ -126,18 +147,20 @@
                 "description": "Bitte gib die erforderlichen Informationen ein, um Another MVG einzurichten.",
                 "data": {
                     "globalid": "Global ID",
+                    "monitor_type": "Monitorart",
                     "name": "Name der Karte",
-                    "limit": "Anzahl der Abfahrten",
+                    "limit": "Abfragelimit",
                     "transporttypes": "Transportarten",
-                    "sort_by_real_departure": "Nach der tatsächlichen Abfahrtszeit sortieren (anstatt nach der geplanten Abfahrtszeit).",
+                    "sort_by_real_departure": "Nach der tatsächlichen Zeit sortieren (anstatt nach der geplanten Zeit).",
                     "offset_in_minutes": "Zeitversatz in Minuten",
                     "station_name": "Stationsname"
                 },
                 "data_description": {
                     "globalid": "Wähle Deine Station / Haltestelle aus der obigen Liste aus.",
+                    "monitor_type": "Wähle aus, ob dieser Sensor Abfahrten über die MVG API oder Ankünfte über die MVV/EFA API anzeigen soll. Bestehende Sensoren verwenden automatisch Abfahrten.",
                     "name": "Der Name, der in der Karte angezeigt werden soll.",
-                    "limit": "Standardmäßig siehst Du 6 Abfahrten. Wenn Du mehr oder weniger sehen möchtest, kannst Du dies hier einstellen. Die API ruft maximal 80 Abfahrten ab. Wenn Du Filter wie 'hidedestination' verwendest und 40 Einträge herausgefiltert werden, siehst Du maximal die verbleibenden 40.",
-                    "transporttypes": "Wähle die Transportarten aus, die Du in der Karte sehen möchtest. Du kannst auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich die Abfahrten der normalen Züge zu sehen. Diese Funktion wird aber noch nicht zu 100% unterstützt.",
+                    "limit": "Legt fest, wie viele Einträge die API maximal abfragen soll. Standard ist 40, intern wird immer auf 80 begrenzt. Ein höherer Wert liefert mehr Daten für Sensor- und Kartenfilter, kann aber größere Antworten erzeugen und die API stärker belasten.",
+                    "transporttypes": "Wähle die Transportarten aus, die abgefragt werden sollen. Bei Ankünften wird daraus direkt der MVV/EFA-Vorfilter gebaut, wodurch unnötige Verkehrsmittel bereits in der API-Abfrage entfallen. Du kannst auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich normale Züge zu sehen.",
                     "offset_in_minutes": "Trage hier die Minuten ein, um die angezeigten Abfahrten zu korrigieren. Zum Beispiel: Wenn Du 10 Minuten eingibst, werden nur Abfahrten angezeigt, die mindestens 10 Minuten in der Zukunft liegen. Dies ist nützlich, um nur die Verbindungen zu sehen, die Du rechtzeitig zu Fuß erreichen kannst.",
                     "station_name": "Gib den Namen der Station ein, nach der Du suchen möchtest."
                 }
@@ -191,18 +214,18 @@
                         }
                      },
                     "filter_options": {
-                       "name": "Filter für Linien und Ziele",
+                       "name": "Sensor-Vorfilter: Linien und Richtungen",
                        "data": {
                           "onlyline": "Nur diese Linien",
-                          "hidedestination": "Diese Ziele ausblenden",
-                          "onlydestination": "Nur diese Ziele"
+                          "hidedestination": "Diese Richtung / Herkunft ausblenden",
+                          "onlydestination": "Nur diese Richtung / Herkunft"
                        },
                        "data_description": {
-                          "onlyline": "Wenn Du nur bestimmte Linien sehen möchtest, wie S3, S4 und S20, kannst Du sie als kommagetrennte Liste konfigurieren. Beispiel: ```S3,S4,S20```",
-                          "hidedestination": "Wenn Du bestimmte Richtungen/Ziele ausblenden möchtest, müssen die **GENAUEN** Namen der unerwünschten Ziele eingeben werden, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen sollten durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
-                          "onlydestination": "Wenn Du nur bestimmte Richtungen/Ziele sehen möchtest, müssen die GENAUEN Namen der gewünschten Ziele eingeben werden, wie sie auf der Verbindungsanzeige (Karte) erscheinen. Die Namen müssen durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
-                        }
-                     },
+                          "onlyline": "Sensor-Vorfilter: Wenn Du hier Linien einträgst, werden andere Linien bereits im Sensor entfernt. Dadurch kommen weniger Einträge in den Karten an und es werden weniger Daten in den Home-Assistant-Sensorattributen gespeichert. Für unterschiedliche Ansichten pro Dashboard nutze bevorzugt die Linienfilter in der Karte. Mehrere Linien können mit Komma getrennt werden. Beispiel: ```S3,S4,S20```",
+                          "hidedestination": "Sensor-Vorfilter: Bei Abfahrten werden Ziele ausgeblendet, bei Ankünften Herkünfte. Diese Filterung passiert bereits im Sensor; die Karte erhält diese Einträge nicht mehr. Für unterschiedliche Ansichten pro Dashboard nutze bevorzugt die Richtungs-/Herkunftsfilter in der Karte. Mehrere Werte müssen durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```",
+                          "onlydestination": "Sensor-Vorfilter: Bei Abfahrten wird nach Ziel gefiltert, bei Ankünften nach Herkunft. Diese Filterung passiert bereits im Sensor; die Karte erhält nur noch passende Einträge. Für unterschiedliche Ansichten pro Dashboard nutze bevorzugt die Richtungs-/Herkunftsfilter in der Karte. Mehrere Werte müssen durch **Semikolons** getrennt sein. Beispiel: ```Grafing-Bahnhof;Heimeranplatz;Deisenhofen;Holzkirchen;Grafing Bahnhof```"
+                       }
+                    },
                     "proxy_options": {
                        "name": "PHP 'Proxy' Einstellungen",
                        "data": {
@@ -220,18 +243,20 @@
                 "title": "Optionen für Another MVG",
                 "data": {
                     "globalid": "Global ID",
+                    "monitor_type": "Monitorart",
                     "name": "Name der Karte",
-                    "limit": "Anzahl der Abfahrten",
+                    "limit": "Abfragelimit",
                     "departure_format": "Formatierung der Abfahrtzeit",
                     "transporttypes": "Transportarten",
-                    "sort_by_real_departure": "Nach der tatsächlichen Abfahrtszeit sortieren (anstatt nach der geplanten Abfahrtszeit).",
+                    "sort_by_real_departure": "Nach der tatsächlichen Zeit sortieren (anstatt nach der geplanten Zeit).",
                     "offset_in_minutes": "Zeitversatz in Minuten"
                 },
                 "data_description": {
                     "globalid": "Die Stationskennung für die Haltestelle/Station/Ort. Dieser Eintrag wird normalerweise während der Erstkonfiguration automatisch erstellt und ist **NICHT** der Name der Station! Wenn Du diesen Eintrag ändern möchtest und die ID nicht kennst, schließe diese Eingabemaske und wähle unter **'KONFIGURIEREN'** die Option **'Station (Global ID 1) - suchen und speichern'** aus. Alternativ kannst Du die Global ID für Deine Station hier finden: https://www.mvg.de/api/bgw-pt/v3/locations?query=Pasing. Ersetze dafür einfach den Namen in der Abfrage.",
+                    "monitor_type": "Wähle aus, ob dieser Sensor Abfahrten über die MVG API oder Ankünfte über die MVV/EFA API anzeigen soll.",
                     "name": "Der Name, der in der Karte angezeigt werden soll.",
-                    "limit": "Standardmäßig siehst Du 6 Abfahrten. Wenn Du mehr oder weniger sehen möchtest, kannst Du dies hier einstellen. Die API ruft maximal 80 Abfahrten ab. Wenn Du Filter wie 'hidedestination' verwendest und 40 Einträge herausgefiltert werden, siehst Du maximal die verbleibenden 40.",
-                    "transporttypes": "Wähle die Transportarten aus, die Du in der Karte sehen möchtest. Du kannst auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich die Abfahrten der normalen Züge zu sehen. Diese Funktion wird aber noch nicht zu 100% unterstützt.",
+                    "limit": "Legt fest, wie viele Einträge die API maximal abfragen soll. Standard ist 40, intern wird immer auf 80 begrenzt. Ein höherer Wert liefert mehr Daten für Sensor- und Kartenfilter, kann aber größere Antworten erzeugen und die API stärker belasten.",
+                    "transporttypes": "Wähle die Transportarten aus, die abgefragt werden sollen. Bei Ankünften wird daraus direkt der MVV/EFA-Vorfilter gebaut, wodurch unnötige Verkehrsmittel bereits in der API-Abfrage entfallen. Du kannst auch **'BAHN'** eingeben (und **'ENTER'** drücken) um zusätzlich normale Züge zu sehen.",
                     "offset_in_minutes": "Trage hier die Minuten ein, um die angezeigten Abfahrten zu korrigieren. Zum Beispiel: Wenn Du 10 Minuten eingibst, werden nur Abfahrten angezeigt, die mindestens 10 Minuten in der Zukunft liegen. Dies ist nützlich, um nur die Verbindungen zu sehen, die Du rechtzeitig zu Fuß erreichen kannst."
                 }
             },

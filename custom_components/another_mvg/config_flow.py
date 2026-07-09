@@ -2,6 +2,8 @@ import logging
 import aiohttp
 import voluptuous as vol
 import uuid
+import json
+from pathlib import Path
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
@@ -13,6 +15,7 @@ from typing import Any
 from homeassistant.const import CONF_NAME
 from .const import (
     DOMAIN,
+    CONF_MONITOR_TYPE,
     CONF_GLOBALID,
     CONF_ONLYLINE,
     CONF_HIDEDESTINATION,
@@ -34,6 +37,9 @@ from .const import (
     CONF_CSS_CODE,
     CONF_CSS_CODE_DARKMODE_ONLY,
     DEFAULT_ONLYLINE,
+    DEFAULT_MONITOR_TYPE,
+    MONITOR_TYPE_DEPARTURE,
+    MONITOR_TYPE_ARRIVAL,
     DEFAULT_HIDEDESTINATION,
     DEFAULT_ONLYDESTINATION,
     DEFAULT_LIMIT,
@@ -54,11 +60,76 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+_TRANSLATION_CACHE = {}
 
 class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Another MVG integration."""
 
     VERSION = 1
+
+    @staticmethod
+    def _normalize_limit(value) -> int:
+        """Clamp API request limit to the supported range."""
+        try:
+            limit = int(value)
+        except (TypeError, ValueError):
+            limit = DEFAULT_LIMIT
+        return max(1, min(80, limit))
+
+    @staticmethod
+    def _load_translation(language: str | None) -> dict:
+        """Load the integration translation file."""
+        lang = "de" if (language or "").lower().startswith("de") else "en"
+        if lang in _TRANSLATION_CACHE:
+            return _TRANSLATION_CACHE[lang]
+
+        translation_file = Path(__file__).with_name("translations") / f"{lang}.json"
+        try:
+            with translation_file.open(encoding="utf-8") as file:
+                _TRANSLATION_CACHE[lang] = json.load(file)
+        except (OSError, json.JSONDecodeError):
+            _TRANSLATION_CACHE[lang] = {}
+        return _TRANSLATION_CACHE[lang]
+
+    @staticmethod
+    def _translation(translations: dict, keys: list[str], fallback: str) -> str:
+        """Return a translated string from the integration translation files."""
+        value = translations
+        for key in keys:
+            if not isinstance(value, dict) or key not in value:
+                return fallback
+            value = value[key]
+        return value if isinstance(value, str) else fallback
+
+    @classmethod
+    def _monitor_type_options(cls, translations: dict) -> list[dict[str, str]]:
+        """Return monitor type labels for the active Home Assistant language."""
+        return [
+            {
+                "label": cls._translation(
+                    translations,
+                    ["selector", "monitor_type", "options", MONITOR_TYPE_DEPARTURE],
+                    "Departure monitor",
+                ),
+                "value": MONITOR_TYPE_DEPARTURE,
+            },
+            {
+                "label": cls._translation(
+                    translations,
+                    ["selector", "monitor_type", "options", MONITOR_TYPE_ARRIVAL],
+                    "Arrival monitor",
+                ),
+                "value": MONITOR_TYPE_ARRIVAL,
+            },
+        ]
+
+    async def _async_monitor_type_options(self) -> list[dict[str, str]]:
+        """Return translated monitor type options without blocking the event loop."""
+        translations = await self.hass.async_add_executor_job(
+            self._load_translation,
+            self.hass.config.language,
+        )
+        return self._monitor_type_options(translations)
 
     @staticmethod
     @callback
@@ -71,6 +142,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return await self.async_step_user(
             {
                 CONF_GLOBALID: import_data.get(CONF_GLOBALID),
+                CONF_MONITOR_TYPE: import_data.get(CONF_MONITOR_TYPE, DEFAULT_MONITOR_TYPE),
                 CONF_NAME: import_data.get(CONF_NAME),
                 CONF_ONLYLINE: import_data.get(CONF_ONLYLINE, DEFAULT_ONLYLINE),
                 CONF_HIDEDESTINATION: import_data.get(CONF_HIDEDESTINATION, DEFAULT_HIDEDESTINATION),
@@ -106,9 +178,10 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 stations = await self._fetch_stations(station_name)
 
                 if stations:
+                    monitor_type_options = await self._async_monitor_type_options()
                     return self.async_show_form(
                         step_id="user",
-                        data_schema=self._user_config_schema(stations, station_name)
+                        data_schema=self._user_config_schema(stations, station_name, monitor_type_options)
                     )
                 else:
                     errors = {}
@@ -182,6 +255,9 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if CONF_TRANSPORTTYPES in user_input:
                     user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
 
+                if CONF_LIMIT in user_input:
+                    user_input[CONF_LIMIT] = self._normalize_limit(user_input[CONF_LIMIT])
+
                 # if the request is from the YAML import, 
                 # means there is a CONF_DOUBLESTATIONNUMBER,
                 # use the old unique_id format to keep the old relations and avoid double import from YAML
@@ -198,7 +274,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             return self.async_show_form(
                 step_id="user",
-                data_schema=self._user_config_schema(None),
+                data_schema=self._user_config_schema(None, None, await self._async_monitor_type_options()),
                 errors={"base": "invalid_input"}
             )
 
@@ -250,7 +326,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("station_name"): str,
         })
 
-    def _user_config_schema(self, stations, station_name):
+    def _user_config_schema(self, stations, station_name, monitor_type_options):
         """Return the schema for the user configuration form with station options."""
         options = [
             {"label": f"{station['name']} - {station['transportTypes']} ({station['globalId']})", "value": station['globalId']}
@@ -259,6 +335,12 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return vol.Schema({
             vol.Required(CONF_NAME, default=station_name): str,
+            vol.Optional(CONF_MONITOR_TYPE, default=DEFAULT_MONITOR_TYPE): selector({
+                "select": {
+                    "options": monitor_type_options,
+                    "mode": "dropdown"
+                }
+            }),
             vol.Required(CONF_GLOBALID): selector({
                 "select": {
                     "options": options
@@ -271,7 +353,14 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "custom_value": True
                 }
             }),
-            vol.Optional(CONF_LIMIT,               default=DEFAULT_LIMIT): int,
+            vol.Optional(CONF_LIMIT,               default=self._normalize_limit(DEFAULT_LIMIT)): selector({
+                "number": {
+                    "min": 1,
+                    "max": 80,
+                    "step": 1,
+                    "mode": "box"
+                }
+            }),
             vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, default=DEFAULT_SORT_BY_REAL_DEPARTURE): bool,
             vol.Optional(CONF_OFFSET_IN_MINUTES, default=DEFAULT_OFFSET_IN_MINUTES): int,
 
@@ -542,10 +631,16 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_TIMEZONE_FROM, CONF_TIMEZONE_TO, CONF_ALERT_FOR, CONF_GLOBALID2, CONF_STATS_TEMPLATE, CONF_PROXY_USETIME, CONF_PROXY_URL, CONF_CSS_CODE]:
                 if key not in user_input:
                     user_input[key] = ""  # Explicitly set the field to an empty string if it's not in the user_input
+
+            if CONF_MONITOR_TYPE not in user_input:
+                user_input[CONF_MONITOR_TYPE] = current_data.get(CONF_MONITOR_TYPE, DEFAULT_MONITOR_TYPE)
             
             # Convert selected transport types to a comma-separated string
             if CONF_TRANSPORTTYPES in user_input:
                 user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
+
+            if CONF_LIMIT in user_input:
+                user_input[CONF_LIMIT] = AnotherMVGConfigFlow._normalize_limit(user_input[CONF_LIMIT])
             
             # Save the updated data
             self.hass.config_entries.async_update_entry(
@@ -561,9 +656,20 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         current_data = self._config_entry.data
         transport_types = DEFAULT_CONF_TRANSPORTTYPES.split(',')
         selected_transport_types = current_data.get(CONF_TRANSPORTTYPES, '').split(',')
+        translations = await self.hass.async_add_executor_job(
+            AnotherMVGConfigFlow._load_translation,
+            self.hass.config.language,
+        )
+        monitor_type_options = AnotherMVGConfigFlow._monitor_type_options(translations)
 
         self.options_schema = vol.Schema({
             vol.Required(CONF_NAME,           default=current_data.get(CONF_NAME)): str,
+            vol.Optional(CONF_MONITOR_TYPE,   default=current_data.get(CONF_MONITOR_TYPE, DEFAULT_MONITOR_TYPE)): selector({
+                "select": {
+                    "options": monitor_type_options,
+                    "mode": "dropdown"
+                }
+            }),
             vol.Required(CONF_GLOBALID,       default=current_data.get(CONF_GLOBALID)): str,
             vol.Optional(CONF_TRANSPORTTYPES, default=selected_transport_types): selector({
                 "select": {
@@ -572,7 +678,14 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                     "custom_value": True
                 }
             }),
-            vol.Optional(CONF_LIMIT,            default=current_data.get(CONF_LIMIT, DEFAULT_LIMIT)): int,
+            vol.Optional(CONF_LIMIT,            default=AnotherMVGConfigFlow._normalize_limit(current_data.get(CONF_LIMIT, DEFAULT_LIMIT))): selector({
+                "number": {
+                    "min": 1,
+                    "max": 80,
+                    "step": 1,
+                    "mode": "box"
+                }
+            }),
             vol.Optional(CONF_SORT_BY_REAL_DEPARTURE, description={"suggested_value": current_data.get(CONF_SORT_BY_REAL_DEPARTURE, "")}): bool,
             vol.Optional(CONF_OFFSET_IN_MINUTES, default=current_data.get(CONF_OFFSET_IN_MINUTES, DEFAULT_OFFSET_IN_MINUTES)): int,
 

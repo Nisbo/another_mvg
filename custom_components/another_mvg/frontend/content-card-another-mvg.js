@@ -1,5 +1,5 @@
 /* AnotherMVG */
-const version = "3.0.0-BETA-2";
+const version = "3.0.0-BETA-6";
 let debug = false;
 
 class ContentAnotherMVG extends HTMLElement {
@@ -37,8 +37,11 @@ class ContentAnotherMVG extends HTMLElement {
         let changedEntities = [];
 
         entities.forEach((entityId) => {
-            const newData = hass.states[entityId]?.attributes?.departures;
-            const newString = JSON.stringify(newData);
+            const attributes = hass.states[entityId]?.attributes || {};
+            const newString = JSON.stringify({
+                departures: attributes.departures,
+                monitor_type: attributes.monitor_type || attributes.config?.monitor_type || "departure",
+            });
 
             if (this._lastEntityData[entityId] !== newString) {
                 changedEntities.push(entityId);
@@ -168,6 +171,62 @@ class ContentAnotherMVG extends HTMLElement {
             clearInterval(this._clockTimer);
             this._clockTimer = null;
         }
+    }
+
+    parseCardFilterValues(value) {
+        if (!value) return [];
+        if (Array.isArray(value)) {
+            return value
+                .flatMap(item => String(item).split(/[;,]/))
+                .map(item => item.trim().toLowerCase())
+                .filter(Boolean);
+        }
+
+        return String(value)
+            .split(/[;,]/)
+            .map(item => item.trim().toLowerCase())
+            .filter(Boolean);
+    }
+
+    parseDirectionFilterValues(value) {
+        if (!value) return [];
+        if (Array.isArray(value)) {
+            return value
+                .flatMap(item => String(item).split(";"))
+                .map(item => item.trim().toLowerCase())
+                .filter(Boolean);
+        }
+
+        return String(value)
+            .split(";")
+            .map(item => item.trim().toLowerCase())
+            .filter(Boolean);
+    }
+
+    matchesLineFilter(departure, onlyLine) {
+        const lineFilters = this.parseCardFilterValues(onlyLine);
+        if (lineFilters.length === 0) return true;
+
+        const line = String(departure.label || "").trim().toLowerCase();
+        const lineWithTrainType = `${departure.trainType || ""}${departure.label || ""}`.trim().toLowerCase();
+
+        return lineFilters.some(filter => filter === line || filter === lineWithTrainType);
+    }
+
+    matchesDirectionFilter(departure, onlyDirection, hideDirection) {
+        const direction = String(departure.destination || "").trim().toLowerCase();
+        const onlyFilters = this.parseDirectionFilterValues(onlyDirection);
+        const hideFilters = this.parseDirectionFilterValues(hideDirection);
+
+        if (onlyFilters.length > 0 && !onlyFilters.some(filter => direction.includes(filter))) {
+            return false;
+        }
+
+        if (hideFilters.length > 0 && hideFilters.some(filter => direction.includes(filter))) {
+            return false;
+        }
+
+        return true;
     }
 
     toggleShowAll(entity) {
@@ -357,7 +416,7 @@ class ContentAnotherMVG extends HTMLElement {
             });
 
         // for each entity, get the corresponding maxDepartures and displayOptions, if available
-        const fields = ["maxDepartures", "displayOptions", "transportType", "name", "maxDeparturesFixed"];
+        const fields = ["maxDepartures", "displayOptions", "transportType", "onlyLine", "onlyDirection", "hideDirection", "name", "maxDeparturesFixed"];
         const entityConfigs = entityKeys.map((key) => {
             const index = key === "entity" ? "" : key.slice(6);
 
@@ -443,7 +502,7 @@ class ContentAnotherMVG extends HTMLElement {
             if (showType)  colspawn += 1;
 
             // show all stations in the same card, if there are more than one station configured
-            entityConfigs.forEach(({ entity, maxDepartures, displayOptions, transportType, name, maxDeparturesFixed }) => {
+            entityConfigs.forEach(({ entity, maxDepartures, displayOptions, transportType, onlyLine, onlyDirection, hideDirection, name, maxDeparturesFixed }) => {
                 ccc++;
 
                 const departureFormat = displayOptions && ["1", "2", "3", "4", "5"].includes(displayOptions) ? displayOptions : globalDepartureFormat;
@@ -461,6 +520,14 @@ class ContentAnotherMVG extends HTMLElement {
                         </tr>
                     `;
                 } else{
+                    const monitorType = state2.attributes.monitor_type || state2.attributes.config?.monitor_type || "departure";
+                    const timeColumnLabel = monitorType === "arrival"
+                        ? hass.localize("component.another_mvg.frontend.column_arrival")
+                        : hass.localize("component.another_mvg.frontend.column_departure");
+                    const destinationColumnLabel = monitorType === "arrival"
+                        ? hass.localize("component.another_mvg.frontend.column_origin")
+                        : hass.localize("component.another_mvg.frontend.column_destination");
+
                     // only show as separator for the additionally stations
                     if (ccc > 1) {
                         html += `
@@ -480,9 +547,9 @@ class ContentAnotherMVG extends HTMLElement {
                         <tr class="amvg-headline clickable ${this._showAllDepartures[ccc] ? 'expanded' : ''}" data-entity="${ccc}">
                             ${showType ? `<th class="labelHL">${hass.localize("component.another_mvg.frontend.column_type")}</th>` : ""}
                             <th class="labelHL">${hass.localize("component.another_mvg.frontend.column_line")}</th>
-                            <th class="destinationHL">${hass.localize("component.another_mvg.frontend.column_destination")}</th>
+                            <th class="destinationHL">${destinationColumnLabel}</th>
                             ${!hideTrack ? `<th class="trackHL">${hass.localize("component.another_mvg.frontend.column_track")}</th>` : ""}
-                            <th class="timeHL">${hass.localize("component.another_mvg.frontend.column_departure")}</th>
+                            <th class="timeHL">${timeColumnLabel}</th>
                         </tr>
                         `;
 
@@ -516,6 +583,11 @@ class ContentAnotherMVG extends HTMLElement {
                                 return type && transportTypes.includes(type);
                             });
                         }
+
+                        filtered = filtered.filter(dep =>
+                            this.matchesLineFilter(dep, onlyLine) &&
+                            this.matchesDirectionFilter(dep, onlyDirection, hideDirection)
+                        );
 
                         let list2;
 
@@ -693,6 +765,21 @@ class ContentAnotherMVG extends HTMLElement {
                     }
                 }
             },
+            {
+                name: "onlyLine",
+                selector: { text: {} },
+                default: ""
+            },
+            {
+                name: "onlyDirection",
+                selector: { text: {} },
+                default: ""
+            },
+            {
+                name: "hideDirection",
+                selector: { text: {} },
+                default: ""
+            },
 
             // Options
             {
@@ -819,6 +906,21 @@ class ContentAnotherMVG extends HTMLElement {
                                 }
                             },
                             {
+                                name: "onlyLine2",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
+                                name: "onlyDirection2",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
+                                name: "hideDirection2",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
                                 name: "displayOptions2",
                                 selector: {
                                     select: {
@@ -881,6 +983,21 @@ class ContentAnotherMVG extends HTMLElement {
                                         ]
                                     }
                                 }
+                            },
+                            {
+                                name: "onlyLine3",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
+                                name: "onlyDirection3",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
+                                name: "hideDirection3",
+                                selector: { text: {} },
+                                default: ""
                             },
                             {
                                 name: "displayOptions3",
@@ -947,6 +1064,21 @@ class ContentAnotherMVG extends HTMLElement {
                                 }
                             },
                             {
+                                name: "onlyLine4",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
+                                name: "onlyDirection4",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
+                                name: "hideDirection4",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
                                 name: "displayOptions4",
                                 selector: {
                                     select: {
@@ -1011,6 +1143,21 @@ class ContentAnotherMVG extends HTMLElement {
                                 }
                             },
                             {
+                                name: "onlyLine5",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
+                                name: "onlyDirection5",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
+                                name: "hideDirection5",
+                                selector: { text: {} },
+                                default: ""
+                            },
+                            {
                                 name: "displayOptions5",
                                 selector: {
                                     select: {
@@ -1064,6 +1211,22 @@ class ContentAnotherMVG extends HTMLElement {
                 if (schema.name == "transportType3")        label = "transport_type";
                 if (schema.name == "transportType4")        label = "transport_type";
                 if (schema.name == "transportType5")        label = "transport_type";
+
+                if (schema.name == "onlyLine")              label = "only_line";
+                if (schema.name == "onlyLine2")             label = "only_line";
+                if (schema.name == "onlyLine3")             label = "only_line";
+                if (schema.name == "onlyLine4")             label = "only_line";
+                if (schema.name == "onlyLine5")             label = "only_line";
+                if (schema.name == "onlyDirection")         label = "only_direction";
+                if (schema.name == "onlyDirection2")        label = "only_direction";
+                if (schema.name == "onlyDirection3")        label = "only_direction";
+                if (schema.name == "onlyDirection4")        label = "only_direction";
+                if (schema.name == "onlyDirection5")        label = "only_direction";
+                if (schema.name == "hideDirection")         label = "hide_direction";
+                if (schema.name == "hideDirection2")        label = "hide_direction";
+                if (schema.name == "hideDirection3")        label = "hide_direction";
+                if (schema.name == "hideDirection4")        label = "hide_direction";
+                if (schema.name == "hideDirection5")        label = "hide_direction";
 
                 if (schema.name == "entity")                label = "entity";
                 if (schema.name == "entity2")               label = "entity2";
@@ -1130,6 +1293,22 @@ class ContentAnotherMVG extends HTMLElement {
                 if (schema.name == "transportType3")        label = "transport_type_desc";
                 if (schema.name == "transportType4")        label = "transport_type_desc";
                 if (schema.name == "transportType5")        label = "transport_type_desc";
+
+                if (schema.name == "onlyLine")              label = "only_line_desc";
+                if (schema.name == "onlyLine2")             label = "only_line_desc";
+                if (schema.name == "onlyLine3")             label = "only_line_desc";
+                if (schema.name == "onlyLine4")             label = "only_line_desc";
+                if (schema.name == "onlyLine5")             label = "only_line_desc";
+                if (schema.name == "onlyDirection")         label = "only_direction_desc";
+                if (schema.name == "onlyDirection2")        label = "only_direction_desc";
+                if (schema.name == "onlyDirection3")        label = "only_direction_desc";
+                if (schema.name == "onlyDirection4")        label = "only_direction_desc";
+                if (schema.name == "onlyDirection5")        label = "only_direction_desc";
+                if (schema.name == "hideDirection")         label = "hide_direction_desc";
+                if (schema.name == "hideDirection2")        label = "hide_direction_desc";
+                if (schema.name == "hideDirection3")        label = "hide_direction_desc";
+                if (schema.name == "hideDirection4")        label = "hide_direction_desc";
+                if (schema.name == "hideDirection5")        label = "hide_direction_desc";
 
                 if (schema.name == "entity")                label = "station_desc";
 
