@@ -36,6 +36,11 @@ from .const import (
     CONF_FORCE_PROXY,
     CONF_CSS_CODE,
     CONF_CSS_CODE_DARKMODE_ONLY,
+    CONF_MQTT_ENABLED,
+    CONF_MQTT_TOPIC_PREFIX,
+    CONF_MQTT_RETAIN,
+    CONF_MQTT_QOS,
+    CONF_UPDATE_MODE,
     DEFAULT_ONLYLINE,
     DEFAULT_MONITOR_TYPE,
     MONITOR_TYPE_DEPARTURE,
@@ -57,6 +62,13 @@ from .const import (
     DEFAULT_FORCE_PROXY,
     DEFAULT_CSS_CODE,
     DEFAULT_CSS_CODE_DARKMODE_ONLY,
+    DEFAULT_MQTT_ENABLED,
+    DEFAULT_MQTT_TOPIC_PREFIX,
+    DEFAULT_MQTT_RETAIN,
+    DEFAULT_MQTT_QOS,
+    DEFAULT_UPDATE_MODE,
+    UPDATE_MODE_AUTO,
+    UPDATE_MODE_MANUAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -75,6 +87,27 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except (TypeError, ValueError):
             limit = DEFAULT_LIMIT
         return max(1, min(80, limit))
+
+    @staticmethod
+    def _normalize_mqtt_topic_prefix(value) -> str:
+        """Normalize an MQTT topic prefix."""
+        topic = str(value or "").strip()
+        return topic or DEFAULT_MQTT_TOPIC_PREFIX
+
+    @staticmethod
+    def _is_valid_mqtt_topic_prefix(value) -> bool:
+        """Return true if the MQTT topic prefix can be published to."""
+        topic = AnotherMVGConfigFlow._normalize_mqtt_topic_prefix(value)
+        return (
+            bool(topic)
+            and all(
+                char.isascii() and (char.isalnum() or char in "._-/")
+                for char in topic
+            )
+            and not topic.startswith("/")
+            and not topic.endswith("/")
+            and "//" not in topic
+        )
 
     @staticmethod
     def _load_translation(language: str | None) -> dict:
@@ -123,6 +156,28 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             },
         ]
 
+    @classmethod
+    def _update_mode_options(cls, translations: dict) -> list[dict[str, str]]:
+        """Return update mode labels for the active Home Assistant language."""
+        return [
+            {
+                "label": cls._translation(
+                    translations,
+                    ["selector", "update_mode", "options", UPDATE_MODE_AUTO],
+                    "Automatic",
+                ),
+                "value": UPDATE_MODE_AUTO,
+            },
+            {
+                "label": cls._translation(
+                    translations,
+                    ["selector", "update_mode", "options", UPDATE_MODE_MANUAL],
+                    "Manual",
+                ),
+                "value": UPDATE_MODE_MANUAL,
+            },
+        ]
+
     async def _async_monitor_type_options(self) -> list[dict[str, str]]:
         """Return translated monitor type options without blocking the event loop."""
         translations = await self.hass.async_add_executor_job(
@@ -130,6 +185,14 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.hass.config.language,
         )
         return self._monitor_type_options(translations)
+
+    async def _async_update_mode_options(self) -> list[dict[str, str]]:
+        """Return translated update mode options without blocking the event loop."""
+        translations = await self.hass.async_add_executor_job(
+            self._load_translation,
+            self.hass.config.language,
+        )
+        return self._update_mode_options(translations)
 
     @staticmethod
     @callback
@@ -163,6 +226,11 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_FORCE_PROXY: import_data.get(CONF_FORCE_PROXY, DEFAULT_FORCE_PROXY),
                 CONF_CSS_CODE: import_data.get(CONF_CSS_CODE, DEFAULT_CSS_CODE),
                 CONF_CSS_CODE_DARKMODE_ONLY: import_data.get(CONF_CSS_CODE_DARKMODE_ONLY, DEFAULT_CSS_CODE_DARKMODE_ONLY),
+                CONF_MQTT_ENABLED: import_data.get(CONF_MQTT_ENABLED, DEFAULT_MQTT_ENABLED),
+                CONF_MQTT_TOPIC_PREFIX: import_data.get(CONF_MQTT_TOPIC_PREFIX, DEFAULT_MQTT_TOPIC_PREFIX),
+                CONF_MQTT_RETAIN: import_data.get(CONF_MQTT_RETAIN, DEFAULT_MQTT_RETAIN),
+                CONF_MQTT_QOS: import_data.get(CONF_MQTT_QOS, DEFAULT_MQTT_QOS),
+                CONF_UPDATE_MODE: import_data.get(CONF_UPDATE_MODE, DEFAULT_UPDATE_MODE),
             }
         )
 
@@ -179,9 +247,10 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 if stations:
                     monitor_type_options = await self._async_monitor_type_options()
+                    update_mode_options = await self._async_update_mode_options()
                     return self.async_show_form(
                         step_id="user",
-                        data_schema=self._user_config_schema(stations, station_name, monitor_type_options)
+                        data_schema=self._user_config_schema(stations, station_name, monitor_type_options, update_mode_options)
                     )
                 else:
                     errors = {}
@@ -199,6 +268,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 advanced_options = user_input.get("advanced_options", {})
                 filter_options   = user_input.get("filter_options", {})
                 proxy_options    = user_input.get("proxy_options", {})
+                mqtt_options     = user_input.get("mqtt_options", {})
                 unique_id = str(uuid.uuid4())  # Generate unique_id
                 #_LOGGER.warning("AnotherMVG: UUID prepared: %s", unique_id)
 
@@ -251,12 +321,35 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if CONF_FORCE_PROXY in proxy_options:
                     user_input[CONF_FORCE_PROXY] = proxy_options[CONF_FORCE_PROXY]
 
+                if CONF_MQTT_ENABLED in mqtt_options:
+                    user_input[CONF_MQTT_ENABLED] = mqtt_options[CONF_MQTT_ENABLED]
+
+                user_input[CONF_MQTT_TOPIC_PREFIX] = self._normalize_mqtt_topic_prefix(
+                    mqtt_options.get(CONF_MQTT_TOPIC_PREFIX, DEFAULT_MQTT_TOPIC_PREFIX)
+                )
+
+                if CONF_MQTT_RETAIN in mqtt_options:
+                    user_input[CONF_MQTT_RETAIN] = mqtt_options[CONF_MQTT_RETAIN]
+
+                user_input[CONF_MQTT_QOS] = int(
+                    mqtt_options.get(CONF_MQTT_QOS, DEFAULT_MQTT_QOS)
+                )
+
+                if not self._is_valid_mqtt_topic_prefix(user_input[CONF_MQTT_TOPIC_PREFIX]):
+                    return self.async_show_form(
+                        step_id="user",
+                        data_schema=self._user_config_schema(None, None, await self._async_monitor_type_options(), await self._async_update_mode_options()),
+                        errors={"base": "invalid_mqtt_topic"},
+                    )
 
                 if CONF_TRANSPORTTYPES in user_input:
                     user_input[CONF_TRANSPORTTYPES] = ','.join(user_input[CONF_TRANSPORTTYPES])
 
                 if CONF_LIMIT in user_input:
                     user_input[CONF_LIMIT] = self._normalize_limit(user_input[CONF_LIMIT])
+
+                if CONF_UPDATE_MODE not in user_input:
+                    user_input[CONF_UPDATE_MODE] = DEFAULT_UPDATE_MODE
 
                 # if the request is from the YAML import, 
                 # means there is a CONF_DOUBLESTATIONNUMBER,
@@ -274,7 +367,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             return self.async_show_form(
                 step_id="user",
-                data_schema=self._user_config_schema(None, None, await self._async_monitor_type_options()),
+                data_schema=self._user_config_schema(None, None, await self._async_monitor_type_options(), await self._async_update_mode_options()),
                 errors={"base": "invalid_input"}
             )
 
@@ -326,7 +419,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("station_name"): str,
         })
 
-    def _user_config_schema(self, stations, station_name, monitor_type_options):
+    def _user_config_schema(self, stations, station_name, monitor_type_options, update_mode_options):
         """Return the schema for the user configuration form with station options."""
         options = [
             {"label": f"{station['name']} - {station['transportTypes']} ({station['globalId']})", "value": station['globalId']}
@@ -338,6 +431,12 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(CONF_MONITOR_TYPE, default=DEFAULT_MONITOR_TYPE): selector({
                 "select": {
                     "options": monitor_type_options,
+                    "mode": "dropdown"
+                }
+            }),
+            vol.Optional(CONF_UPDATE_MODE, default=DEFAULT_UPDATE_MODE): selector({
+                "select": {
+                    "options": update_mode_options,
                     "mode": "dropdown"
                 }
             }),
@@ -404,6 +503,23 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
+                {"collapsed": True},
+            ),
+            # MQTT
+            vol.Required("mqtt_options"): data_entry_flow.section(
+                vol.Schema(
+                    {
+                        vol.Optional(CONF_MQTT_ENABLED, default=DEFAULT_MQTT_ENABLED): bool,
+                        vol.Optional(CONF_MQTT_TOPIC_PREFIX, default=DEFAULT_MQTT_TOPIC_PREFIX): str,
+                        vol.Optional(CONF_MQTT_QOS, default=str(DEFAULT_MQTT_QOS)): selector({
+                            "select": {
+                                "options": ["0", "1", "2"],
+                                "mode": "dropdown"
+                            }
+                        }),
+                        vol.Optional(CONF_MQTT_RETAIN, default=DEFAULT_MQTT_RETAIN): bool,
+                    }
+                ),
                 {"collapsed": True},
             )
         })
@@ -569,6 +685,8 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_edit(self, user_input=None):
         """Manage the options."""
+        current_data = self._config_entry.data
+
         if user_input is not None:
             # Log submitted user_input
             # for key, value in user_input.items():
@@ -578,6 +696,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             advanced_options = user_input.get("advanced_options", {})
             filter_options   = user_input.get("filter_options", {})
             proxy_options    = user_input.get("proxy_options", {})
+            mqtt_options     = user_input.get("mqtt_options", {})
         
             # and convert the input
             # this is because the section function creates a dictionary and I dont want this
@@ -625,6 +744,26 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             if CONF_FORCE_PROXY in proxy_options:
                 user_input[CONF_FORCE_PROXY] = proxy_options[CONF_FORCE_PROXY]
 
+            if CONF_MQTT_ENABLED in mqtt_options:
+                user_input[CONF_MQTT_ENABLED] = mqtt_options[CONF_MQTT_ENABLED]
+
+            user_input[CONF_MQTT_TOPIC_PREFIX] = AnotherMVGConfigFlow._normalize_mqtt_topic_prefix(
+                mqtt_options.get(CONF_MQTT_TOPIC_PREFIX, DEFAULT_MQTT_TOPIC_PREFIX)
+            )
+
+            if CONF_MQTT_RETAIN in mqtt_options:
+                user_input[CONF_MQTT_RETAIN] = mqtt_options[CONF_MQTT_RETAIN]
+
+            user_input[CONF_MQTT_QOS] = int(
+                mqtt_options.get(CONF_MQTT_QOS, DEFAULT_MQTT_QOS)
+            )
+
+            if not AnotherMVGConfigFlow._is_valid_mqtt_topic_prefix(user_input[CONF_MQTT_TOPIC_PREFIX]):
+                return self.async_show_form(
+                    step_id="edit",
+                    data_schema=self.options_schema,
+                    errors={"base": "invalid_mqtt_topic"},
+                )
 
             # Ensure that empty fields are stored as empty strings
             for key in [CONF_ONLYLINE, CONF_HIDEDESTINATION, CONF_ONLYDESTINATION, 
@@ -634,6 +773,9 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
 
             if CONF_MONITOR_TYPE not in user_input:
                 user_input[CONF_MONITOR_TYPE] = current_data.get(CONF_MONITOR_TYPE, DEFAULT_MONITOR_TYPE)
+
+            if CONF_UPDATE_MODE not in user_input:
+                user_input[CONF_UPDATE_MODE] = current_data.get(CONF_UPDATE_MODE, DEFAULT_UPDATE_MODE)
             
             # Convert selected transport types to a comma-separated string
             if CONF_TRANSPORTTYPES in user_input:
@@ -653,7 +795,6 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data={})
 
         # Prepare the default values based on current configuration data
-        current_data = self._config_entry.data
         transport_types = DEFAULT_CONF_TRANSPORTTYPES.split(',')
         selected_transport_types = current_data.get(CONF_TRANSPORTTYPES, '').split(',')
         translations = await self.hass.async_add_executor_job(
@@ -661,12 +802,19 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             self.hass.config.language,
         )
         monitor_type_options = AnotherMVGConfigFlow._monitor_type_options(translations)
+        update_mode_options = AnotherMVGConfigFlow._update_mode_options(translations)
 
         self.options_schema = vol.Schema({
             vol.Required(CONF_NAME,           default=current_data.get(CONF_NAME)): str,
             vol.Optional(CONF_MONITOR_TYPE,   default=current_data.get(CONF_MONITOR_TYPE, DEFAULT_MONITOR_TYPE)): selector({
                 "select": {
                     "options": monitor_type_options,
+                    "mode": "dropdown"
+                }
+            }),
+            vol.Optional(CONF_UPDATE_MODE,   default=current_data.get(CONF_UPDATE_MODE, DEFAULT_UPDATE_MODE)): selector({
+                "select": {
+                    "options": update_mode_options,
                     "mode": "dropdown"
                 }
             }),
@@ -729,6 +877,23 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                     }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
+                {"collapsed": True},
+            ),
+            # MQTT
+            vol.Required("mqtt_options"): data_entry_flow.section(
+                vol.Schema(
+                    {
+                        vol.Optional(CONF_MQTT_ENABLED, default=current_data.get(CONF_MQTT_ENABLED, DEFAULT_MQTT_ENABLED)): bool,
+                        vol.Optional(CONF_MQTT_TOPIC_PREFIX, description={"suggested_value": current_data.get(CONF_MQTT_TOPIC_PREFIX, DEFAULT_MQTT_TOPIC_PREFIX)}): str,
+                        vol.Optional(CONF_MQTT_QOS, default=str(current_data.get(CONF_MQTT_QOS, DEFAULT_MQTT_QOS))): selector({
+                            "select": {
+                                "options": ["0", "1", "2"],
+                                "mode": "dropdown"
+                            }
+                        }),
+                        vol.Optional(CONF_MQTT_RETAIN, default=current_data.get(CONF_MQTT_RETAIN, DEFAULT_MQTT_RETAIN)): bool,
+                    }
+                ),
                 {"collapsed": True},
             )
         })

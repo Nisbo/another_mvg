@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+import json
 import logging
+import re
 import time
 import requests
 import asyncio
@@ -13,6 +15,7 @@ import aiohttp
 from requests import HTTPError, Timeout
 import urllib.parse
 import voluptuous as vol
+from homeassistant.components import mqtt
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
@@ -44,6 +47,11 @@ from .const import (
     CONF_FORCE_PROXY,
     CONF_CSS_CODE,
     CONF_CSS_CODE_DARKMODE_ONLY,
+    CONF_MQTT_ENABLED,
+    CONF_MQTT_TOPIC_PREFIX,
+    CONF_MQTT_RETAIN,
+    CONF_MQTT_QOS,
+    CONF_UPDATE_MODE,
     URL,
     URL_EFA_ARRIVALS,
     USER_AGENT,
@@ -68,6 +76,13 @@ from .const import (
     DEFAULT_FORCE_PROXY,
     DEFAULT_CSS_CODE,
     DEFAULT_CSS_CODE_DARKMODE_ONLY,
+    DEFAULT_MQTT_ENABLED,
+    DEFAULT_MQTT_TOPIC_PREFIX,
+    DEFAULT_MQTT_RETAIN,
+    DEFAULT_MQTT_QOS,
+    DEFAULT_UPDATE_MODE,
+    UPDATE_MODE_AUTO,
+    UPDATE_MODE_MANUAL,
 )
 
 # integration imports end
@@ -101,6 +116,11 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_FORCE_PROXY, default=DEFAULT_FORCE_PROXY): cv.boolean,
         vol.Optional(CONF_CSS_CODE, default=DEFAULT_CSS_CODE): cv.string,
         vol.Optional(CONF_CSS_CODE_DARKMODE_ONLY, default=DEFAULT_CSS_CODE_DARKMODE_ONLY): cv.boolean,
+        vol.Optional(CONF_MQTT_ENABLED, default=DEFAULT_MQTT_ENABLED): cv.boolean,
+        vol.Optional(CONF_MQTT_TOPIC_PREFIX, default=DEFAULT_MQTT_TOPIC_PREFIX): cv.string,
+        vol.Optional(CONF_MQTT_RETAIN, default=DEFAULT_MQTT_RETAIN): cv.boolean,
+        vol.Optional(CONF_MQTT_QOS, default=DEFAULT_MQTT_QOS): vol.All(vol.Coerce(int), vol.Range(min=0, max=2)),
+        vol.Optional(CONF_UPDATE_MODE, default=DEFAULT_UPDATE_MODE): cv.string,
     }
 )
 
@@ -153,7 +173,9 @@ async def async_setup_entry(
         unique_id = config_entry.data[CONF_GLOBALID].replace(":", "") + config_entry.data[CONF_DOUBLESTATIONNUMBER]
         hass.config_entries.async_update_entry(config_entry, unique_id=unique_id)
     
-    async_add_entities([ConnectionInfo(hass, config_entry)])
+    entity = ConnectionInfo(hass, config_entry)
+    hass.data.setdefault(DOMAIN, {}).setdefault("entities", {})[config_entry.entry_id] = entity
+    async_add_entities([entity])
 
 
 @dataclass
@@ -220,6 +242,7 @@ class ConnectionInfo(SensorEntity):
 
         self._onlyline = config_data.get(CONF_ONLYLINE)
         self._monitor_type = config_data.get(CONF_MONITOR_TYPE, DEFAULT_MONITOR_TYPE)
+        self._update_mode = config_data.get(CONF_UPDATE_MODE, DEFAULT_UPDATE_MODE)
         self._limit = self.normalize_api_limit(config_data.get(CONF_LIMIT, DEFAULT_LIMIT))
         self._hidedestination = config_data.get(CONF_HIDEDESTINATION)
         self._onlydestination = config_data.get(CONF_ONLYDESTINATION)
@@ -229,6 +252,16 @@ class ConnectionInfo(SensorEntity):
         self._transporttypes = config_data.get(CONF_TRANSPORTTYPES)
         self._css_code = config_data.get(CONF_CSS_CODE, DEFAULT_CSS_CODE)
         self._css_code_darkmode_only = config_data.get(CONF_CSS_CODE_DARKMODE_ONLY, DEFAULT_CSS_CODE_DARKMODE_ONLY)
+        self._mqtt_enabled = config_data.get(CONF_MQTT_ENABLED, DEFAULT_MQTT_ENABLED)
+        self._mqtt_topic_prefix = self.normalize_mqtt_topic_prefix(
+            config_data.get(CONF_MQTT_TOPIC_PREFIX, DEFAULT_MQTT_TOPIC_PREFIX)
+        )
+        self._mqtt_retain = config_data.get(CONF_MQTT_RETAIN, DEFAULT_MQTT_RETAIN)
+        self._mqtt_qos = min(2, max(0, self.normalize_non_negative_int(
+            config_data.get(CONF_MQTT_QOS, DEFAULT_MQTT_QOS),
+            DEFAULT_MQTT_QOS,
+        )))
+        self._mqtt_publish_warning_logged = False
         self._sort_by_real_departure = config_data.get(CONF_SORT_BY_REAL_DEPARTURE, DEFAULT_SORT_BY_REAL_DEPARTURE)
         self._stats_template = config_data.get(CONF_STATS_TEMPLATE, DEFAULT_STATS_TEMPLATE)
         self._timezoneFrom = config_data.get(CONF_TIMEZONE_FROM)
@@ -251,16 +284,27 @@ class ConnectionInfo(SensorEntity):
                 "name": self._name, 
                 "unique_id": self._unique_id,
                 "monitor_type": self._monitor_type,
+                "update_mode": self._update_mode,
+                "mqtt_enabled": self._mqtt_enabled,
+                "mqtt_topic_prefix": self._mqtt_topic_prefix,
+                "mqtt_retain": self._mqtt_retain,
+                "mqtt_qos": self._mqtt_qos,
                 "css_code": self._css_code,
                 "css_code_darkmode_only": self._css_code_darkmode_only
             }
         }
         self._custom_attributes["monitor_type"] = self._monitor_type
+        self._custom_attributes["update_mode"] = self._update_mode
 
     @property
     def name(self) -> str:
         """Return the name."""
         return self._name
+
+    @property
+    def should_poll(self) -> bool:
+        """Return true if Home Assistant should poll this sensor automatically."""
+        return self._update_mode == UPDATE_MODE_AUTO
 
     @staticmethod
     def normalize_api_limit(value, default: int = DEFAULT_LIMIT) -> int:
@@ -279,6 +323,39 @@ class ConnectionInfo(SensorEntity):
         except (TypeError, ValueError):
             number = default
         return max(0, number)
+
+    @staticmethod
+    def normalize_mqtt_topic_prefix(value) -> str:
+        """Return a publishable MQTT topic prefix."""
+        topic = str(value or "").strip()
+        if (
+            not topic
+            or topic.startswith("/")
+            or topic.endswith("/")
+            or "//" in topic
+            or not all(
+                char.isascii() and (char.isalnum() or char in "._-/")
+                for char in topic
+            )
+        ):
+            return DEFAULT_MQTT_TOPIC_PREFIX
+        return topic
+
+    @staticmethod
+    def sanitize_mqtt_topic_part(value: str) -> str:
+        """Return a safe MQTT topic segment based on a Home Assistant entity id."""
+        raw_value = str(value or "").strip()
+        object_id = raw_value.split(".", 1)[1] if "." in raw_value else raw_value
+        topic_part = re.sub(r"[^A-Za-z0-9_-]+", "_", object_id)
+        return topic_part.strip("_") or "unknown"
+
+    @property
+    def mqtt_topic(self) -> str:
+        """Return the MQTT topic for this sensor."""
+        entity_part = self.sanitize_mqtt_topic_part(
+            self.entity_id or self._unique_id or self._name
+        )
+        return f"{self._mqtt_topic_prefix}/{entity_part}/state"
 
     def get_request_limit(self) -> int:
         """Return the effective API request limit, including the optional buffer."""
@@ -442,6 +519,8 @@ class ConnectionInfo(SensorEntity):
     async def async_update(self) -> None:
         self._custom_attributes["monitor_type"] = self._monitor_type
         self._custom_attributes["config"]["monitor_type"] = self._monitor_type
+        self._custom_attributes["update_mode"] = self._update_mode
+        self._custom_attributes["config"]["update_mode"] = self._update_mode
         self._custom_attributes["departures"] = [
             departure.to_dict() if isinstance(departure, Departure) else departure
             for departure in await self.get_departures()
@@ -450,6 +529,54 @@ class ConnectionInfo(SensorEntity):
         self._custom_attributes["dataOutdated"] = self._dataOutdated
         self._custom_attributes["maxConnectionErrorTime"] = self._maxConnectionErrorTime
         self.process_late_connections()
+        await self.async_publish_mqtt()
+
+    async def async_manual_refresh(self) -> None:
+        """Refresh this sensor when it is configured for manual updates."""
+        if self._update_mode != UPDATE_MODE_MANUAL:
+            _LOGGER.warning(
+                "AnotherMVG: Manual refresh requested for %s, but the sensor is in automatic update mode.",
+                self._name,
+            )
+            return
+
+        await self.async_update()
+        self.async_write_ha_state()
+
+    async def async_publish_mqtt(self) -> None:
+        """Publish the current monitor data through Home Assistant MQTT."""
+        if not self._mqtt_enabled:
+            return
+
+        payload = {
+            "name": self._name,
+            "entity_id": self.entity_id,
+            "unique_id": self._unique_id,
+            "topic": self.mqtt_topic,
+            "monitor_type": self._monitor_type,
+            "state": self.native_value,
+            "dataOutdated": self._dataOutdated,
+            "maxConnectionErrorTime": self._maxConnectionErrorTime,
+            "departures": self._custom_attributes.get("departures", []),
+        }
+
+        try:
+            await mqtt.async_publish(
+                self._hass,
+                self.mqtt_topic,
+                json.dumps(payload, ensure_ascii=False),
+                qos=self._mqtt_qos,
+                retain=self._mqtt_retain,
+            )
+            self._mqtt_publish_warning_logged = False
+        except Exception as err:
+            if not self._mqtt_publish_warning_logged:
+                _LOGGER.warning(
+                    "AnotherMVG: MQTT publish for %s failed. Is the Home Assistant MQTT integration configured? Error: %s",
+                    self._name,
+                    err,
+                )
+                self._mqtt_publish_warning_logged = True
 
     def process_late_connections(self):
         """Method to update the lateConnections"""
@@ -1067,12 +1194,12 @@ class ConnectionInfo(SensorEntity):
             or ""
         )
         if isinstance(track, str):
-            normalized_track = (
-                track.replace("Bstg.", "")
-                .replace("Bstg", "")
-                .replace("Steig", "")
-                .strip()
-            )
+            normalized_track = track.strip()
+            track_match = re.search(r"(?:^|\s)(?:Gleis|Gl\.?|Bstg\.?|Steig|Pos\.?|Position)\s*([0-9]+[a-zA-Z]?)\b", normalized_track, re.IGNORECASE)
+            if track_match:
+                return track_match.group(1)
+
+            normalized_track = re.sub(r"\b(?:Bstg\.?|Steig|Pos\.?|Position)\b", "", normalized_track, flags=re.IGNORECASE).strip()
             if normalized_track:
                 return normalized_track
         elif track:

@@ -1,5 +1,5 @@
 /* AnotherMVG-Livemap */
-const version = "3.0.0-BETA-3";
+const version = "3.0.0-BETA-11.0";
 
 class ContentAnotherMVGlivemap extends HTMLElement {
     constructor(){

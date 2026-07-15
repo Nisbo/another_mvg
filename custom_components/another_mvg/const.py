@@ -33,6 +33,11 @@ CONF_PROXY_USETIME = "proxy_usetime" # optionalo
 CONF_FORCE_PROXY = "force_proxy" # optional
 CONF_CSS_CODE = "css_code" # optional
 CONF_CSS_CODE_DARKMODE_ONLY = "css_code_darkmode_only" # optional
+CONF_MQTT_ENABLED = "mqtt_enabled" # optional
+CONF_MQTT_TOPIC_PREFIX = "mqtt_topic_prefix" # optional
+CONF_MQTT_RETAIN = "mqtt_retain" # optional
+CONF_MQTT_QOS = "mqtt_qos" # optional
+CONF_UPDATE_MODE = "update_mode" # optional
 
 DEFAULT_HIDEDESTINATION = ""
 DEFAULT_ONLYDESTINATION = ""
@@ -55,22 +60,40 @@ DEFAULT_PROXY_USETIME = 600
 DEFAULT_FORCE_PROXY = False
 DEFAULT_CSS_CODE = ""
 DEFAULT_CSS_CODE_DARKMODE_ONLY = False
+DEFAULT_MQTT_ENABLED = False
+DEFAULT_MQTT_TOPIC_PREFIX = "another_mvg"
+DEFAULT_MQTT_RETAIN = False
+DEFAULT_MQTT_QOS = 0
+DEFAULT_UPDATE_MODE = "auto"
+UPDATE_MODE_AUTO = "auto"
+UPDATE_MODE_MANUAL = "manual"
+SERVICE_REFRESH = "refresh"
 
 URL_BASE = "/another_mvg"
 ANOTHER_MVG_CARDS = [
     {
         "name": "Another MVG Card",
         "filename": "content-card-another-mvg.js",
-        "version": "3.0.0-BETA-6",
+        "version": "3.0.0-BETA-11.0",
     },
     {
         "name": "Another MVG Big Card",
         "filename": "content-card-another-mvg-big.js",
-        "version": "3.0.0-BETA-6",
+        "version": "3.0.0-BETA-11.0",
+    },
+    {
+        "name": "Another MVG Search Card",
+        "filename": "content-card-another-mvg-search.js",
+        "version": "3.0.0-BETA-11.0",
+    },
+    {
+        "name": "Another MVG Route Card",
+        "filename": "content-card-another-mvg-route.js",
+        "version": "3.0.0-BETA-11.0",
     },
     {
         "name": "Another MVG LiveMap Card",
         "filename": "content-card-another-mvg-livemap.js",
-        "version": "3.0.0-BETA-3",
+        "version": "3.0.0-BETA-11.0",
     },
 ]

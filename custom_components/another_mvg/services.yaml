@@ -1,0 +1,11 @@
+refresh:
+  name: Refresh
+  description: Refreshes a manual Another MVG sensor.
+  fields:
+    entity_id:
+      name: Entity
+      description: Manual Another MVG sensor to refresh.
+      required: true
+      selector:
+        entity:
+          integration: another_mvg

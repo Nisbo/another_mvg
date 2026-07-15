@@ -1,5 +1,5 @@
 /* AnotherMVG-Big */
-const version = "3.0.0-BETA-6";
+const version = "3.0.0-BETA-11.0";
 let debug = false;
 
 class ContentAnotherMVGbig extends HTMLElement {
@@ -13,6 +13,7 @@ class ContentAnotherMVGbig extends HTMLElement {
         );
 
         this._showAllDepartures = {};
+        this._selectedLineFilters = {};
     }
 
     set hass(hass) {
@@ -41,6 +42,7 @@ class ContentAnotherMVGbig extends HTMLElement {
             const newString = JSON.stringify({
                 departures: attributes.departures,
                 monitor_type: attributes.monitor_type || attributes.config?.monitor_type || "departure",
+                update_mode: attributes.update_mode || attributes.config?.update_mode || "auto",
             });
 
             if (this._lastEntityData[entityId] !== newString) {
@@ -50,7 +52,9 @@ class ContentAnotherMVGbig extends HTMLElement {
         });
 
         if (changedEntities.length === 0 && this._translationsLoaded) {
-            console.log("AnotherMVG-Big - Data Update (without changes) received for card with main entity: ", this.config.entity);
+            if (debug) {
+                console.log("AnotherMVG-Big - Data Update (without changes) received for card with main entity: ", this.config.entity);
+            }
             return;
         }
 
@@ -62,8 +66,7 @@ class ContentAnotherMVGbig extends HTMLElement {
 
         // check if translations are loaded
         if (!this._translationsLoaded) {
-            const test = hass.localize("component.another_mvg.frontend.column_type");
-            if (test) {
+            if (this.hasTranslation("frontend.column_type")) {
                 this._translationsLoaded = true;
                 if (debug) {
                     console.log("AnotherMVG-Big - translations ready.");
@@ -86,12 +89,19 @@ class ContentAnotherMVGbig extends HTMLElement {
                 hass.loadBackendTranslation("frontend", "another_mvg"),
                 hass.loadBackendTranslation("cardeditor", "another_mvg")
             ]);
+            this._translationsLoaded = this.hasTranslation("frontend.column_type");
             if (debug) {
                 console.log("AnotherMVG-Big - translations requested");
             }
         } catch (e) {
             console.warn("AnotherMVG-Big - translation load failed", e);
         }
+    }
+
+    hasTranslation(key) {
+        const fullKey = `component.another_mvg.${key}`;
+        const translated = this._hass?.localize(fullKey);
+        return Boolean(translated && translated !== fullKey);
     }
 
     getConfiguredCss(state, hass) {
@@ -115,6 +125,17 @@ class ContentAnotherMVGbig extends HTMLElement {
         if (this.styleElement.textContent !== nextStyleContent) {
             this.styleElement.textContent = nextStyleContent;
         }
+    }
+
+    bindManualRefreshHandlers() {
+        this.content.querySelectorAll('[data-refresh-entity]').forEach(el => {
+            el.addEventListener("click", (e) => {
+                const entity = e.currentTarget.dataset.refreshEntity;
+                if (entity) {
+                    this._hass.callService("another_mvg", "refresh", { entity_id: entity });
+                }
+            });
+        });
     }
 
     // Function, to show the current time
@@ -234,6 +255,115 @@ class ContentAnotherMVGbig extends HTMLElement {
         return true;
     }
 
+    getDisplayLineLabel(departure) {
+        const label = departure.label === "LUFTHANSA EXPRESS BUS" ? "LEB" : departure.label;
+        return `${departure.trainType || ""}${label || ""}`.trim();
+    }
+
+    getEffectiveTransportType(departure) {
+        const type = String(departure.transport_type || "").toUpperCase();
+        const lineLabel = this.getDisplayLineLabel(departure).toUpperCase();
+
+        if (
+            (!type || type === "UNKNOWN") &&
+            /^(RE|RB|BRB|ALX|EC|EN|IC|ICE|IRE|MEX|NJ|RJ|SWE)\s*\d*/.test(lineLabel)
+        ) {
+            return "BAHN";
+        }
+
+        return type;
+    }
+
+    escapeAttribute(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+    matchesTemporaryLineFilter(departure, entityIndex) {
+        const selectedLine = this._selectedLineFilters?.[entityIndex];
+        if (!selectedLine) return true;
+
+        return this.getDisplayLineLabel(departure).toLowerCase() === selectedLine.toLowerCase();
+    }
+
+    toggleLineFilter(entityIndex, line) {
+        if (!this._selectedLineFilters) {
+            this._selectedLineFilters = {};
+        }
+
+        if (this._selectedLineFilters[entityIndex] === line) {
+            delete this._selectedLineFilters[entityIndex];
+        } else {
+            this._selectedLineFilters[entityIndex] = line;
+        }
+
+        if (this._hass) {
+            this.render(this._hass);
+        }
+    }
+
+    bindLineFilterHandlers() {
+        this.content.querySelectorAll('[data-line-filter-entity]').forEach(el => {
+            el.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const entityIndex = e.currentTarget.dataset.lineFilterEntity;
+                const line = e.currentTarget.dataset.lineFilterValue;
+                if (entityIndex && line) {
+                    this.toggleLineFilter(entityIndex, line);
+                }
+            });
+        });
+    }
+
+    getTransportGroup(departure) {
+        const type = this.getEffectiveTransportType(departure);
+        const groups = {
+            SBAHN: { key: "SBAHN", label: "S-Bahn", order: 10 },
+            UBAHN: { key: "UBAHN", label: "U-Bahn", order: 20 },
+            TRAM: { key: "TRAM", label: "Tram", order: 30 },
+            BUS: { key: "BUS", label: "Bus", order: 40 },
+            REGIONAL_BUS: { key: "BUS", label: "Bus", order: 40 },
+            BAHN: { key: "BAHN", label: "Bahn", order: 50 },
+        };
+
+        return groups[type] || { key: type || "OTHER", label: type || "Other", order: 99 };
+    }
+
+    groupDepartures(departures, groupingMode, groupingSort) {
+        if (!groupingMode || groupingMode === "none") {
+            return [{ label: "", order: 0, departures }];
+        }
+
+        const groups = new Map();
+        departures.forEach((departure) => {
+            const group = groupingMode === "transport_type"
+                ? this.getTransportGroup(departure)
+                : { key: this.getDisplayLineLabel(departure), label: this.getDisplayLineLabel(departure), order: 0 };
+
+            if (!groups.has(group.key)) {
+                groups.set(group.key, { ...group, departures: [] });
+            }
+            groups.get(group.key).departures.push(departure);
+        });
+
+        return [...groups.values()].sort((a, b) => {
+            if (groupingSort === "next_departure") {
+                const aNext = Math.min(...a.departures.map(dep => dep.time_diff ?? Number.MAX_SAFE_INTEGER));
+                const bNext = Math.min(...b.departures.map(dep => dep.time_diff ?? Number.MAX_SAFE_INTEGER));
+                return aNext - bNext;
+            }
+
+            if (groupingMode === "transport_type" && a.order !== b.order) {
+                return a.order - b.order;
+            }
+
+            return a.label.localeCompare(b.label, undefined, { numeric: true, sensitivity: "base" });
+        });
+    }
+
     toggleShowAll(entity) {
         this._showAllDepartures[entity] = !this._showAllDepartures[entity];
         this.render(this._hass);
@@ -335,12 +465,37 @@ class ContentAnotherMVGbig extends HTMLElement {
                 font-size: 1.0em;
                 color: var(--amvg-text-color, #FFFFFF);
               }
+              .amvg-refresh-title {
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.25em;
+              }
+              .amvg-refresh-icon {
+                --mdc-icon-size: 0.9em;
+                width: 0.9em;
+                height: 0.9em;
+                line-height: 1;
+              }
 
               .cancelled {
                 color: red;
               }
               .delay {
                 color: red;
+              }
+              .amvg-group-label {
+                font-weight: bold;
+                color: var(--amvg-text-color, #FFFFFF);
+                border-top: 1px solid rgba(255,255,255,0.25);
+                padding-top: 0.2em;
+              }
+              .line.clickable {
+                cursor: pointer;
+                box-shadow: 0 0 0 0.08em rgba(255,255,255,0.25);
+              }
+              .line.selected {
+                box-shadow: 0 0 0 0.08em #FAE10C;
               }
               tr.clickable {
                 cursor: pointer;
@@ -424,7 +579,7 @@ class ContentAnotherMVGbig extends HTMLElement {
             });
 
         // for each entity, get the corresponding maxDepartures and displayOptions, if available
-        const fields = ["maxDepartures", "displayOptions", "transportType", "onlyLine", "onlyDirection", "hideDirection", "name", "maxDeparturesFixed"];
+        const fields = ["maxDepartures", "displayOptions", "transportType", "onlyLine", "onlyDirection", "hideDirection", "name", "maxDeparturesFixed", "groupingMode", "groupingSort", "labelClickAction"];
         const entityConfigs = entityKeys.map((key) => {
             const index = key === "entity" ? "" : key.slice(6);
 
@@ -487,15 +642,26 @@ class ContentAnotherMVGbig extends HTMLElement {
             let html = ``;
             let ccc = 0;
             let colspawn = 4;
+            const isManualUpdate = (state.attributes.update_mode || state.attributes.config?.update_mode || "auto") === "manual";
+            const refreshLabel = hass.localize("component.another_mvg.frontend.refresh_manual") || "Refresh now";
+            const loadingLabel = hass.localize("component.another_mvg.frontend.loading") || "Loading...";
+            const loadingSuffix = isManualUpdate ? "" : ` (${loadingLabel})`;
+            const titleContent = `${stopName}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : loadingSuffix}`;
+            const titleMarkup = isManualUpdate
+                ? `<span class="amvg-refresh-title" data-refresh-entity="${this.config.entity}" title="${refreshLabel}"><ha-icon class="amvg-refresh-icon" icon="mdi:refresh"></ha-icon>${titleContent}</span>`
+                : titleContent;
 
             if (hideTrack) colspawn -= 1;
             if (showType)  colspawn += 1;
 
             // show all stations in the same card, if there are more than one station configured
-            entityConfigs.forEach(({ entity, maxDepartures, displayOptions, transportType, onlyLine, onlyDirection, hideDirection, name, maxDeparturesFixed }) => {
+            entityConfigs.forEach(({ entity, maxDepartures, displayOptions, transportType, onlyLine, onlyDirection, hideDirection, name, maxDeparturesFixed, groupingMode, groupingSort, labelClickAction }) => {
                 ccc++;
 
                 const departureFormat = displayOptions && ["1", "2", "3", "4", "5"].includes(displayOptions) ? displayOptions : globalDepartureFormat;
+                const entityGroupingMode = groupingMode || "none";
+                const entityGroupingSort = groupingSort || "alphabetical";
+                const entityLabelClickAction = labelClickAction || "off";
 
                 const state2 = hass.states[entity];
                 if (!state2?.attributes?.config) {
@@ -511,6 +677,7 @@ class ContentAnotherMVGbig extends HTMLElement {
                     `;
                 } else{
                     const monitorType = state2.attributes.monitor_type || state2.attributes.config?.monitor_type || "departure";
+                    const entityUpdateMode = state2.attributes.update_mode || state2.attributes.config?.update_mode || "auto";
                     const timeColumnLabel = monitorType === "arrival"
                         ? hass.localize("component.another_mvg.frontend.column_arrival")
                         : hass.localize("component.another_mvg.frontend.column_departure");
@@ -527,7 +694,7 @@ class ContentAnotherMVGbig extends HTMLElement {
                                         ${name || state2?.attributes?.config?.name || stopName}
                                         ${state2.attributes.dataOutdated !== undefined
                                             ? ` ${state2.attributes.dataOutdated}`
-                                            : " (loading)"}
+                                            : ((state2.attributes.update_mode || state2.attributes.config?.update_mode || "auto") === "manual" ? "" : ` (${loadingLabel})`)}
                                     </td>
                                 </tr>` : ""}
                         `;
@@ -547,10 +714,13 @@ class ContentAnotherMVGbig extends HTMLElement {
 
                     // if there are no departures, show a loading message
                     if (!data2 || data2 === "undefined" || (Array.isArray(data2) && data2.length === 0)) {
+                        const emptyMessageKey = entityUpdateMode === "manual"
+                            ? "component.another_mvg.frontend.manual_refresh_hint"
+                            : "component.another_mvg.frontend.no_departures_or_loading";
                         html += `
                             <tr>
                                 <td colspan="${colspawn}" class="amvg-cardname">
-                                    Addon is loading or no departures available.
+                                    ${hass.localize(emptyMessageKey)}
                                 </td>
                             </tr>
                             `;
@@ -569,14 +739,15 @@ class ContentAnotherMVGbig extends HTMLElement {
 
                         if (transportTypes && transportTypes.length > 0) {
                             filtered = data2.filter(dep => {
-                                const type = dep.transport_type?.toUpperCase();
+                                const type = this.getEffectiveTransportType(dep);
                                 return type && transportTypes.includes(type);
                             });
                         }
 
                         filtered = filtered.filter(dep =>
                             this.matchesLineFilter(dep, onlyLine) &&
-                            this.matchesDirectionFilter(dep, onlyDirection, hideDirection)
+                            this.matchesDirectionFilter(dep, onlyDirection, hideDirection) &&
+                            this.matchesTemporaryLineFilter(dep, ccc)
                         );
 
                         let list2;
@@ -590,83 +761,92 @@ class ContentAnotherMVGbig extends HTMLElement {
                         }
 
                         let rowCount = 0;
-                        list2.forEach((departure) => {
-                            rowCount++;
-                            let transportType = transportTypeMap[departure.transport_type] || departure.transport_type;
-                            let label = departure.label;
-
-                            if (label === "LUFTHANSA EXPRESS BUS") {
-                                label = "LEB";
+                        this.groupDepartures(list2, entityGroupingMode, entityGroupingSort).forEach((group) => {
+                            if (group.label) {
+                                html += `<tr class="amvg-group-row"><td colspan="${colspawn}" class="departureline amvg-group-label">${group.label}</td></tr>`;
                             }
 
-                            html += `<tr class="item">`;
+                            group.departures.forEach((departure) => {
+                                rowCount++;
+                                const effectiveTransportType = this.getEffectiveTransportType(departure);
+                                let transportType = transportTypeMap[effectiveTransportType] || effectiveTransportType || departure.transport_type;
+                                const lineLabel = this.getDisplayLineLabel(departure);
+                                const safeLineLabel = this.escapeAttribute(lineLabel);
+                                const lineFilterEnabled = entityLabelClickAction === "filter_line";
+                                const lineSelected = this._selectedLineFilters?.[ccc] === lineLabel;
+                                const lineFilterAttributes = lineFilterEnabled
+                                    ? ` data-line-filter-entity="${ccc}" data-line-filter-value="${safeLineLabel}" title="${this.escapeAttribute(hass.localize("component.another_mvg.frontend.filter_line") || "Filter line")}"`
+                                    : "";
 
-                            if (showType) {
-                                html += `<td class="departureline"><nobr>${transportType}</nobr></td>`;
-                            }
+                                html += `<tr class="item">`;
 
-                            html += `<td class="departureline">
-                                        <span class="line ${departure.transport_type} ${label}">
-                                            ${departure.trainType}${label}
-                                        </span>
-                                    </td>`;
-
-                            html += `<td class="departureline">${departure.destination}</td>`;
-
-                            if (!hideTrack) {
-                                html += `<td class="departureline">${departure.track}</td>`;
-                            }
-
-                            let timeDisplay = "";
-
-                            if (departureFormat === "1") {
-                                timeDisplay = departure.planned_departure;
-
-                                if (departure.cancelled) {
-                                    timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
-                                } else if (departure.delay > 0) {
-                                    timeDisplay += ` <span class="delay">+${departure.delay}</span> (${departure.expected_departure})`;
+                                if (showType) {
+                                    html += `<td class="departureline"><nobr>${transportType}</nobr></td>`;
                                 }
 
-                            } else if (departureFormat === "2") {
-                                timeDisplay = departure.planned_departure;
+                                html += `<td class="departureline">
+                                            <span class="line ${effectiveTransportType} ${departure.label} ${lineFilterEnabled ? "clickable" : ""} ${lineSelected ? "selected" : ""}"${lineFilterAttributes}>
+                                                ${safeLineLabel}
+                                            </span>
+                                        </td>`;
 
-                                if (departure.cancelled) {
-                                    timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
-                                } else if (departure.delay > 0) {
-                                    timeDisplay += ` <span class="delay">+${departure.delay}</span>`;
+                                html += `<td class="departureline">${departure.destination}</td>`;
+
+                                if (!hideTrack) {
+                                    html += `<td class="departureline">${departure.track}</td>`;
                                 }
 
-                            } else if (departureFormat === "3") {
-                                timeDisplay = departure.delay > 0
-                                    ? `<span class="delay">${departure.expected_departure}</span>`
-                                    : departure.expected_departure;
+                                let timeDisplay = "";
 
-                                if (departure.cancelled) {
-                                    timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
+                                if (departureFormat === "1") {
+                                    timeDisplay = departure.planned_departure;
+
+                                    if (departure.cancelled) {
+                                        timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
+                                    } else if (departure.delay > 0) {
+                                        timeDisplay += ` <span class="delay">+${departure.delay}</span> (${departure.expected_departure})`;
+                                    }
+
+                                } else if (departureFormat === "2") {
+                                    timeDisplay = departure.planned_departure;
+
+                                    if (departure.cancelled) {
+                                        timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
+                                    } else if (departure.delay > 0) {
+                                        timeDisplay += ` <span class="delay">+${departure.delay}</span>`;
+                                    }
+
+                                } else if (departureFormat === "3") {
+                                    timeDisplay = departure.delay > 0
+                                        ? `<span class="delay">${departure.expected_departure}</span>`
+                                        : departure.expected_departure;
+
+                                    if (departure.cancelled) {
+                                        timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
+                                    }
+
+                                } else if (departureFormat === "4") {
+                                    timeDisplay = Math.floor(departure.time_diff / 60);
+
+                                    if (departure.cancelled) {
+                                        timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
+                                    }
+
+                                } else if (departureFormat === "5") {
+                                    timeDisplay = Math.floor(departure.time_diff / 60);
+
+                                    if (departure.delay > 0) {
+                                        timeDisplay += ` <span class="delay">(+${departure.delay})</span>`;
+                                    }
+
+                                    if (departure.cancelled) {
+                                        timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
+                                    }
                                 }
 
-                            } else if (departureFormat === "4") {
-                                timeDisplay = Math.floor(departure.time_diff / 60);
-
-                                if (departure.cancelled) {
-                                    timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
-                                }
-
-                            } else if (departureFormat === "5") {
-                                timeDisplay = Math.floor(departure.time_diff / 60);
-
-                                if (departure.delay > 0) {
-                                    timeDisplay += ` <span class="delay">(+${departure.delay})</span>`;
-                                }
-
-                                if (departure.cancelled) {
-                                    timeDisplay += ` <span class="cancelled">${hass.localize("component.another_mvg.frontend.cancelled")}</span>`;
-                                }
-                            }
-
-                            html += `<td class="departureline">${timeDisplay}</td>`;
-                            html += `</tr>`;
+                                html += `<td class="departureline">${timeDisplay}</td>`;
+                                html += `</tr>`;
+                            });
                         });
 
                         if ((maxDeparturesFixed ?? globalMaxDepFixed) && rowCount < (maxDepartures ?? globalMax)) {
@@ -687,7 +867,7 @@ class ContentAnotherMVGbig extends HTMLElement {
                 <table class="amvg-table-big">
                     ${!hideName ? `
                     <tr>
-                        <td colspan="${colspawn}" class="amvg-cardname">${stopName}${state.attributes.dataOutdated !== undefined ? ` ${state.attributes.dataOutdated}` : " (loading)"}<span class="currentTime" style="float: right; margin-right: 5px;">${showClock ? this.getCurrentTime(clockWithSeconds) : ""}</span></td>
+                        <td colspan="${colspawn}" class="amvg-cardname">${titleMarkup}<span class="currentTime" style="float: right; margin-right: 5px;">${showClock ? this.getCurrentTime(clockWithSeconds) : ""}</span></td>
                     </tr>` : ""}
                     ` + html + `
                 </table>
@@ -699,6 +879,8 @@ class ContentAnotherMVGbig extends HTMLElement {
                     this.toggleShowAll(entity);
                 });
             });
+            this.bindManualRefreshHandlers();
+            this.bindLineFilterHandlers();
         }
     }
 
@@ -719,6 +901,147 @@ class ContentAnotherMVGbig extends HTMLElement {
 
     // Editor Configuration
     static getConfigForm() {
+    const filterSchema = (suffix = "") => ([
+        {
+            name: `transportType${suffix}`,
+            selector: {
+                select: {
+                    multiple : true,
+                    sort: false,
+                    options: [
+                        { value: "SBAHN",        label: "S-Bahn" },
+                        { value: "UBAHN",        label: "U-Bahn" },
+                        { value: "BAHN",         label: "Bahn" },
+                        { value: "TRAM",         label: "Tram" },
+                        { value: "BUS",          label: "Bus" },
+                        { value: "REGIONAL_BUS", label: "Regional-Bus" }
+                    ]
+                }
+            }
+        },
+        {
+            name: `onlyLine${suffix}`,
+            selector: { text: {} },
+            default: ""
+        },
+        {
+            name: `onlyDirection${suffix}`,
+            selector: { text: {} },
+            default: ""
+        },
+        {
+            name: `hideDirection${suffix}`,
+            selector: { text: {} },
+            default: ""
+        }
+    ]);
+
+    const displayOptionsSchema = (suffix = "") => ([
+        {
+            name: `displayOptions${suffix}`,
+            selector: {
+                select: {
+                    mode: "dropdown",
+                    options: [
+                        { value: "1", label: "16:27 +2 (16:29)" },
+                        { value: "2", label: "16:27 +2" },
+                        { value: "3", label: "16:29" },
+                        { value: "4", label: "7" },
+                        { value: "5", label: "7 (+2)" }
+                    ]
+                }
+            },
+            default: "1"
+        },
+        {
+            name: `maxDepartures${suffix}`,
+            selector: { number: { min: 1, max: 100, step: 1 } }
+        },
+        {
+            name: `maxDeparturesFixed${suffix}`,
+            selector: { boolean: {} },
+            default: false
+        },
+        {
+            name: `groupingMode${suffix}`,
+            selector: {
+                select: {
+                    mode: "dropdown",
+                    options: [
+                        { value: "none", label: "None" },
+                        { value: "transport_type", label: "Transport type" },
+                        { value: "line", label: "Line" }
+                    ]
+                }
+            },
+            default: "none"
+        },
+        {
+            name: `groupingSort${suffix}`,
+            selector: {
+                select: {
+                    mode: "dropdown",
+                    options: [
+                        { value: "alphabetical", label: "Alphabetical" },
+                        { value: "next_departure", label: "Next departure" }
+                    ]
+                }
+            },
+            default: "alphabetical"
+        },
+        {
+            name: `labelClickAction${suffix}`,
+            selector: {
+                select: {
+                    mode: "dropdown",
+                    options: [
+                        { value: "off", label: "Off" },
+                        { value: "filter_line", label: "Filter line" }
+                    ]
+                }
+            },
+            default: "off"
+        }
+    ]);
+
+    const localizeSelectOptions = (schema, localize) => {
+        const baseName = schema.name ? schema.name.replace(/\d+$/, "") : "";
+        const optionLabelKeys = {
+            groupingMode: {
+                none: "grouping_none",
+                transport_type: "grouping_transport_type",
+                line: "grouping_line",
+            },
+            groupingSort: {
+                alphabetical: "grouping_sort_alphabetical",
+                next_departure: "grouping_sort_next_departure",
+            },
+            labelClickAction: {
+                off: "label_click_off",
+                filter_line: "label_click_filter_line",
+            },
+        };
+        const labelKeys = optionLabelKeys[baseName];
+
+        if (!labelKeys || !schema.selector?.select?.options) {
+            return;
+        }
+
+        schema.selector.select.options = schema.selector.select.options.map((option) => {
+            if (!option?.value || !labelKeys[option.value]) {
+                return option;
+            }
+
+            const key = `component.another_mvg.cardeditor.${labelKeys[option.value]}`;
+            const translated = localize(key);
+
+            return {
+                ...option,
+                label: translated && translated !== key ? translated : option.label,
+            };
+        });
+    };
+
     return {
         schema: [
             // Entity Selection
@@ -741,36 +1064,10 @@ class ContentAnotherMVGbig extends HTMLElement {
                 default: ""
             },
             {
-                name: "transportType",
-                selector: {
-                    select: {
-                        multiple : true,
-                        sort: false,
-                        options: [
-                            { value: "SBAHN",        label: "S-Bahn" },
-                            { value: "UBAHN",        label: "U-Bahn" },
-                            { value: "BAHN",         label: "Bahn" },
-                            { value: "TRAM",         label: "Tram" },
-                            { value: "BUS",          label: "Bus" },
-                            { value: "REGIONAL_BUS", label: "Regional-Bus" }
-                        ]
-                    }
-                }
-            },
-            {
-                name: "onlyLine",
-                selector: { text: {} },
-                default: ""
-            },
-            {
-                name: "onlyDirection",
-                selector: { text: {} },
-                default: ""
-            },
-            {
-                name: "hideDirection",
-                selector: { text: {} },
-                default: ""
+                type: 'expandable',
+                label: 'filter',
+                icon: 'mdi:filter-outline',
+                schema: filterSchema()
             },
 
             // Options
@@ -804,7 +1101,47 @@ class ContentAnotherMVGbig extends HTMLElement {
                         name: "maxDepartures",
                         selector: { number: { min: 1, max: 100, step: 1 } }
                     },
-                    { name: "maxDeparturesFixed", selector: { boolean: {} }, default: false }
+                    { name: "maxDeparturesFixed", selector: { boolean: {} }, default: false },
+                    {
+                        name: "groupingMode",
+                        selector: {
+                            select: {
+                                mode: "dropdown",
+                                options: [
+                                    { value: "none", label: "None" },
+                                    { value: "transport_type", label: "Transport type" },
+                                    { value: "line", label: "Line" }
+                                ]
+                            }
+                        },
+                        default: "none"
+                    },
+                    {
+                        name: "groupingSort",
+                        selector: {
+                            select: {
+                                mode: "dropdown",
+                                options: [
+                                    { value: "alphabetical", label: "Alphabetical" },
+                                    { value: "next_departure", label: "Next departure" }
+                                ]
+                            }
+                        },
+                        default: "alphabetical"
+                    },
+                    {
+                        name: "labelClickAction",
+                        selector: {
+                            select: {
+                                mode: "dropdown",
+                                options: [
+                                    { value: "off", label: "Off" },
+                                    { value: "filter_line", label: "Filter line" }
+                                ]
+                            }
+                        },
+                        default: "off"
+                    }
                 ]
             },
 
@@ -881,58 +1218,17 @@ class ContentAnotherMVGbig extends HTMLElement {
                                 default: ""
                             },
                             {
-                                name: "transportType2",
-                                selector: {
-                                    select: {
-                                        multiple : true,
-                                        sort: false,
-                                        options: [
-                                            { value: "SBAHN",        label: "S-Bahn" },
-                                            { value: "UBAHN",        label: "U-Bahn" },
-                                            { value: "BAHN",         label: "Bahn" },
-                                            { value: "TRAM",         label: "Tram" },
-                                            { value: "BUS",          label: "Bus" },
-                                            { value: "REGIONAL_BUS", label: "Regional-Bus" }
-                                        ]
-                                    }
-                                }
+                                type: 'expandable',
+                                label: 'filter2',
+                                icon: 'mdi:filter-outline',
+                                schema: filterSchema("2")
                             },
                             {
-                                name: "onlyLine2",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "onlyDirection2",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "hideDirection2",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "displayOptions2",
-                                selector: {
-                                    select: {
-                                        mode: "dropdown",
-                                        options: [
-                                            { value: "1", label: "16:27 +2 (16:29)" },
-                                            { value: "2", label: "16:27 +2" },
-                                            { value: "3", label: "16:29" },
-                                            { value: "4", label: "7" },
-                                            { value: "5", label: "7 (+2)" }
-                                        ]
-                                    }
-                                },
-                                default: "1"
-                            },
-                            {
-                                name: "maxDepartures2",
-                                selector: { number: { min: 1, max: 100, step: 1 } }
-                            },
-                            { name: "maxDeparturesFixed2", selector: { boolean: {} }, default: false }
+                                type: 'expandable',
+                                label: 'options2',
+                                icon: 'mdi:cog-outline',
+                                schema: displayOptionsSchema("2")
+                            }
                         ]
                     },
 
@@ -960,58 +1256,17 @@ class ContentAnotherMVGbig extends HTMLElement {
                                 default: ""
                             },
                             {
-                                name: "transportType3",
-                                selector: {
-                                    select: {
-                                        multiple : true,
-                                        sort: false,
-                                        options: [
-                                            { value: "SBAHN",        label: "S-Bahn" },
-                                            { value: "UBAHN",        label: "U-Bahn" },
-                                            { value: "BAHN",         label: "Bahn" },
-                                            { value: "TRAM",         label: "Tram" },
-                                            { value: "BUS",          label: "Bus" },
-                                            { value: "REGIONAL_BUS", label: "Regional-Bus" }
-                                        ]
-                                    }
-                                }
+                                type: 'expandable',
+                                label: 'filter3',
+                                icon: 'mdi:filter-outline',
+                                schema: filterSchema("3")
                             },
                             {
-                                name: "onlyLine3",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "onlyDirection3",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "hideDirection3",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "displayOptions3",
-                                selector: {
-                                    select: {
-                                        mode: "dropdown",
-                                        options: [
-                                            { value: "1", label: "16:27 +2 (16:29)" },
-                                            { value: "2", label: "16:27 +2" },
-                                            { value: "3", label: "16:29" },
-                                            { value: "4", label: "7" },
-                                            { value: "5", label: "7 (+2)" }
-                                        ]
-                                    }
-                                },
-                                default: "1"
-                            },
-                            {
-                                name: "maxDepartures3",
-                                selector: { number: { min: 1, max: 100, step: 1 } }
-                            },
-                            { name: "maxDeparturesFixed3", selector: { boolean: {} }, default: false }
+                                type: 'expandable',
+                                label: 'options3',
+                                icon: 'mdi:cog-outline',
+                                schema: displayOptionsSchema("3")
+                            }
                         ]
                     },
                     {
@@ -1039,58 +1294,17 @@ class ContentAnotherMVGbig extends HTMLElement {
                                 default: ""
                             },
                             {
-                                name: "transportType4",
-                                selector: {
-                                    select: {
-                                        multiple : true,
-                                        sort: false,
-                                        options: [
-                                            { value: "SBAHN",        label: "S-Bahn" },
-                                            { value: "UBAHN",        label: "U-Bahn" },
-                                            { value: "BAHN",         label: "Bahn" },
-                                            { value: "TRAM",         label: "Tram" },
-                                            { value: "BUS",          label: "Bus" },
-                                            { value: "REGIONAL_BUS", label: "Regional-Bus" }
-                                        ]
-                                    }
-                                }
+                                type: 'expandable',
+                                label: 'filter4',
+                                icon: 'mdi:filter-outline',
+                                schema: filterSchema("4")
                             },
                             {
-                                name: "onlyLine4",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "onlyDirection4",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "hideDirection4",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "displayOptions4",
-                                selector: {
-                                    select: {
-                                        mode: "dropdown",
-                                        options: [
-                                            { value: "1", label: "16:27 +2 (16:29)" },
-                                            { value: "2", label: "16:27 +2" },
-                                            { value: "3", label: "16:29" },
-                                            { value: "4", label: "7" },
-                                            { value: "5", label: "7 (+2)" }
-                                        ]
-                                    }
-                                },
-                                default: "1"
-                            },
-                            {
-                                name: "maxDepartures4",
-                                selector: { number: { min: 1, max: 100, step: 1 } }
-                            },
-                            { name: "maxDeparturesFixed4", selector: { boolean: {} }, default: false }
+                                type: 'expandable',
+                                label: 'options4',
+                                icon: 'mdi:cog-outline',
+                                schema: displayOptionsSchema("4")
+                            }
                         ]
                     },
                     {
@@ -1118,58 +1332,17 @@ class ContentAnotherMVGbig extends HTMLElement {
                                 default: ""
                             },
                             {
-                                name: "transportType5",
-                                selector: {
-                                    select: {
-                                        multiple : true,
-                                        sort: false,
-                                        options: [
-                                            { value: "SBAHN",        label: "S-Bahn" },
-                                            { value: "UBAHN",        label: "U-Bahn" },
-                                            { value: "BAHN",         label: "Bahn" },
-                                            { value: "TRAM",         label: "Tram" },
-                                            { value: "BUS",          label: "Bus" },
-                                            { value: "REGIONAL_BUS", label: "Regional-Bus" }
-                                        ]
-                                    }
-                                }
+                                type: 'expandable',
+                                label: 'filter5',
+                                icon: 'mdi:filter-outline',
+                                schema: filterSchema("5")
                             },
                             {
-                                name: "onlyLine5",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "onlyDirection5",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "hideDirection5",
-                                selector: { text: {} },
-                                default: ""
-                            },
-                            {
-                                name: "displayOptions5",
-                                selector: {
-                                    select: {
-                                        mode: "dropdown",
-                                        options: [
-                                            { value: "1", label: "16:27 +2 (16:29)" },
-                                            { value: "2", label: "16:27 +2" },
-                                            { value: "3", label: "16:29" },
-                                            { value: "4", label: "7" },
-                                            { value: "5", label: "7 (+2)" }
-                                        ]
-                                    }
-                                },
-                                default: "1"
-                            },
-                            {
-                                name: "maxDepartures5",
-                                selector: { number: { min: 1, max: 100, step: 1 } }
-                            },
-                            { name: "maxDeparturesFixed5", selector: { boolean: {} }, default: false }
+                                type: 'expandable',
+                                label: 'options5',
+                                icon: 'mdi:cog-outline',
+                                schema: displayOptionsSchema("5")
+                            }
                         ]
                     },
                 ]
@@ -1178,6 +1351,7 @@ class ContentAnotherMVGbig extends HTMLElement {
 
             computeLabel: (schema, localize) => {
                 let label = "";
+                localizeSelectOptions(schema, localize);
 
                 // this is only for the expandable options, because they don't have a name property, but we want to translate them as well
                 if (!schema.name) {
@@ -1247,6 +1421,21 @@ class ContentAnotherMVGbig extends HTMLElement {
                 if (schema.name == "maxDeparturesFixed3")   label = "max_departures_fixed";
                 if (schema.name == "maxDeparturesFixed4")   label = "max_departures_fixed";
                 if (schema.name == "maxDeparturesFixed5")   label = "max_departures_fixed";
+                if (schema.name == "groupingMode")          label = "grouping_mode";
+                if (schema.name == "groupingMode2")         label = "grouping_mode";
+                if (schema.name == "groupingMode3")         label = "grouping_mode";
+                if (schema.name == "groupingMode4")         label = "grouping_mode";
+                if (schema.name == "groupingMode5")         label = "grouping_mode";
+                if (schema.name == "groupingSort")          label = "grouping_sort";
+                if (schema.name == "groupingSort2")         label = "grouping_sort";
+                if (schema.name == "groupingSort3")         label = "grouping_sort";
+                if (schema.name == "groupingSort4")         label = "grouping_sort";
+                if (schema.name == "groupingSort5")         label = "grouping_sort";
+                if (schema.name == "labelClickAction")      label = "label_click_action";
+                if (schema.name == "labelClickAction2")     label = "label_click_action";
+                if (schema.name == "labelClickAction3")     label = "label_click_action";
+                if (schema.name == "labelClickAction4")     label = "label_click_action";
+                if (schema.name == "labelClickAction5")     label = "label_click_action";
 
                 if (schema.name == "cardBackgroundColor")   label = "card_bg_color";
                 if (schema.name == "textColor")             label = "text_color";
@@ -1325,6 +1514,21 @@ class ContentAnotherMVGbig extends HTMLElement {
                 if (schema.name == "maxDeparturesFixed3")   label = "max_departures_fixed_desc";
                 if (schema.name == "maxDeparturesFixed4")   label = "max_departures_fixed_desc";
                 if (schema.name == "maxDeparturesFixed5")   label = "max_departures_fixed_desc";
+                if (schema.name == "groupingMode")          label = "grouping_mode_desc";
+                if (schema.name == "groupingMode2")         label = "grouping_mode_desc";
+                if (schema.name == "groupingMode3")         label = "grouping_mode_desc";
+                if (schema.name == "groupingMode4")         label = "grouping_mode_desc";
+                if (schema.name == "groupingMode5")         label = "grouping_mode_desc";
+                if (schema.name == "groupingSort")          label = "grouping_sort_desc";
+                if (schema.name == "groupingSort2")         label = "grouping_sort_desc";
+                if (schema.name == "groupingSort3")         label = "grouping_sort_desc";
+                if (schema.name == "groupingSort4")         label = "grouping_sort_desc";
+                if (schema.name == "groupingSort5")         label = "grouping_sort_desc";
+                if (schema.name == "labelClickAction")      label = "label_click_action_desc";
+                if (schema.name == "labelClickAction2")     label = "label_click_action_desc";
+                if (schema.name == "labelClickAction3")     label = "label_click_action_desc";
+                if (schema.name == "labelClickAction4")     label = "label_click_action_desc";
+                if (schema.name == "labelClickAction5")     label = "label_click_action_desc";
 
                 if (schema.name == "cardBackgroundColor")   label = "card_bg_color_desc";
                 if (schema.name == "textColor")             label = "text_color_desc";

@@ -1,5 +1,3 @@
-## v2.1.0 YAML configuration deprecated - will be converted automatically to a "GUI-Sensor"
-
 # Another MVG
 
 1. [Installation](#1-installation)  
@@ -7,13 +5,11 @@
     1.2. [Manual Installation](#option-2-manual-installation)  
 
 2. [Create a sensor for your stop / station](#2-create-a-sensor-for-your-stop--station)  
-    2.1. [via GUI (recommended)](#option-1-via-gui-recommended)  
-    2.2. [via configuration.yaml](#option-2-via-configurationyaml-deprecated) (deprecated)  
 
 3. [Adding a card to your dashboard](#3-adding-a-card-to-your-dashboard)  
     3.1. [Add the map to your dashboard](#31-add-the-map-to-your-dashboard)
 
-4. [Code for your configuration.yaml](#4-code-for-your-configurationyaml-deprecated) (deprecated)  
+4. [Sensor configuration options](#4-sensor-configuration-options)
 
 5. [Screenshots](#5-screenshots)  
 
@@ -80,7 +76,6 @@ Or use these steps:
 * Restart HA
 
 # 2. Create a sensor for your stop / station
-## Option 1: via GUI (recommended)
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=another_mvg)
 
 Or use these steps:
@@ -107,12 +102,6 @@ Or use these steps:
 
 ⚠️ It may take a minute to create the entity
 
-
-## Option 2: via ```configuration.yaml``` (deprecated)
-* Configure the configuration.yaml [(see guide below)](#4-code-for-your-configurationyaml)
-* Check configuration.yaml with the check function under Dev-Tools
-* Restart HA again
-
 # 3. Adding a card to your dashboard
 * create a manual card with this content:
 ```
@@ -124,7 +113,7 @@ entity: sensor.yourSensor
 type: custom:content-card-another-mvg-big
 entity: sensor.yourSensor
 ```
-* replace ```sensor.yourSensor``` with the name of your sensor. Should be something with **sensor.name** where name, the name from the parameter in the configuration.yaml is.
+* replace ```sensor.yourSensor``` with the entity ID of your Another MVG sensor.
 * Enjoy
 
 ⚠️ If you get the error that ```custom:content-card-another-mvg``` doesnt exist, clear the frontend / browser cache.
@@ -160,262 +149,200 @@ zoom: "4.8"
 ``` 
 
 
-# 4. Code for your configuration.yaml (deprecated)
+# 4. Sensor configuration options
 
-⚠️ Currently its still working, but it will be removed in one of the next versions.
-All sensors from the configuration.yaml will be migrated automatically. 
-If you see the sensors in the GUI you can remove the code from the configuration.yaml.
-There will be no more updates on this section in the documentation.
+Another MVG is configured through the Home Assistant UI. YAML based sensor configuration is deprecated and should no longer be used for new setups.
 
-### Add the name of this integration
+Existing YAML sensors from older versions are migrated to GUI entries automatically. After the migrated sensors are visible in Home Assistant under `Settings` --> `Devices & services` --> `Another MVG`, the old YAML configuration can be removed from your Home Assistant configuration.
 
-To load the integration, you have to add
+## Basic fields
 
-```  - platform: another_mvg``` **Required**
+### Station / Global ID
 
-to the **sensor:** part in your configuration.
+The station identifier is the technical ID of a stop, station or location. Another MVG uses this identifier instead of the station name because it is clearer for the API and avoids ambiguous station names.
 
-> [!CAUTION]
-> Don't add the line ```sensor:``` a second time!
-> If it is already there, just put ```  - platform: another_mvg``` below your other **platforms** in the sensor part.
+Usually you do not have to search this ID manually. Use the integration setup flow, enter the station name, and select the correct stop from the search result.
 
-### Define your station / stop / location
-```   globalid: "de:09162:10"``` **Required**
-> [!IMPORTANT]
-> The station identifier of the stop/station/location. I decided to use the identifier, instead of names, because it is more clear (for the API) and leads to less problems.
-The only problem you have, is to find the identifier (globalid) by your own.
-Here you can find the globalid for your station.
-> ```https://www.mvg.de/api/bgw-pt/v3/locations?query=pasing```
-> Just replace the name in the query. If there is more than one entry, you have to find the correct one. I recommend to open the link on your PC/Notebook.
+If you want to look up a Global ID manually, you can use the MVG location endpoint in a browser and replace the query text:
+
+`https://www.mvg.de/api/bgw-pt/v3/locations?query=pasing`
 
 https://www.mvg.de/api/bgw-pt/v3/locations?query=pasing
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/ec7bfb9b-48a0-45bc-a50d-16d960433caa)
 
+### Name
 
-### Name of the display
-```    name: "Pasing"``` **Required**
+This is the display name used for the sensor and as the default card title. It is not used for the API request itself.
 
-Is the name of the display inside the card and will be used for the sensorname. It is **NOT** the name of the station for the API call.
+### Monitor type
 
-## Minimal configuration example
-```
-sensor:
-  - platform: another_mvg
-    name: "Pasing"
-    globalid: "de:09162:10"
-```
-The code above, will show all connections from Pasing. (Pasing has the globalid de:09162:10)
-If you want to see only Bus, Regional Bus, Tram and/or U-Bahn (U-Bahn of course not in Pasing) you have to configure the ```   transporttypes```.
+Choose what this sensor should provide:
 
-## Extended Configuration
+* `Departure monitor` uses the MVG departure API and shows departures from the selected stop.
+* `Arrival monitor` uses the MVV/EFA arrival API and shows arrivals at the selected stop.
 
-### Types of public trasportation (Bus, Regional Bus, S-Bahn ...)
+For compatibility, older sensors default to `Departure monitor`.
 
-```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS"```
+## Transport types and request limit
 
-This should be selfexplaining. Add the types of transportation **comma separated and without spaces** in between.
-**BUS** and **REGIONAL_BUS** <ins>are different</ins>. **BUS** is **MVG** and **REGIONAL_BUS** is **MVV**. But it looks like, in the API they mixed it for some lines. Just <ins>add both</ins>, to be save.
-As mentioned above, by default all transportations are enabled. If you want to see only some, you have to use this parameter.
+### Transport types
 
-You can also use ```BAHN``` but this feature is not fully integrated and not enabled by default. There is also no special design / labeling available.
-If you want to include it to your departure list, you can use this code:
+Select the transport types that should be requested by the sensor.
 
-```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS,BAHN"```
+Available values include:
 
-### Show only some lines
+* `SBAHN`
+* `UBAHN`
+* `TRAM`
+* `BUS`
+* `REGIONAL_BUS`
+* `BAHN`
 
-```   onlyline: "S3,S4,S20"```
+`BUS` and `REGIONAL_BUS` are different API values. In practice, some lines may appear in one or the other, so selecting both is often useful when you want to see all bus traffic.
 
-If you want to see only some lines, like S3, S4 and S20, you can configure it comma seperated.
+`BAHN` can be used for regular trains. This is available, but not as deeply styled and integrated as the common MVG/MVV transport types.
 
+For arrival monitors, transport types are used as a prefilter in the MVV/EFA API request. This can reduce the response size and avoids loading transport types you do not need.
 
-### Hide some destinations
+### Request limit
 
-```   hidedestination: "Mammendorf;Maisach"```
+The request limit defines how many entries the API should request. The default is `40`; the integration limits the value internally to `80`.
 
-If you want to see only some directions / destinations, you have to insert the EXACT names of the **unwanted** destinations like they are shown in the connection display. (card)
-The names should be ```;``` separated. They can be ```,``` or space sepatared, but this can lead to problems if a ```,``` or a space is in the name of the destination.
+The sensor-level limit is a data request limit, not a guaranteed number of visible rows in the card. If you use sensor prefilters for lines or directions, fewer entries may remain after filtering.
 
-```   hidedestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
+For busy stations such as Pasing or Hauptbahnhof, a higher value gives card filters more data to work with. For smaller stops, the default is usually enough.
 
-### Only some destinations
+## Sensor prefilters: lines and directions
 
-```   onlydestination: "Ostbahnhof;Holzkirchen"```
+These filters are applied inside the sensor. That means filtered-out entries are not stored in the Home Assistant sensor attributes and cannot be shown by any card later.
 
-If you want to see only some directions / destinations, you have to insert the EXACT names of the **wanted** destinations like they are shown in the connection display. (card)
-The names should be ```;``` separated. They can be ```,``` or space sepatared, but this can lead to problems if a ```,``` or a space is in the name of the destination.
+For different dashboard views, prefer the filter options in the card editor. Use sensor prefilters when you intentionally want to reduce the amount of stored data or API result data.
 
-```   onlydestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
+### Only these lines
 
-### Define the number of departures
+Shows only entries for specific lines, for example `S3,S4,S20` or `860,831,843`.
 
-```   limit: 15```
+Multiple lines can be separated by comma or semicolon.
 
-By default you will see 6 departures. If you want to see more or less, you have to configure it.
-Please add **_only a number_ and _no quotes_**.
-Die API will pull a maximum of 80 departures. 
-If you use "filters" like **hidedestination** or **onlydestination**, witch filter out 40 entries, you will only see the remaining 40 as maximum.
+### Hide this direction / origin
 
-### Hide the name of the card (the row above the yellow row)
+For departure monitors this hides destinations. For arrival monitors this hides origins.
 
-```   hidename: True```
+Use the exact text as it appears in the card. Multiple values should be separated by semicolon:
 
-If you don't want to see the name of the card (the name of the station you configured in configuration.yaml with the **name** parameter) you have to set this parameter to ```True```.
+`Graßlfing, Olchinger See;Olching, Georgenstraße`
 
-### doublestationnumber
+Semicolon is recommended because commas may be part of station or direction names.
 
-```   doublestationnumber: "2"```
+### Only this direction / origin
 
-> [!IMPORTANT]
-> If you want to create 2 or more cards for the same globalid, you have to use this parameter. (e.g. one for BUS, one for SBAHN, one for TRAM)
-It can be a number or a letter. Also more numbers or letters are possible. No special chars are allowed and also no space.
+For departure monitors this keeps only matching destinations. For arrival monitors this keeps only matching origins.
 
-### Merge 2 different stations in one display
-```   globalid2: "de:09179:6180"```
+Use semicolon-separated values when entering more than one direction or origin.
 
-If you have 2 stations close together (or far far away) like a train station and a bus stop, you can combine both in one card.
-Keep in mind, that you have to insert all transportations in ``` transporttypes```.
-The use of this function can lead to problems, because there are 2 API calls in 1 second and it can happen, that the API blocks the 2nd call.
-If you use it only in one card, it should be no problem. If you use more, the risk is higher that the API blocks the request.
+## Advanced settings
 
-### Time Zone options ###
-Default is "Europe/Berlin".
-If your system is running with UTC settings, you can use UTC in ```timezone_from```. 
-If you want to display a different timezone, you can define it in ```timezone_to```
-```
-    timezone_from : "UTC"
-    timezone_to   : "Europe/Berlin"
-``` 
+### Additional station / Global ID 2
 
-### Alert Settings ###
+You can combine a second station into the same sensor. This can be useful when two stops are close together, for example a train station and a bus stop.
 
-```
-    alert_for: "S3,S4,S20"
-``` 
+Keep in mind that the integration needs to perform an additional API request for the second station. If you use this on many sensors, the risk of blocked or delayed API requests increases.
 
-If you configure this option, there will be 3 additional attributes (per line) for your sensor.
-Format:
-```
-notifyLateMvgConnectionLine_1
-notifyLateMvgConnectionLine_2
-notifyLateMvgConnectionLine_3
-```
-If you configure the the alert for S4 the name of the attributes are as follow
+### Increased limit
+
+This option can help when many filters are used and entries after midnight are missing. Increase it carefully, preferably in small steps, because it can create additional API requests.
+
+### Time zone options
+
+Default is `Europe/Berlin`. Normally this should not be changed.
+
+If your system runs in UTC or you want to display times in another timezone, you can configure the source and target timezone in the advanced settings. Use timezone names such as `UTC` or `Europe/Berlin`.
+
+### Alert attributes
+
+You can configure lines for which additional delay attributes should be created.
+
+Example lines: `S3,S4,S20`
+
+For each configured line, the sensor creates attributes for the next matching connections, for example:
+
 ```
 notifyLateMvgConnectionS4_1
 notifyLateMvgConnectionS4_2
 notifyLateMvgConnectionS4_3
 ```
-You can use it e.g. in an automation as condition 
 
-```
-condition:
-  - condition: numeric_state
-    entity_id: sensor.olching_und_eichenau
-    attribute: notifyLateMvgConnectionS4_3
-    above: 0
-```
-The possible values from ```above``` in this example are
-* -1 --> departure is cancelled
-* 0 --> departure is in time
-* greater than 0 --> the delay in minutes of this departure
+Possible values:
 
-I am using this in an automation to change the color of a LED from WLED
-```
-alias: WLED Test - Unten Gelb
-description: ""
-trigger:
-  - platform: state
-    entity_id:
-      - sensor.olching_und_eichenau
-    attribute: connections
-  - platform: time_pattern
-    minutes: "*"
-condition:
-  - condition: numeric_state
-    entity_id: sensor.olching_und_eichenau
-    attribute: notifyLateMvgConnectionS4_3
-    above: 0
-action:
-  - service: select.select_option
-    target:
-      device_id: 2e48d67fbe95d4ee7c9ef03bdf8ffe08
-    data:
-      option: Unten Gelb
-  - service: select.select_option
-    target:
-      device_id: d99baaee5d4ecce453980a792ec2f3a1
-    data:
-      option: Bahn 3 gelb
-mode: single
-```
-This is an example code from my WLED configuration, dont copy and paste it, if you dont know what you are doing. ;) 
+* `-1` means the departure is cancelled
+* `0` means the departure is on time
+* values greater than `0` are the delay in minutes
 
+These attributes can be used in Home Assistant automations as conditions.
 
+### Status template
 
+The status template controls the main state text of the sensor.
 
-## Complex configuration example
-```
-sensor:
-  - platform: another_mvg
-    name: "Olching"
-    globalid: "de:09179:6110"
-    hidedestination: "Mammendorf,Maisach"
-    limit: 15
-    transporttypes: "SBAHN"
-  - platform: another_mvg
-    name: "Olching Busabfahrten"
-    globalid: "de:09179:6110"
-    hidedestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"
-    onlyline: "860,831,843"
-    limit: 15
-    transporttypes: "BUS,REGIONAL_BUS"
-    doublestationnumber: "2"
-  - platform: another_mvg
-    name: "Eichenau"
-    globalid: "de:09179:6180"
-    hidedestination: "Geltendorf,Buchenau,Grafrath"
-    limit: 15
-    transporttypes: "SBAHN"
-  - platform: another_mvg
-    name: "Eichenau Busabfahrten"
-    globalid: "de:09179:6181"
-    hidedestination: "Freiham (S) Süd"
-    limit: 15
-    transporttypes: "BUS,REGIONAL_BUS"
-    onlyline: "860"
-  - platform: another_mvg
-    name: "Pasing"
-    globalid: "de:09162:10"
-    onlyline: "S3,S4,S20"
-    limit: 20
-    transporttypes: "SBAHN"
-    hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof,Haar,Ebersberg, München Hbf, Höllriegelskreuth"
-    timezone_from : "Europe/Berlin"
-    timezone_to   : "Europe/Berlin"
-  - platform: another_mvg
-    name: "Pasing - alle Abfahrten"
-    globalid: "de:09162:10"
-    limit: 20
-    doublestationnumber: "2"
-    transporttypes: "SBAHN,BUS,REGIONAL_BUS,TRAM"
-  - platform: another_mvg
-    name: "Olching und Eichenau"
-    globalid: "de:09179:6110"
-    globalid2: "de:09179:6180"
-    hidedestination: "Mammendorf,Maisach,Geltendorf,Buchenau,Grafrath"
-    limit: 15
-    transporttypes: "SBAHN"
-    doublestationnumber: "3"
-    alert_for: "S3,S4,S20"
-  - platform: another_mvg
-    name: "UBahn Test"
-    globalid: "de:09162:360"
-    transporttypes: "UBAHN"
-    limit: 15
-    hidename: True
-```
+Available placeholders include:
+
+* `{planned_departure}`
+* `{expected_departure}`
+* `{track}`
+* `{transport_type}`
+* `{label}`
+* `{destination}`
+* `{delay}`
+* `{trainType}`
+* `{cancelled}`
+* `{plannedDepartureTime}`
+* `{realtimeDepartureTime}`
+* `{realtime_departure_diff_minutes}`
+* `{minutes_difference}`
+* `{announcement}`
+* `{announcementEN}`
+
+### Custom CSS
+
+Custom CSS in the sensor settings applies to all Another MVG cards that use this sensor. Use this when you want the same CSS for every card showing this sensor.
+
+The card editor also has a card-specific CSS field. Do not use both for the same styling unless you intentionally want to layer them.
+
+### Proxy settings
+
+The optional PHP proxy can be used as a fallback when direct API requests fail from your Home Assistant instance.
+
+Normally this should stay disabled. Use it only if you know you need it.
+
+### MQTT
+
+MQTT publishing is optional and uses the MQTT integration configured in Home Assistant. You do not configure broker host, port or credentials in Another MVG.
+
+Per sensor you can configure:
+
+* Enable MQTT publishing
+* MQTT topic prefix
+* MQTT QoS
+* MQTT retain
+
+The default topic prefix is `another_mvg`. The final topic also includes the sanitized sensor entity name, for example:
+
+`another_mvg/olching_ankunfte/state`
+
+The payload includes the sensor name, entity ID, unique ID, monitor type, state, data freshness information and the current entries.
+
+If `retain` is enabled, the broker keeps the last message until it is overwritten or manually cleared. Disabling MQTT in Another MVG does not automatically delete retained messages from your broker.
+
+## Card filters vs sensor filters
+
+The sensor configuration decides which data is requested and stored in Home Assistant.
+
+The card configuration decides which of the available sensor entries are shown in a specific dashboard card.
+
+If you want one dashboard card to show only S-Bahn and another card to show only buses, it is usually better to request both transport types in the sensor and then filter in the card.
+
+If you never need certain lines, directions or transport types anywhere, use the sensor prefilters to reduce stored data.
 
 # 5. Screenshots
 ## Browser View
@@ -424,84 +351,41 @@ sensor:
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c679ee24-23a4-4ed5-8c15-858794d51f68)
 
-```
-  - platform: another_mvg
-    name: "Pasing - alle Abfahrten"
-    globalid: "de:09162:10"
-    limit: 20
-```
+Example setup: create a departure monitor for `Pasing`, keep all relevant transport types enabled, and set a request limit high enough for the number of entries you want to show.
 
 
 ### Pasing S3, S4, S20 western direction
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/6336adc3-8084-40bf-b4bb-2747fa13e6c1)
 
-```
-  - platform: another_mvg
-    name: "Pasing"
-    globalid: "de:09162:10"
-    onlyline: "S3,S4,S20"
-    limit: 20
-    transporttypes: "SBAHN"
-    hidedestination: "Deisenhofen,Holzkirchen,Grafing Bahnhof, Trudering, Ostbahnhof,Haar,Ebersberg, München Hbf, Höllriegelskreuth"
-```
+Example setup: create a departure monitor for `Pasing`, select `SBAHN`, filter to lines `S3`, `S4` and `S20`, and hide the directions that should not be shown.
 
 ### Bus / Regional Bus Olching - some directions and lines
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/0bfc9858-54ea-4b1a-8cd0-a031df044b1d)
 
-```
-  - platform: another_mvg
-    name: "Olching Busabfahrten"
-    globalid: "de:09179:6110"
-    hidedestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"
-    onlyline: "860,831,843"
-    limit: 15
-    transporttypes: "BUS,REGIONAL_BUS"
-```
+Example setup: create a departure monitor for `Olching`, select `BUS` and `REGIONAL_BUS`, filter to the wanted bus lines, and hide directions that should not be shown.
 
 
 ### U-Bahn
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/b725a2d4-938e-479d-89d9-0bdbb714360e)
 
-```
-  - platform: another_mvg
-    name: "UBahn Test"
-    globalid: "de:09162:360"
-    transporttypes: "UBAHN"
-    limit: 15
-    hidename: True
-```
+Example setup: create a departure monitor for the U-Bahn station and select `UBAHN` as transport type. The card title can be hidden in the card editor if you want a more compact display.
 
 
 ### Eichenau S-Bahn
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/0cd07461-b429-417e-907a-4316656dea59)
 
-```
-  - platform: another_mvg
-    name: "Eichenau"
-    globalid: "de:09179:6180"
-    hidedestination: "Geltendorf,Buchenau,Grafrath"
-    limit: 15
-    transporttypes: "SBAHN"
-```
+Example setup: create a departure monitor for `Eichenau`, select `SBAHN`, and use the direction filter to hide directions that should not be shown.
 
 
 ### Eichenau / Olching S-Bahn station combined in one card
 
 ![grafik](https://github.com/Nisbo/another_mvg/assets/26260572/c715acb4-1102-48c7-8763-77c8357a18ed)
 
-```
-  - platform: another_mvg
-    name: "Olching und Eichenau"
-    globalid: "de:09179:6110"
-    globalid2: "de:09179:6180"
-    hidedestination: "Mammendorf,Maisach,Geltendorf,Buchenau,Grafrath"
-    limit: 15
-    transporttypes: "SBAHN"
-```
+Example setup: create one monitor for `Olching` and use `Additional station / Global ID 2` for `Eichenau`. Select `SBAHN` and configure direction filters as needed.
 
 
 ## Mobile App View
@@ -517,11 +401,7 @@ sensor:
 - better error handling for connection problems
 
 ## 29.01.2024 - Version 1.2.0
-- added timezone options, default is "Europe/Berlin" if your system is running with UTC settings, you can use UTC in ```timezone_from```. If you want to display a different timezone, you can define it in ```timezone_to```
-- ```
-    timezone_from : "UTC"
-    timezone_to   : "Europe/Berlin"
-  ``` 
+- added timezone options, default is "Europe/Berlin". If your system is running with UTC settings, you can use UTC as source timezone. If you want to display a different timezone, you can define a target timezone.
 - minor fixes
 
 ## 01.03.2024 - Version 1.3.0
@@ -538,9 +418,7 @@ sensor:
 - workaround for missing track 2a (not provided by the API) in Ebersberg. It assumes that if there is no platform provided by the API that the departure is from track 2a (Gleis 2a).
 - fixed an issue with CSS on some installations (possible problems with other addons)
 - You can also use ```BAHN``` but this feature is not fully integrated and not enabled by default. There is also no special design / labeling available.
-If you want to include it to your departure list, you can use this code:
-
-```   transporttypes: "SBAHN,UBAHN,TRAM,BUS,REGIONAL_BUS,BAHN"```
+If you want to include it, add `BAHN` to the transport types in the sensor configuration.
 
 ## 13.08.2024 - Version 1.5.0
 - Now with the option to install Another MVG via HACS
@@ -553,14 +431,7 @@ If you want to include it to your departure list, you can use this code:
 * Formerly planned and announced as v1.6.0, now released as v2.0.0 due to the **amount** of changes.
 * v2.0.0 includes a complete GUI configuration, following the integration in HACS from the last version.
 * Added language files for English and German.
-* added "Only some destinations"
-
-```   onlydestination: "Ostbahnhof;Holzkirchen"```
-
-If you want to see only some directions / destinations, you have to insert the EXACT names of the **wanted** destinations like they are shown in the connection display. (card)
-The names should be ```;``` separated. They can be ```,``` or space sepatared, but this can lead to problems if a ```,``` or a space is in the name of the destination.
-
-```   onlydestination: "Graßlfing, Olchinger See;Olching, Georgenstraße"```
+* added "Only some destinations". Multiple values should be separated by semicolon because commas and spaces may be part of station or direction names.
 * Improved error handling in the custom card if a sensor is unavailable or deleted.
   * ![grafik](https://github.com/user-attachments/assets/7735b742-8d59-4397-a65c-9b78657763be)
 * Improved data handling of the custom card during startup.
@@ -597,10 +468,9 @@ Settings --> Dashboards --> 3 dots on the top right --> Resources
 - Remove the old Files and follow the instructions from the HACS installation part.
 
 ### from v1.5.0 (>= v1.5.0)
-- Remove the old Files (and remove the entries from the configuration.yaml)
+- Remove the old files.
 - Restart HACS
 - follow the instructions from the HACS installation part.
-⚠️ you can also comment (put a # in front of each another_mvg related line) the settings in your configuration.yaml and uncomment it after the installation for the case that you want to stay with yaml configuration.
 
 
 # 7. Credits
@@ -641,6 +511,3 @@ English: ... For private, non-commercial purposes, moderate use is tolerated wit
 Full (german) text can be found in the MVG impressum at the bottom.
 
 https://www.mvg.de/impressum.html
-
-
-
