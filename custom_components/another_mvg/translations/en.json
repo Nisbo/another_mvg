@@ -281,6 +281,23 @@
                 "auto": "Automatic",
                 "manual": "Manual"
             }
+        },
+        "alert_weekday": {
+            "options": {
+                "mon": "Monday",
+                "tue": "Tuesday",
+                "wed": "Wednesday",
+                "thu": "Thursday",
+                "fri": "Friday",
+                "sat": "Saturday",
+                "sun": "Sunday"
+            }
+        },
+        "alert_notify_mode": {
+            "options": {
+                "once": "Once per trip",
+                "worsening": "Again when delay gets worse"
+            }
         }
     },
     "config": {
@@ -299,9 +316,10 @@
                           "timezone_from": "Timezone From",
                           "timezone_to": "Timezone To",
                           "alert_for": "Alert Attributes For",
-                          "stats_template": "Content of the status variable",
-                          "css_code": "Custom CSS Code",  
-                          "css_code_darkmode_only": "Use only in 'Dark Mode'."  
+	                          "stats_template": "Content of the status variable",
+	                          "css_code": "Custom CSS Code",
+	                          "css_code_darkmode_only": "Use only in 'Dark Mode'.",
+	                          "exclude_attributes_from_recorder": "Do not store sensor attributes in history"
                        },
                        "data_description": {
                           "increased_limit": "This option is intended to correct missing entries after midnight if many filters are used. Use this option only if fewer entries than desired are displayed in the evening. Adjust slowly in steps of 10, as this option can lead to unnecessary additional API requests.",
@@ -309,9 +327,10 @@
                           "timezone_from": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "timezone_to": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "alert_for": "If you want to create additional attributes for certain lines, like S3, S4, and S20, you can configure them as a comma-separated list. For more information, refer to the documentation.",
-                          "stats_template": "Here you can define the value of the status variable. The following variables are available (multiple can be combined). Scheduled departure: ```'{planned_departure}'```, Expected departure: ```'{expected_departure}'```, Track: ```'{track}'```, Transport type: ```'{transport_type}'```, Line: ```'{label}'```, Destination: ```'{destination}'```, Delay: ```'{delay}'``` (in minutes), Train type: ```'{trainType}'``` (for trains, excluding RB and RE), Cancellation: ```'{cancelled}'```, Scheduled departure time: ```'{plannedDepartureTime}'``` (timestamp), Real departure time: ```'{realtimeDepartureTime}'``` (timestamp), Difference to real departure time: ```'{realtime_departure_diff_minutes}'``` (in minutes), Rounded difference to real departure time: ```'{minutes_difference}'``` (in minutes). If you want a preformatted text in the form of a station announcement (in German), enter ```'{announcement}'```. For the English version, enter ```'{announcementEN}'```.",
-                          "css_code": "Here you can customize the design of the AnotherMVG card by overriding CSS rules for specific areas. Important: The entire code must be written in a single line, as Home Assistant does not support multi-line inputs!",  
-                          "css_code_darkmode_only": "Use the above CSS code only when 'Dark Mode' is enabled."  
+	                          "stats_template": "Here you can define the value of the status variable. The following variables are available (multiple can be combined). Scheduled departure: ```'{planned_departure}'```, Expected departure: ```'{expected_departure}'```, Track: ```'{track}'```, Transport type: ```'{transport_type}'```, Line: ```'{label}'```, Destination: ```'{destination}'```, Delay: ```'{delay}'``` (in minutes), Train type: ```'{trainType}'``` (for trains, excluding RB and RE), Cancellation: ```'{cancelled}'```, Scheduled departure time: ```'{plannedDepartureTime}'``` (timestamp), Real departure time: ```'{realtimeDepartureTime}'``` (timestamp), Difference to real departure time: ```'{realtime_departure_diff_minutes}'``` (in minutes), Rounded difference to real departure time: ```'{minutes_difference}'``` (in minutes). If you want a preformatted text in the form of a station announcement (in German), enter ```'{announcement}'```. For the English version, enter ```'{announcementEN}'```.",
+	                          "css_code": "Here you can customize the design of the AnotherMVG card by overriding CSS rules for specific areas. Important: The entire code must be written in a single line, as Home Assistant does not support multi-line inputs!",
+	                          "css_code_darkmode_only": "Use the above CSS code only when 'Dark Mode' is enabled.",
+	                          "exclude_attributes_from_recorder": "When enabled, large dynamic attributes like departures, alerts and config are not stored in Home Assistant recorder history. Cards, automations and current sensor attributes continue to work. Already recorded data is not deleted immediately."
                         }
                      },
                     "filter_options": {
@@ -340,10 +359,10 @@
                             "force_proxy": "Always use the PHP 'Proxy' (URL) specified above."  
                         }  
                     },
-                    "mqtt_options": {
-                       "name": "MQTT",
-                       "data": {
-                          "mqtt_enabled": "Enable MQTT",
+	                    "mqtt_options": {
+	                       "name": "MQTT",
+	                       "data": {
+	                          "mqtt_enabled": "Enable MQTT",
                           "mqtt_topic_prefix": "MQTT topic prefix",
                           "mqtt_qos": "MQTT QoS",
                           "mqtt_retain": "Use MQTT retain"
@@ -352,10 +371,155 @@
                           "mqtt_enabled": "Publishes this sensor's data through the MQTT integration configured in Home Assistant.",
                           "mqtt_topic_prefix": "Base topic for MQTT messages. If left empty, another_mvg is used. Use only letters without accents, numbers, /, _, - and .. / can create sublevels, but must not be the first or last character. The final topic also includes the sensor name.",
                           "mqtt_qos": "Quality of Service. 0 is the default and is sufficient for most cases. 1 confirms delivery at least once, 2 is the strictest delivery mode and is rarely needed.",
-                          "mqtt_retain": "If enabled, the broker stores the last message and sends it immediately to new subscribers."
-                       }
-                    }
-                },
+	                          "mqtt_retain": "If enabled, the broker stores the last message and sends it immediately to new subscribers."
+	                       }
+	                    },
+	                    "alert1_options": {
+	                       "name": "Alerts - Alert 1",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    },
+	                    "alert2_options": {
+	                       "name": "Alerts - Alert 2",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    },
+	                    "alert3_options": {
+	                       "name": "Alerts - Alert 3",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    },
+	                    "alert4_options": {
+	                       "name": "Alerts - Alert 4",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    },
+	                    "alert5_options": {
+	                       "name": "Alerts - Alert 5",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    }
+	                },
                 "title": "Configure Another MVG",
                 "description": "Please provide the required information to set up the Another MVG integration.",
                 "data": {
@@ -421,9 +585,10 @@
                           "timezone_from": "Timezone From",
                           "timezone_to": "Timezone To",
                           "alert_for": "Alert Attributes For",
-                          "stats_template": "Content of the status variable",
-                          "css_code": "Custom CSS Code",  
-                          "css_code_darkmode_only": "Use only in 'Dark Mode'."  
+	                          "stats_template": "Content of the status variable",
+	                          "css_code": "Custom CSS Code",
+	                          "css_code_darkmode_only": "Use only in 'Dark Mode'.",
+	                          "exclude_attributes_from_recorder": "Do not store sensor attributes in history"
                        },
                        "data_description": {
                           "increased_limit": "This option is intended to correct missing entries after midnight if many filters are used. Use this option only if fewer entries than desired are displayed in the evening. Adjust slowly in steps of 10, as this option can lead to unnecessary additional API requests.",
@@ -431,9 +596,10 @@
                           "timezone_from": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "timezone_to": "Normally, this should not be changed unless your server is running in a different time zone, the times are not displayed correctly, or you want to see the departures in a different time zone. Enter the time zone in a format like Europe/Berlin or UTC. Do not leave the field empty.",
                           "alert_for": "If you want to create additional attributes for certain lines, like S3, S4, and S20, you can configure them as a comma-separated list. For more information, refer to the documentation.",
-                          "stats_template": "Here you can define the value of the status variable. The following variables are available (multiple can be combined). Scheduled departure: ```'{planned_departure}'```, Expected departure: ```'{expected_departure}'```, Track: ```'{track}'```, Transport type: ```'{transport_type}'```, Line: ```'{label}'```, Destination: ```'{destination}'```, Delay: ```'{delay}'``` (in minutes), Train type: ```'{trainType}'``` (for trains, excluding RB and RE), Cancellation: ```'{cancelled}'```, Scheduled departure time: ```'{plannedDepartureTime}'``` (timestamp), Real departure time: ```'{realtimeDepartureTime}'``` (timestamp), Difference to real departure time: ```'{realtime_departure_diff_minutes}'``` (in minutes), Rounded difference to real departure time: ```'{minutes_difference}'``` (in minutes). If you want a preformatted text in the form of a station announcement (in German), enter ```'{announcement}'```. For the English version, enter ```'{announcementEN}'```.",
-                          "css_code": "Here you can customize the design of the AnotherMVG card by overriding CSS rules for specific areas. Important: The entire code must be written in a single line, as Home Assistant does not support multi-line inputs!",  
-                          "css_code_darkmode_only": "Use the above CSS code only when 'Dark Mode' is enabled."  
+	                          "stats_template": "Here you can define the value of the status variable. The following variables are available (multiple can be combined). Scheduled departure: ```'{planned_departure}'```, Expected departure: ```'{expected_departure}'```, Track: ```'{track}'```, Transport type: ```'{transport_type}'```, Line: ```'{label}'```, Destination: ```'{destination}'```, Delay: ```'{delay}'``` (in minutes), Train type: ```'{trainType}'``` (for trains, excluding RB and RE), Cancellation: ```'{cancelled}'```, Scheduled departure time: ```'{plannedDepartureTime}'``` (timestamp), Real departure time: ```'{realtimeDepartureTime}'``` (timestamp), Difference to real departure time: ```'{realtime_departure_diff_minutes}'``` (in minutes), Rounded difference to real departure time: ```'{minutes_difference}'``` (in minutes). If you want a preformatted text in the form of a station announcement (in German), enter ```'{announcement}'```. For the English version, enter ```'{announcementEN}'```.",
+	                          "css_code": "Here you can customize the design of the AnotherMVG card by overriding CSS rules for specific areas. Important: The entire code must be written in a single line, as Home Assistant does not support multi-line inputs!",
+	                          "css_code_darkmode_only": "Use the above CSS code only when 'Dark Mode' is enabled.",
+	                          "exclude_attributes_from_recorder": "When enabled, large dynamic attributes like departures, alerts and config are not stored in Home Assistant recorder history. Cards, automations and current sensor attributes continue to work. Already recorded data is not deleted immediately."
                         }
                      },
                     "filter_options": {
@@ -474,10 +640,155 @@
                           "mqtt_enabled": "Publishes this sensor's data through the MQTT integration configured in Home Assistant.",
                           "mqtt_topic_prefix": "Base topic for MQTT messages. If left empty, another_mvg is used. Use only letters without accents, numbers, /, _, - and .. / can create sublevels, but must not be the first or last character. The final topic also includes the sensor name.",
                           "mqtt_qos": "Quality of Service. 0 is the default and is sufficient for most cases. 1 confirms delivery at least once, 2 is the strictest delivery mode and is rarely needed.",
-                          "mqtt_retain": "If enabled, the broker stores the last message and sends it immediately to new subscribers."
-                       }
-                    }
-                },
+	                          "mqtt_retain": "If enabled, the broker stores the last message and sends it immediately to new subscribers."
+	                       }
+	                    },
+	                    "alert1_options": {
+	                       "name": "Alerts - Alert 1",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    },
+	                    "alert2_options": {
+	                       "name": "Alerts - Alert 2",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    },
+	                    "alert3_options": {
+	                       "name": "Alerts - Alert 3",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    },
+	                    "alert4_options": {
+	                       "name": "Alerts - Alert 4",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    },
+	                    "alert5_options": {
+	                       "name": "Alerts - Alert 5",
+	                       "data": {
+	                          "enabled": "Enabled",
+	                          "name": "Name",
+	                          "weekdays": "Weekdays",
+	                          "line": "Line",
+	                          "planned_time": "Scheduled departure/arrival time",
+	                          "direction": "Direction / origin contains",
+	                          "active_from": "Notifications active from",
+	                          "active_to": "Notifications active until",
+	                          "delay_minutes": "Warn from delay",
+	                          "cancelled": "Warn when cancelled",
+	                          "notify_mode": "Notify again"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Enables this alert rule.",
+	                          "name": "Optional name for this rule, for example morning commute.",
+	                          "weekdays": "Optional: Select weekdays. If nothing is selected, the rule applies every day.",
+	                          "line": "Optional: Enter the line, for example S3 or 860. If empty, only the scheduled time is matched.",
+	                          "planned_time": "Scheduled departure or arrival time in HH:MM format. 5:38 and 05:38 both work.",
+	                          "direction": "Optional: For departures this checks the destination, for arrivals the origin. The text must be contained.",
+	                          "active_from": "Optional: Earliest time when notifications may be triggered, for example 05:00.",
+	                          "active_to": "Optional: Latest time when notifications may be triggered, for example 05:45.",
+	                          "delay_minutes": "0 disables delay alerts. With 5, alerts are sent from 5 minutes delay.",
+	                          "cancelled": "Alerts when the monitored trip is cancelled.",
+	                          "notify_mode": "Once per trip sends only the first match. Worsening sends again if the delay increases."
+	                       }
+	                    }
+	                },
                 "title": "Edit Options for Another MVG",
                 "data": {
                     "globalid": "Global ID",

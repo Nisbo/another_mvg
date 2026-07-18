@@ -17,7 +17,7 @@ import urllib.parse
 import voluptuous as vol
 from homeassistant.components import mqtt
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_NAME, MATCH_ALL
 from homeassistant.core import HomeAssistant
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -47,11 +47,23 @@ from .const import (
     CONF_FORCE_PROXY,
     CONF_CSS_CODE,
     CONF_CSS_CODE_DARKMODE_ONLY,
+    CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER,
     CONF_MQTT_ENABLED,
     CONF_MQTT_TOPIC_PREFIX,
     CONF_MQTT_RETAIN,
     CONF_MQTT_QOS,
     CONF_UPDATE_MODE,
+    CONF_ALERT_ENABLED,
+    CONF_ALERT_NAME,
+    CONF_ALERT_WEEKDAYS,
+    CONF_ALERT_LINE,
+    CONF_ALERT_PLANNED_TIME,
+    CONF_ALERT_DIRECTION,
+    CONF_ALERT_ACTIVE_FROM,
+    CONF_ALERT_ACTIVE_TO,
+    CONF_ALERT_DELAY_MINUTES,
+    CONF_ALERT_CANCELLED,
+    CONF_ALERT_NOTIFY_MODE,
     URL,
     URL_EFA_ARRIVALS,
     USER_AGENT,
@@ -76,6 +88,7 @@ from .const import (
     DEFAULT_FORCE_PROXY,
     DEFAULT_CSS_CODE,
     DEFAULT_CSS_CODE_DARKMODE_ONLY,
+    DEFAULT_EXCLUDE_ATTRIBUTES_FROM_RECORDER,
     DEFAULT_MQTT_ENABLED,
     DEFAULT_MQTT_TOPIC_PREFIX,
     DEFAULT_MQTT_RETAIN,
@@ -83,6 +96,22 @@ from .const import (
     DEFAULT_UPDATE_MODE,
     UPDATE_MODE_AUTO,
     UPDATE_MODE_MANUAL,
+    ALERT_COUNT,
+    ALERT_WEEKDAYS,
+    ALERT_NOTIFY_ONCE,
+    ALERT_NOTIFY_WORSENING,
+    DEFAULT_ALERT_ENABLED,
+    DEFAULT_ALERT_NAME,
+    DEFAULT_ALERT_WEEKDAYS,
+    DEFAULT_ALERT_LINE,
+    DEFAULT_ALERT_PLANNED_TIME,
+    DEFAULT_ALERT_DIRECTION,
+    DEFAULT_ALERT_ACTIVE_FROM,
+    DEFAULT_ALERT_ACTIVE_TO,
+    DEFAULT_ALERT_DELAY_MINUTES,
+    DEFAULT_ALERT_CANCELLED,
+    DEFAULT_ALERT_NOTIFY_MODE,
+    EVENT_ANOTHER_MVG_ALERT,
 )
 
 # integration imports end
@@ -116,6 +145,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_FORCE_PROXY, default=DEFAULT_FORCE_PROXY): cv.boolean,
         vol.Optional(CONF_CSS_CODE, default=DEFAULT_CSS_CODE): cv.string,
         vol.Optional(CONF_CSS_CODE_DARKMODE_ONLY, default=DEFAULT_CSS_CODE_DARKMODE_ONLY): cv.boolean,
+        vol.Optional(CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER, default=DEFAULT_EXCLUDE_ATTRIBUTES_FROM_RECORDER): cv.boolean,
         vol.Optional(CONF_MQTT_ENABLED, default=DEFAULT_MQTT_ENABLED): cv.boolean,
         vol.Optional(CONF_MQTT_TOPIC_PREFIX, default=DEFAULT_MQTT_TOPIC_PREFIX): cv.string,
         vol.Optional(CONF_MQTT_RETAIN, default=DEFAULT_MQTT_RETAIN): cv.boolean,
@@ -173,7 +203,12 @@ async def async_setup_entry(
         unique_id = config_entry.data[CONF_GLOBALID].replace(":", "") + config_entry.data[CONF_DOUBLESTATIONNUMBER]
         hass.config_entries.async_update_entry(config_entry, unique_id=unique_id)
     
-    entity = ConnectionInfo(hass, config_entry)
+    entity_class = (
+        ConnectionInfoWithoutRecordedAttributes
+        if config_entry.data.get(CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER, DEFAULT_EXCLUDE_ATTRIBUTES_FROM_RECORDER)
+        else ConnectionInfo
+    )
+    entity = entity_class(hass, config_entry)
     hass.data.setdefault(DOMAIN, {}).setdefault("entities", {})[config_entry.entry_id] = entity
     async_add_entities([entity])
 
@@ -252,6 +287,10 @@ class ConnectionInfo(SensorEntity):
         self._transporttypes = config_data.get(CONF_TRANSPORTTYPES)
         self._css_code = config_data.get(CONF_CSS_CODE, DEFAULT_CSS_CODE)
         self._css_code_darkmode_only = config_data.get(CONF_CSS_CODE_DARKMODE_ONLY, DEFAULT_CSS_CODE_DARKMODE_ONLY)
+        self._exclude_attributes_from_recorder = config_data.get(
+            CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER,
+            DEFAULT_EXCLUDE_ATTRIBUTES_FROM_RECORDER,
+        )
         self._mqtt_enabled = config_data.get(CONF_MQTT_ENABLED, DEFAULT_MQTT_ENABLED)
         self._mqtt_topic_prefix = self.normalize_mqtt_topic_prefix(
             config_data.get(CONF_MQTT_TOPIC_PREFIX, DEFAULT_MQTT_TOPIC_PREFIX)
@@ -267,6 +306,8 @@ class ConnectionInfo(SensorEntity):
         self._timezoneFrom = config_data.get(CONF_TIMEZONE_FROM)
         self._timezoneTo = config_data.get(CONF_TIMEZONE_TO)
         self._alert_for = config_data.get(CONF_ALERT_FOR)
+        self._alert_rules = self.build_alert_rules(config_data)
+        self._alert_last_fired = {}
         self._lateConnections = []
         self._nextDeparture = ""
         self._dataOutdated = ""
@@ -290,11 +331,13 @@ class ConnectionInfo(SensorEntity):
                 "mqtt_retain": self._mqtt_retain,
                 "mqtt_qos": self._mqtt_qos,
                 "css_code": self._css_code,
-                "css_code_darkmode_only": self._css_code_darkmode_only
+                "css_code_darkmode_only": self._css_code_darkmode_only,
+                "exclude_attributes_from_recorder": self._exclude_attributes_from_recorder
             }
         }
         self._custom_attributes["monitor_type"] = self._monitor_type
         self._custom_attributes["update_mode"] = self._update_mode
+        self._custom_attributes["alerts"] = []
 
     @property
     def name(self) -> str:
@@ -323,6 +366,93 @@ class ConnectionInfo(SensorEntity):
         except (TypeError, ValueError):
             number = default
         return max(0, number)
+
+    @staticmethod
+    def normalize_alert_time(value) -> str:
+        """Return a HH:MM time string or an empty string."""
+        time_value = str(value or "").strip()
+        match = re.fullmatch(r"(\d{1,2}):(\d{2})", time_value)
+        if not match:
+            return ""
+
+        hour = int(match.group(1))
+        minute = int(match.group(2))
+        if hour > 23 or minute > 59:
+            return ""
+
+        return f"{hour:02d}:{minute:02d}"
+
+    @staticmethod
+    def normalize_alert_weekdays(value) -> list[str]:
+        """Return selected alert weekdays as a normalized list."""
+        if isinstance(value, str):
+            items = [item.strip().lower() for item in value.split(",")]
+        elif isinstance(value, list):
+            items = [str(item).strip().lower() for item in value]
+        else:
+            items = []
+
+        return [item for item in items if item in ALERT_WEEKDAYS]
+
+    @classmethod
+    def build_alert_rules(cls, config_data: dict) -> list[dict]:
+        """Build alert rule definitions from config data with safe defaults."""
+        rules = []
+        for index in range(1, ALERT_COUNT + 1):
+            delay_minutes = cls.normalize_non_negative_int(
+                config_data.get(CONF_ALERT_DELAY_MINUTES.format(index), DEFAULT_ALERT_DELAY_MINUTES),
+                DEFAULT_ALERT_DELAY_MINUTES,
+            )
+            notify_mode = config_data.get(CONF_ALERT_NOTIFY_MODE.format(index), DEFAULT_ALERT_NOTIFY_MODE)
+            if notify_mode not in (ALERT_NOTIFY_ONCE, ALERT_NOTIFY_WORSENING):
+                notify_mode = DEFAULT_ALERT_NOTIFY_MODE
+
+            rules.append(
+                {
+                    "index": index,
+                    "enabled": bool(config_data.get(CONF_ALERT_ENABLED.format(index), DEFAULT_ALERT_ENABLED)),
+                    "name": str(config_data.get(CONF_ALERT_NAME.format(index), DEFAULT_ALERT_NAME) or "").strip(),
+                    "weekdays": cls.normalize_alert_weekdays(
+                        config_data.get(CONF_ALERT_WEEKDAYS.format(index), DEFAULT_ALERT_WEEKDAYS)
+                    ),
+                    "line": str(config_data.get(CONF_ALERT_LINE.format(index), DEFAULT_ALERT_LINE) or "").strip(),
+                    "planned_time": cls.normalize_alert_time(
+                        config_data.get(CONF_ALERT_PLANNED_TIME.format(index), DEFAULT_ALERT_PLANNED_TIME)
+                    ),
+                    "direction": str(config_data.get(CONF_ALERT_DIRECTION.format(index), DEFAULT_ALERT_DIRECTION) or "").strip(),
+                    "active_from": cls.normalize_alert_time(
+                        config_data.get(CONF_ALERT_ACTIVE_FROM.format(index), DEFAULT_ALERT_ACTIVE_FROM)
+                    ),
+                    "active_to": cls.normalize_alert_time(
+                        config_data.get(CONF_ALERT_ACTIVE_TO.format(index), DEFAULT_ALERT_ACTIVE_TO)
+                    ),
+                    "delay_minutes": delay_minutes,
+                    "cancelled": bool(config_data.get(CONF_ALERT_CANCELLED.format(index), DEFAULT_ALERT_CANCELLED)),
+                    "notify_mode": notify_mode,
+                }
+            )
+
+        return rules
+
+    @staticmethod
+    def alert_time_in_window(current_time: str, active_from: str, active_to: str) -> bool:
+        """Return true if the current time is inside the optional alert window."""
+        if not active_from and not active_to:
+            return True
+        if active_from and not active_to:
+            return current_time >= active_from
+        if active_to and not active_from:
+            return current_time <= active_to
+        if active_from <= active_to:
+            return active_from <= current_time <= active_to
+        return current_time >= active_from or current_time <= active_to
+
+    @staticmethod
+    def alert_text_contains(haystack: str, needle: str) -> bool:
+        """Return true if an optional alert text filter matches."""
+        if not needle:
+            return True
+        return needle.casefold() in str(haystack or "").casefold()
 
     @staticmethod
     def normalize_mqtt_topic_prefix(value) -> str:
@@ -529,6 +659,7 @@ class ConnectionInfo(SensorEntity):
         self._custom_attributes["dataOutdated"] = self._dataOutdated
         self._custom_attributes["maxConnectionErrorTime"] = self._maxConnectionErrorTime
         self.process_late_connections()
+        self.process_alert_rules()
         await self.async_publish_mqtt()
 
     async def async_manual_refresh(self) -> None:
@@ -558,6 +689,7 @@ class ConnectionInfo(SensorEntity):
             "dataOutdated": self._dataOutdated,
             "maxConnectionErrorTime": self._maxConnectionErrorTime,
             "departures": self._custom_attributes.get("departures", []),
+            "alerts": self._custom_attributes.get("alerts", []),
         }
 
         try:
@@ -577,6 +709,137 @@ class ConnectionInfo(SensorEntity):
                     err,
                 )
                 self._mqtt_publish_warning_logged = True
+
+    def process_alert_rules(self) -> None:
+        """Evaluate configured alert rules and fire HA events for new matches."""
+        departures = self._custom_attributes.get("departures", [])
+        now = datetime.now(ZoneInfo(self._timezoneTo or DEFAULT_TIMEZONE_TO))
+        current_day = ALERT_WEEKDAYS[now.weekday()]
+        current_time = now.strftime("%H:%M")
+        current_date = now.date().isoformat()
+        self._alert_last_fired = {
+            key: value
+            for key, value in self._alert_last_fired.items()
+            if value.get("date") == current_date
+        }
+
+        active_alerts = []
+        events_to_fire = []
+
+        for rule in self._alert_rules:
+            if not self.alert_rule_is_usable(rule, current_day, current_time):
+                continue
+
+            for departure in departures:
+                alerts = self.alerts_for_departure(rule, departure, current_date)
+                active_alerts.extend(alerts)
+                for alert in alerts:
+                    if self.should_fire_alert(rule, alert):
+                        events_to_fire.append(alert)
+
+        self._custom_attributes["alerts"] = active_alerts
+
+        for alert in events_to_fire:
+            self._hass.bus.async_fire(EVENT_ANOTHER_MVG_ALERT, alert)
+
+    def alert_rule_is_usable(self, rule: dict, current_day: str, current_time: str) -> bool:
+        """Return true if a rule can be evaluated now."""
+        if not rule["enabled"]:
+            return False
+        if not rule["planned_time"]:
+            return False
+        if not rule["delay_minutes"] and not rule["cancelled"]:
+            return False
+        if rule["weekdays"] and current_day not in rule["weekdays"]:
+            return False
+        return self.alert_time_in_window(current_time, rule["active_from"], rule["active_to"])
+
+    def alerts_for_departure(self, rule: dict, departure: dict, current_date: str) -> list[dict]:
+        """Return alert payloads for one matching departure."""
+        planned_time = self.normalize_alert_time(departure.get("planned_departure"))
+        if planned_time != rule["planned_time"]:
+            return []
+
+        line = str(departure.get("label") or "").strip()
+        direction = str(departure.get("destination") or "").strip()
+        if rule["line"] and line != rule["line"]:
+            return []
+        if not self.alert_text_contains(direction, rule["direction"]):
+            return []
+
+        delay = self.normalize_non_negative_int(departure.get("delay"), 0)
+        cancelled = bool(departure.get("cancelled"))
+        base_payload = {
+            "sensor_name": self._name,
+            "entity_id": self.entity_id,
+            "unique_id": self._unique_id,
+            "monitor_type": self._monitor_type,
+            "rule_index": rule["index"],
+            "rule_name": rule["name"],
+            "date": current_date,
+            "line": line,
+            "direction": direction,
+            "track": departure.get("track"),
+            "planned_time": planned_time,
+            "expected_time": departure.get("expected_departure"),
+            "delay": delay,
+            "cancelled": cancelled,
+            "transport_type": departure.get("transport_type"),
+        }
+
+        alerts = []
+        if rule["cancelled"] and cancelled:
+            alert = dict(base_payload)
+            alert["type"] = "cancelled"
+            alert["key"] = self.alert_key(rule, alert)
+            alerts.append(alert)
+
+        if rule["delay_minutes"] and delay >= rule["delay_minutes"] and not cancelled:
+            alert = dict(base_payload)
+            alert["type"] = "delay"
+            alert["threshold"] = rule["delay_minutes"]
+            alert["key"] = self.alert_key(rule, alert)
+            alerts.append(alert)
+
+        return alerts
+
+    @staticmethod
+    def alert_key(rule: dict, alert: dict) -> str:
+        """Return a stable per-day alert key."""
+        return "|".join(
+            [
+                alert["date"],
+                str(rule["index"]),
+                alert["type"],
+                alert["planned_time"],
+                alert["line"],
+                alert["direction"],
+            ]
+        )
+
+    def should_fire_alert(self, rule: dict, alert: dict) -> bool:
+        """Return true if an alert event should be fired now."""
+        key = alert["key"]
+        previous = self._alert_last_fired.get(key)
+        delay = self.normalize_non_negative_int(alert.get("delay"), 0)
+
+        if previous is None:
+            self._alert_last_fired[key] = {
+                "date": alert["date"],
+                "delay": delay,
+            }
+            return True
+
+        if alert["type"] == "delay" and rule["notify_mode"] == ALERT_NOTIFY_WORSENING:
+            previous_delay = self.normalize_non_negative_int(previous.get("delay"), 0)
+            if delay > previous_delay:
+                self._alert_last_fired[key] = {
+                    "date": alert["date"],
+                    "delay": delay,
+                }
+                return True
+
+        return False
 
     def process_late_connections(self):
         """Method to update the lateConnections"""
@@ -1273,7 +1536,7 @@ class ConnectionInfo(SensorEntity):
             "TRAM": ["4"],
             "BUS": ["5", "7", "10"],
             "REGIONAL_BUS": ["6"],
-            "BAHN": ["0", "13"],
+            "BAHN": ["0", "13", "14", "16"],
         }
         configured_transport_types = [
             item.strip().upper()
@@ -1353,7 +1616,6 @@ class ConnectionInfo(SensorEntity):
             _LOGGER.error("AnotherMVG: HTTP problem while connecting to the MVV/EFA API for globalid %s - %s - %s", global_id, name, str(ex))
             raise MVGException(f"AnotherMVG: HTTP problem while connecting to the MVV/EFA API for {global_id} - {name}") from ex
 
-
     async def get_api_for_globalid(self, name: str, global_id: str, offsetInMinutes: int, transport_types: str, limit: int) -> dict:
         """Get departure data from API, fallback to proxy server if needed."""
         request_limit = self.normalize_api_limit(limit)
@@ -1415,3 +1677,9 @@ class ConnectionInfo(SensorEntity):
                 raise MVGException(f"API and proxy failed for {global_id} - {name}") from ex
     
             raise MVGException(f"AnotherMVG: API and proxy failed for {global_id} - {name}")
+
+
+class ConnectionInfoWithoutRecordedAttributes(ConnectionInfo):
+    """ConnectionInfo variant that keeps dynamic attributes out of recorder history."""
+
+    _unrecorded_attributes = frozenset({MATCH_ALL})

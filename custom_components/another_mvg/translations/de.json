@@ -281,6 +281,23 @@
                 "auto": "Automatisch",
                 "manual": "Manuell"
             }
+        },
+        "alert_weekday": {
+            "options": {
+                "mon": "Montag",
+                "tue": "Dienstag",
+                "wed": "Mittwoch",
+                "thu": "Donnerstag",
+                "fri": "Freitag",
+                "sat": "Samstag",
+                "sun": "Sonntag"
+            }
+        },
+        "alert_notify_mode": {
+            "options": {
+                "once": "Einmal pro Fahrt",
+                "worsening": "Erneut bei Verschlechterung"
+            }
         }
     },
     "config": {
@@ -299,9 +316,10 @@
                           "timezone_from": "Zeitzone von",
                           "timezone_to": "Zeitzone nach",
                           "alert_for": "Alarmattribute für",
-                          "stats_template": "Inhalt der Statusvariabel",
-                          "css_code": "Eigener CSS Code",
-                          "css_code_darkmode_only": "Nur im 'Dark Mode' nutzen."
+	                          "stats_template": "Inhalt der Statusvariabel",
+	                          "css_code": "Eigener CSS Code",
+	                          "css_code_darkmode_only": "Nur im 'Dark Mode' nutzen.",
+	                          "exclude_attributes_from_recorder": "Sensorattribute nicht in der History speichern"
                        },
                        "data_description": {
                           "increased_limit": "Diese Option dient dazu, fehlende Einträge nach Mitternacht zu korrigieren, falls viele Filter verwendet werden. Nutze diese Option nur, wenn abends weniger Einträge als gewünscht angezeigt werden. Taste Dich langsam in 10er-Schritten vor, da diese Option zu unnötigen zusätzlichen API-Abfragen führen kann.",
@@ -309,9 +327,10 @@
                           "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Dein Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Du möchtest die Abfahrten in einer anderen Zeitzone sehen. Gebe die Zeitzone im Format wie Europe/Berlin oder UTC ein. Das Feld darf nicht leer sein.",
                           "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Dein Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Du möchtest die Abfahrten in einer anderen Zeitzone sehen. Gebe die Zeitzone im Format wie Europe/Berlin oder UTC ein. Das Feld darf nicht leer sein.",
                           "alert_for": "Wenn Du zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchtest, kannst Du sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schaue bitte in die Dokumentation.",
-                          "stats_template": "Hier kannst Du den Wert der Statusvariabel bestimmen. Dir stehen die folgenden Variabeln zur Verfügung (Mehrere zusammen sind möglich). Geplante Abfahrt: ```'{planned_departure}'```, Erwartete Abfahrt: ```'{expected_departure}'```, Gleis: ```'{track}'```, Transportmittel: ```'{transport_type}'```, Linie: ```'{label}'```, Ziel ```'{destination}'```, Verspätung: ```'{delay}'``` (in Minuten), Zugtyp: ```'{trainType}'``` (bei Bahn, außer RB und RE), Stornierung: ```'{cancelled}'```, Geplante Abfahrtszeit: ```'{plannedDepartureTime}'``` (Timestamp), Reale Abfahrtszeit: ```'{realtimeDepartureTime}'``` (Timestamp), Differenz zur realen Abfahrtszeit: ```'{realtime_departure_diff_minutes}'``` (in Minuten), Differenz zur realen Abfahrtszeit gerundet: ```'{minutes_difference}'``` (in Minuten). Wenn Du einen vorgefertigten Text in Form einer Bahnhofsdurchsage (in deutsch) wünschst, dann trage hier ```'{announcement}'``` ein. Für die englische Version trage ```'{announcementEN}'``` ein.",
-                          "css_code": "Hier kannst Du das Design der AnotherMVG-Karte individuell anpassen, indem Du CSS-Regeln für bestimmte Bereiche überschreibst. Wichtig: Der gesamte Code muss in einer einzigen Zeile stehen, da mehrzeilige Eingaben von Home Assistant leider nicht unterstützt werden!",
-                          "css_code_darkmode_only": "Den obenstehenden CSS Code nur bei aktiven 'Dark Mode' nutzen."
+	                          "stats_template": "Hier kannst Du den Wert der Statusvariabel bestimmen. Dir stehen die folgenden Variabeln zur Verfügung (Mehrere zusammen sind möglich). Geplante Abfahrt: ```'{planned_departure}'```, Erwartete Abfahrt: ```'{expected_departure}'```, Gleis: ```'{track}'```, Transportmittel: ```'{transport_type}'```, Linie: ```'{label}'```, Ziel ```'{destination}'```, Verspätung: ```'{delay}'``` (in Minuten), Zugtyp: ```'{trainType}'``` (bei Bahn, außer RB und RE), Stornierung: ```'{cancelled}'```, Geplante Abfahrtszeit: ```'{plannedDepartureTime}'``` (Timestamp), Reale Abfahrtszeit: ```'{realtimeDepartureTime}'``` (Timestamp), Differenz zur realen Abfahrtszeit: ```'{realtime_departure_diff_minutes}'``` (in Minuten), Differenz zur realen Abfahrtszeit gerundet: ```'{minutes_difference}'``` (in Minuten). Wenn Du einen vorgefertigten Text in Form einer Bahnhofsdurchsage (in deutsch) wünschst, dann trage hier ```'{announcement}'``` ein. Für die englische Version trage ```'{announcementEN}'``` ein.",
+	                          "css_code": "Hier kannst Du das Design der AnotherMVG-Karte individuell anpassen, indem Du CSS-Regeln für bestimmte Bereiche überschreibst. Wichtig: Der gesamte Code muss in einer einzigen Zeile stehen, da mehrzeilige Eingaben von Home Assistant leider nicht unterstützt werden!",
+	                          "css_code_darkmode_only": "Den obenstehenden CSS Code nur bei aktiven 'Dark Mode' nutzen.",
+	                          "exclude_attributes_from_recorder": "Wenn aktiviert, werden große dynamische Attribute wie departures, alerts und config nicht in der Home-Assistant-Recorder-History gespeichert. Die Karten, Automationen und aktuellen Sensorattribute funktionieren weiterhin. Bereits gespeicherte Daten werden dadurch nicht sofort gelöscht."
                         }
                      },
                     "filter_options": {
@@ -340,10 +359,10 @@
                           "force_proxy": "Den obenstehenden PHP 'Proxy' (URL) immer benutzen."
                         }
                      },
-                    "mqtt_options": {
-                       "name": "MQTT",
-                       "data": {
-                          "mqtt_enabled": "MQTT aktivieren",
+	                    "mqtt_options": {
+	                       "name": "MQTT",
+	                       "data": {
+	                          "mqtt_enabled": "MQTT aktivieren",
                           "mqtt_topic_prefix": "MQTT Topic-Präfix",
                           "mqtt_qos": "MQTT QoS",
                           "mqtt_retain": "MQTT retain verwenden"
@@ -352,10 +371,155 @@
                           "mqtt_enabled": "Veröffentlicht die Daten dieses Sensors über die in Home Assistant eingerichtete MQTT-Integration.",
                           "mqtt_topic_prefix": "Basis-Topic für MQTT-Nachrichten. Wenn das Feld leer ist, wird another_mvg verwendet. Erlaubt sind nur Buchstaben ohne Umlaute, Zahlen, /, _, - und .. / kann Unterebenen erzeugen, darf aber nicht am Anfang oder Ende stehen. Das finale Topic enthält zusätzlich den Sensornamen.",
                           "mqtt_qos": "Quality of Service. 0 ist der Standard und reicht für die meisten Fälle. 1 bestätigt die Zustellung mindestens einmal, 2 ist die strengste Zustellung und wird selten benötigt.",
-                          "mqtt_retain": "Wenn aktiviert, speichert der Broker die letzte Nachricht und liefert sie neuen Abonnenten sofort aus."
-                       }
-                     }
-                },
+	                          "mqtt_retain": "Wenn aktiviert, speichert der Broker die letzte Nachricht und liefert sie neuen Abonnenten sofort aus."
+	                       }
+	                     },
+	                    "alert1_options": {
+	                       "name": "Alarme - Alarm 1",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                    },
+	                    "alert2_options": {
+	                       "name": "Alarme - Alarm 2",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                    },
+	                    "alert3_options": {
+	                       "name": "Alarme - Alarm 3",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                    },
+	                    "alert4_options": {
+	                       "name": "Alarme - Alarm 4",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                    },
+	                    "alert5_options": {
+	                       "name": "Alarme - Alarm 5",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                     }
+	                },
                 "title": "Another MVG konfigurieren",
                 "description": "Bitte gib die erforderlichen Informationen ein, um Another MVG einzurichten.",
                 "data": {
@@ -421,9 +585,10 @@
                           "timezone_from": "Zeitzone von",
                           "timezone_to": "Zeitzone nach",
                           "alert_for": "Alarmattribute für",
-                          "stats_template": "Inhalt der Statusvariabel",
-                          "css_code": "Eigener CSS Code",
-                          "css_code_darkmode_only": "Nur im 'Dark Mode' nutzen."
+	                          "stats_template": "Inhalt der Statusvariabel",
+	                          "css_code": "Eigener CSS Code",
+	                          "css_code_darkmode_only": "Nur im 'Dark Mode' nutzen.",
+	                          "exclude_attributes_from_recorder": "Sensorattribute nicht in der History speichern"
                        },
                        "data_description": {
                           "increased_limit": "Diese Option dient dazu, fehlende Einträge nach Mitternacht zu korrigieren, falls viele Filter verwendet werden. Nutze diese Option nur, wenn abends weniger Einträge als gewünscht angezeigt werden. Taste Dich langsam in 10er-Schritten vor, da diese Option zu unnötigen zusätzlichen API-Abfragen führen kann.",
@@ -431,9 +596,10 @@
                           "timezone_from": "Normalerweise sollte dies nicht geändert werden, es sei denn, Dein Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Du möchtest die Abfahrten in einer anderen Zeitzone sehen. Gebe die Zeitzone im Format wie Europe/Berlin oder UTC ein. Das Feld darf nicht leer sein.",
                           "timezone_to": "Normalerweise sollte dies nicht geändert werden, es sei denn, Dein Server läuft in einer anderen Zeitzone, die Zeiten werden nicht korrekt angezeigt oder Du möchtest die Abfahrten in einer anderen Zeitzone sehen. Gebe die Zeitzone im Format wie Europe/Berlin oder UTC ein. Das Feld darf nicht leer sein.",
                           "alert_for": "Wenn Du zusätzliche Attribute für bestimmte Linien, wie S3, S4 und S20, erstellen möchtest, kannst Du sie als kommagetrennte Liste konfigurieren. Für mehr Informationen schaue bitte in die Dokumentation.",
-                          "stats_template": "Hier kannst Du den Wert der Statusvariabel bestimmen. Dir stehen die folgenden Variabeln zur Verfügung (Mehrere zusammen sind möglich). Geplante Abfahrt: ```'{planned_departure}'```, Erwartete Abfahrt: ```'{expected_departure}'```, Gleis: ```'{track}'```, Transportmittel: ```'{transport_type}'```, Linie: ```'{label}'```, Ziel ```'{destination}'```, Verspätung: ```'{delay}'``` (in Minuten), Zugtyp: ```'{trainType}'``` (bei Bahn, außer RB und RE), Stornierung: ```'{cancelled}'```, Geplante Abfahrtszeit: ```'{plannedDepartureTime}'``` (Timestamp), Reale Abfahrtszeit: ```'{realtimeDepartureTime}'``` (Timestamp), Differenz zur realen Abfahrtszeit: ```'{realtime_departure_diff_minutes}'``` (in Minuten), Differenz zur realen Abfahrtszeit gerundet: ```'{minutes_difference}'``` (in Minuten). Wenn Du einen vorgefertigten Text in Form einer Bahnhofsdurchsage (in deutsch) wünschst, dann trage hier ```'{announcement}'``` ein. Für die englische Version trage ```'{announcementEN}'``` ein.",
-                          "css_code": "Hier kannst Du das Design der AnotherMVG-Karte individuell anpassen, indem Du CSS-Regeln für bestimmte Bereiche überschreibst. Wichtig: Der gesamte Code muss in einer einzigen Zeile stehen, da mehrzeilige Eingaben von Home Assistant leider nicht unterstützt werden!",
-                          "css_code_darkmode_only": "Den obenstehenden CSS Code nur bei aktiven 'Dark Mode' nutzen."
+	                          "stats_template": "Hier kannst Du den Wert der Statusvariabel bestimmen. Dir stehen die folgenden Variabeln zur Verfügung (Mehrere zusammen sind möglich). Geplante Abfahrt: ```'{planned_departure}'```, Erwartete Abfahrt: ```'{expected_departure}'```, Gleis: ```'{track}'```, Transportmittel: ```'{transport_type}'```, Linie: ```'{label}'```, Ziel ```'{destination}'```, Verspätung: ```'{delay}'``` (in Minuten), Zugtyp: ```'{trainType}'``` (bei Bahn, außer RB und RE), Stornierung: ```'{cancelled}'```, Geplante Abfahrtszeit: ```'{plannedDepartureTime}'``` (Timestamp), Reale Abfahrtszeit: ```'{realtimeDepartureTime}'``` (Timestamp), Differenz zur realen Abfahrtszeit: ```'{realtime_departure_diff_minutes}'``` (in Minuten), Differenz zur realen Abfahrtszeit gerundet: ```'{minutes_difference}'``` (in Minuten). Wenn Du einen vorgefertigten Text in Form einer Bahnhofsdurchsage (in deutsch) wünschst, dann trage hier ```'{announcement}'``` ein. Für die englische Version trage ```'{announcementEN}'``` ein.",
+	                          "css_code": "Hier kannst Du das Design der AnotherMVG-Karte individuell anpassen, indem Du CSS-Regeln für bestimmte Bereiche überschreibst. Wichtig: Der gesamte Code muss in einer einzigen Zeile stehen, da mehrzeilige Eingaben von Home Assistant leider nicht unterstützt werden!",
+	                          "css_code_darkmode_only": "Den obenstehenden CSS Code nur bei aktiven 'Dark Mode' nutzen.",
+	                          "exclude_attributes_from_recorder": "Wenn aktiviert, werden große dynamische Attribute wie departures, alerts und config nicht in der Home-Assistant-Recorder-History gespeichert. Die Karten, Automationen und aktuellen Sensorattribute funktionieren weiterhin. Bereits gespeicherte Daten werden dadurch nicht sofort gelöscht."
                         }
                      },
                     "filter_options": {
@@ -474,10 +640,155 @@
                           "mqtt_enabled": "Veröffentlicht die Daten dieses Sensors über die in Home Assistant eingerichtete MQTT-Integration.",
                           "mqtt_topic_prefix": "Basis-Topic für MQTT-Nachrichten. Wenn das Feld leer ist, wird another_mvg verwendet. Erlaubt sind nur Buchstaben ohne Umlaute, Zahlen, /, _, - und .. / kann Unterebenen erzeugen, darf aber nicht am Anfang oder Ende stehen. Das finale Topic enthält zusätzlich den Sensornamen.",
                           "mqtt_qos": "Quality of Service. 0 ist der Standard und reicht für die meisten Fälle. 1 bestätigt die Zustellung mindestens einmal, 2 ist die strengste Zustellung und wird selten benötigt.",
-                          "mqtt_retain": "Wenn aktiviert, speichert der Broker die letzte Nachricht und liefert sie neuen Abonnenten sofort aus."
-                       }
-                     }
-                },
+	                          "mqtt_retain": "Wenn aktiviert, speichert der Broker die letzte Nachricht und liefert sie neuen Abonnenten sofort aus."
+	                       }
+	                     },
+	                    "alert1_options": {
+	                       "name": "Alarme - Alarm 1",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                    },
+	                    "alert2_options": {
+	                       "name": "Alarme - Alarm 2",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                    },
+	                    "alert3_options": {
+	                       "name": "Alarme - Alarm 3",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                    },
+	                    "alert4_options": {
+	                       "name": "Alarme - Alarm 4",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                    },
+	                    "alert5_options": {
+	                       "name": "Alarme - Alarm 5",
+	                       "data": {
+	                          "enabled": "Aktiv",
+	                          "name": "Name",
+	                          "weekdays": "Wochentage",
+	                          "line": "Linie",
+	                          "planned_time": "Planmäßige Abfahrts-/Ankunftszeit",
+	                          "direction": "Richtung / Herkunft enthält",
+	                          "active_from": "Benachrichtigungen aktiv ab",
+	                          "active_to": "Benachrichtigungen aktiv bis",
+	                          "delay_minutes": "Warnen ab Verspätung",
+	                          "cancelled": "Warnen bei Ausfall",
+	                          "notify_mode": "Erneut melden"
+	                       },
+	                       "data_description": {
+	                          "enabled": "Aktiviert diese Alarmregel.",
+	                          "name": "Optionaler Name für die Regel, z. B. Arbeitsweg morgens.",
+	                          "weekdays": "Optional: Wähle die Wochentage aus. Wenn nichts ausgewählt ist, gilt die Regel täglich.",
+	                          "line": "Optional: Trage die Linie ein, z. B. S3 oder 860. Wenn das Feld leer ist, wird nur nach der planmäßigen Zeit gesucht.",
+	                          "planned_time": "Planmäßige Abfahrts- oder Ankunftszeit im Format HH:MM. 5:38 und 05:38 sind beide möglich.",
+	                          "direction": "Optional: Bei Abfahrten wird im Ziel gesucht, bei Ankünften in der Herkunft. Der Text muss enthalten sein.",
+	                          "active_from": "Optional: Früheste Uhrzeit, ab der Benachrichtigungen ausgelöst werden, z. B. 05:00.",
+	                          "active_to": "Optional: Späteste Uhrzeit, bis zu der Benachrichtigungen ausgelöst werden, z. B. 05:45.",
+	                          "delay_minutes": "0 deaktiviert die Verspätungswarnung. Bei 5 wird ab 5 Minuten Verspätung gemeldet.",
+	                          "cancelled": "Meldet, wenn die überwachte Fahrt ausfällt.",
+	                          "notify_mode": "Einmal pro Fahrt meldet nur den ersten Treffer. Bei Verschlechterung meldet erneut, wenn die Verspätung größer wird."
+	                       }
+	                     }
+	                },
                 "title": "Optionen für Another MVG",
                 "data": {
                     "globalid": "Global ID",

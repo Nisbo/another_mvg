@@ -36,11 +36,27 @@ from .const import (
     CONF_FORCE_PROXY,
     CONF_CSS_CODE,
     CONF_CSS_CODE_DARKMODE_ONLY,
+    CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER,
     CONF_MQTT_ENABLED,
     CONF_MQTT_TOPIC_PREFIX,
     CONF_MQTT_RETAIN,
     CONF_MQTT_QOS,
     CONF_UPDATE_MODE,
+    CONF_ALERT_ENABLED,
+    CONF_ALERT_NAME,
+    CONF_ALERT_WEEKDAYS,
+    CONF_ALERT_LINE,
+    CONF_ALERT_PLANNED_TIME,
+    CONF_ALERT_DIRECTION,
+    CONF_ALERT_ACTIVE_FROM,
+    CONF_ALERT_ACTIVE_TO,
+    CONF_ALERT_DELAY_MINUTES,
+    CONF_ALERT_CANCELLED,
+    CONF_ALERT_NOTIFY_MODE,
+    ALERT_COUNT,
+    ALERT_WEEKDAYS,
+    ALERT_NOTIFY_ONCE,
+    ALERT_NOTIFY_WORSENING,
     DEFAULT_ONLYLINE,
     DEFAULT_MONITOR_TYPE,
     MONITOR_TYPE_DEPARTURE,
@@ -62,11 +78,23 @@ from .const import (
     DEFAULT_FORCE_PROXY,
     DEFAULT_CSS_CODE,
     DEFAULT_CSS_CODE_DARKMODE_ONLY,
+    DEFAULT_EXCLUDE_ATTRIBUTES_FROM_RECORDER,
     DEFAULT_MQTT_ENABLED,
     DEFAULT_MQTT_TOPIC_PREFIX,
     DEFAULT_MQTT_RETAIN,
     DEFAULT_MQTT_QOS,
     DEFAULT_UPDATE_MODE,
+    DEFAULT_ALERT_ENABLED,
+    DEFAULT_ALERT_NAME,
+    DEFAULT_ALERT_WEEKDAYS,
+    DEFAULT_ALERT_LINE,
+    DEFAULT_ALERT_PLANNED_TIME,
+    DEFAULT_ALERT_DIRECTION,
+    DEFAULT_ALERT_ACTIVE_FROM,
+    DEFAULT_ALERT_ACTIVE_TO,
+    DEFAULT_ALERT_DELAY_MINUTES,
+    DEFAULT_ALERT_CANCELLED,
+    DEFAULT_ALERT_NOTIFY_MODE,
     UPDATE_MODE_AUTO,
     UPDATE_MODE_MANUAL,
 )
@@ -108,6 +136,61 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             and not topic.endswith("/")
             and "//" not in topic
         )
+
+    @staticmethod
+    def _alert_defaults(index: int) -> dict[str, Any]:
+        """Return default values for one alert rule."""
+        return {
+            CONF_ALERT_ENABLED.format(index): DEFAULT_ALERT_ENABLED,
+            CONF_ALERT_NAME.format(index): DEFAULT_ALERT_NAME,
+            CONF_ALERT_WEEKDAYS.format(index): list(DEFAULT_ALERT_WEEKDAYS),
+            CONF_ALERT_LINE.format(index): DEFAULT_ALERT_LINE,
+            CONF_ALERT_PLANNED_TIME.format(index): DEFAULT_ALERT_PLANNED_TIME,
+            CONF_ALERT_DIRECTION.format(index): DEFAULT_ALERT_DIRECTION,
+            CONF_ALERT_ACTIVE_FROM.format(index): DEFAULT_ALERT_ACTIVE_FROM,
+            CONF_ALERT_ACTIVE_TO.format(index): DEFAULT_ALERT_ACTIVE_TO,
+            CONF_ALERT_DELAY_MINUTES.format(index): DEFAULT_ALERT_DELAY_MINUTES,
+            CONF_ALERT_CANCELLED.format(index): DEFAULT_ALERT_CANCELLED,
+            CONF_ALERT_NOTIFY_MODE.format(index): DEFAULT_ALERT_NOTIFY_MODE,
+        }
+
+    @classmethod
+    def _flatten_alert_options(cls, user_input: dict, current_data=None) -> None:
+        """Move nested alert section values to the flat config entry data."""
+        field_map = {
+            "enabled": CONF_ALERT_ENABLED,
+            "name": CONF_ALERT_NAME,
+            "weekdays": CONF_ALERT_WEEKDAYS,
+            "line": CONF_ALERT_LINE,
+            "planned_time": CONF_ALERT_PLANNED_TIME,
+            "direction": CONF_ALERT_DIRECTION,
+            "active_from": CONF_ALERT_ACTIVE_FROM,
+            "active_to": CONF_ALERT_ACTIVE_TO,
+            "delay_minutes": CONF_ALERT_DELAY_MINUTES,
+            "cancelled": CONF_ALERT_CANCELLED,
+            "notify_mode": CONF_ALERT_NOTIFY_MODE,
+        }
+
+        for index in range(1, ALERT_COUNT + 1):
+            defaults = cls._alert_defaults(index)
+            section_name = f"alert{index}_options"
+            section = user_input.get(section_name, {}) or {}
+            for section_field, config_key_template in field_map.items():
+                config_key = config_key_template.format(index)
+                default_value = defaults[config_key]
+                if current_data is not None:
+                    default_value = current_data.get(config_key, default_value)
+                user_input[config_key] = section.get(section_field, default_value)
+
+            try:
+                user_input[CONF_ALERT_DELAY_MINUTES.format(index)] = max(
+                    0,
+                    int(user_input[CONF_ALERT_DELAY_MINUTES.format(index)]),
+                )
+            except (TypeError, ValueError):
+                user_input[CONF_ALERT_DELAY_MINUTES.format(index)] = DEFAULT_ALERT_DELAY_MINUTES
+
+            user_input.pop(section_name, None)
 
     @staticmethod
     def _load_translation(language: str | None) -> dict:
@@ -178,6 +261,43 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             },
         ]
 
+    @classmethod
+    def _alert_weekday_options(cls, translations: dict) -> list[dict[str, str]]:
+        """Return weekday labels for alert rules."""
+        return [
+            {
+                "label": cls._translation(
+                    translations,
+                    ["selector", "alert_weekday", "options", weekday],
+                    weekday,
+                ),
+                "value": weekday,
+            }
+            for weekday in ALERT_WEEKDAYS
+        ]
+
+    @classmethod
+    def _alert_notify_mode_options(cls, translations: dict) -> list[dict[str, str]]:
+        """Return alert notification mode labels."""
+        return [
+            {
+                "label": cls._translation(
+                    translations,
+                    ["selector", "alert_notify_mode", "options", ALERT_NOTIFY_ONCE],
+                    "Once per trip",
+                ),
+                "value": ALERT_NOTIFY_ONCE,
+            },
+            {
+                "label": cls._translation(
+                    translations,
+                    ["selector", "alert_notify_mode", "options", ALERT_NOTIFY_WORSENING],
+                    "Again when delay gets worse",
+                ),
+                "value": ALERT_NOTIFY_WORSENING,
+            },
+        ]
+
     async def _async_monitor_type_options(self) -> list[dict[str, str]]:
         """Return translated monitor type options without blocking the event loop."""
         translations = await self.hass.async_add_executor_job(
@@ -193,6 +313,22 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.hass.config.language,
         )
         return self._update_mode_options(translations)
+
+    async def _async_alert_weekday_options(self) -> list[dict[str, str]]:
+        """Return translated alert weekday options without blocking the event loop."""
+        translations = await self.hass.async_add_executor_job(
+            self._load_translation,
+            self.hass.config.language,
+        )
+        return self._alert_weekday_options(translations)
+
+    async def _async_alert_notify_mode_options(self) -> list[dict[str, str]]:
+        """Return translated alert notify mode options without blocking the event loop."""
+        translations = await self.hass.async_add_executor_job(
+            self._load_translation,
+            self.hass.config.language,
+        )
+        return self._alert_notify_mode_options(translations)
 
     @staticmethod
     @callback
@@ -226,6 +362,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_FORCE_PROXY: import_data.get(CONF_FORCE_PROXY, DEFAULT_FORCE_PROXY),
                 CONF_CSS_CODE: import_data.get(CONF_CSS_CODE, DEFAULT_CSS_CODE),
                 CONF_CSS_CODE_DARKMODE_ONLY: import_data.get(CONF_CSS_CODE_DARKMODE_ONLY, DEFAULT_CSS_CODE_DARKMODE_ONLY),
+                CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER: import_data.get(CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER, DEFAULT_EXCLUDE_ATTRIBUTES_FROM_RECORDER),
                 CONF_MQTT_ENABLED: import_data.get(CONF_MQTT_ENABLED, DEFAULT_MQTT_ENABLED),
                 CONF_MQTT_TOPIC_PREFIX: import_data.get(CONF_MQTT_TOPIC_PREFIX, DEFAULT_MQTT_TOPIC_PREFIX),
                 CONF_MQTT_RETAIN: import_data.get(CONF_MQTT_RETAIN, DEFAULT_MQTT_RETAIN),
@@ -248,9 +385,18 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if stations:
                     monitor_type_options = await self._async_monitor_type_options()
                     update_mode_options = await self._async_update_mode_options()
+                    weekday_options = await self._async_alert_weekday_options()
+                    notify_mode_options = await self._async_alert_notify_mode_options()
                     return self.async_show_form(
                         step_id="user",
-                        data_schema=self._user_config_schema(stations, station_name, monitor_type_options, update_mode_options)
+                        data_schema=self._user_config_schema(
+                            stations,
+                            station_name,
+                            monitor_type_options,
+                            update_mode_options,
+                            weekday_options,
+                            notify_mode_options,
+                        )
                     )
                 else:
                     errors = {}
@@ -287,6 +433,9 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
                 if CONF_CSS_CODE_DARKMODE_ONLY in advanced_options:
                     user_input[CONF_CSS_CODE_DARKMODE_ONLY] = advanced_options[CONF_CSS_CODE_DARKMODE_ONLY]
+
+                if CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER in advanced_options:
+                    user_input[CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER] = advanced_options[CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER]
         
                 if CONF_TIMEZONE_FROM in advanced_options:
                     user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
@@ -321,6 +470,8 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if CONF_FORCE_PROXY in proxy_options:
                     user_input[CONF_FORCE_PROXY] = proxy_options[CONF_FORCE_PROXY]
 
+                self._flatten_alert_options(user_input)
+
                 if CONF_MQTT_ENABLED in mqtt_options:
                     user_input[CONF_MQTT_ENABLED] = mqtt_options[CONF_MQTT_ENABLED]
 
@@ -338,7 +489,14 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if not self._is_valid_mqtt_topic_prefix(user_input[CONF_MQTT_TOPIC_PREFIX]):
                     return self.async_show_form(
                         step_id="user",
-                        data_schema=self._user_config_schema(None, None, await self._async_monitor_type_options(), await self._async_update_mode_options()),
+                        data_schema=self._user_config_schema(
+                            None,
+                            None,
+                            await self._async_monitor_type_options(),
+                            await self._async_update_mode_options(),
+                            await self._async_alert_weekday_options(),
+                            await self._async_alert_notify_mode_options(),
+                        ),
                         errors={"base": "invalid_mqtt_topic"},
                     )
 
@@ -367,7 +525,14 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             return self.async_show_form(
                 step_id="user",
-                data_schema=self._user_config_schema(None, None, await self._async_monitor_type_options(), await self._async_update_mode_options()),
+                data_schema=self._user_config_schema(
+                    None,
+                    None,
+                    await self._async_monitor_type_options(),
+                    await self._async_update_mode_options(),
+                    await self._async_alert_weekday_options(),
+                    await self._async_alert_notify_mode_options(),
+                ),
                 errors={"base": "invalid_input"}
             )
 
@@ -419,7 +584,70 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("station_name"): str,
         })
 
-    def _user_config_schema(self, stations, station_name, monitor_type_options, update_mode_options):
+    @classmethod
+    def _alert_rule_schema(cls, index, current_data, weekday_options, notify_mode_options):
+        """Return one collapsible alert rule section."""
+        current_data = current_data or {}
+        defaults = cls._alert_defaults(index)
+
+        def value(config_key):
+            return current_data.get(config_key, defaults[config_key])
+
+        weekdays = value(CONF_ALERT_WEEKDAYS.format(index))
+        if isinstance(weekdays, str):
+            weekdays = [item.strip() for item in weekdays.split(",") if item.strip()]
+
+        return data_entry_flow.section(
+            vol.Schema(
+                {
+                    vol.Optional("enabled", default=value(CONF_ALERT_ENABLED.format(index))): bool,
+                    vol.Optional("name", default=value(CONF_ALERT_NAME.format(index))): str,
+                    vol.Optional("weekdays", default=weekdays): selector({
+                        "select": {
+                            "options": weekday_options,
+                            "multiple": True,
+                            "mode": "list",
+                        }
+                    }),
+                    vol.Optional("line", default=value(CONF_ALERT_LINE.format(index))): str,
+                    vol.Optional("planned_time", default=value(CONF_ALERT_PLANNED_TIME.format(index))): str,
+                    vol.Optional("direction", default=value(CONF_ALERT_DIRECTION.format(index))): str,
+                    vol.Optional("active_from", default=value(CONF_ALERT_ACTIVE_FROM.format(index))): str,
+                    vol.Optional("active_to", default=value(CONF_ALERT_ACTIVE_TO.format(index))): str,
+                    vol.Optional("delay_minutes", default=value(CONF_ALERT_DELAY_MINUTES.format(index))): selector({
+                        "number": {
+                            "min": 0,
+                            "max": 180,
+                            "step": 1,
+                            "mode": "box",
+                        }
+                    }),
+                    vol.Optional("cancelled", default=value(CONF_ALERT_CANCELLED.format(index))): bool,
+                    vol.Optional("notify_mode", default=value(CONF_ALERT_NOTIFY_MODE.format(index))): selector({
+                        "select": {
+                            "options": notify_mode_options,
+                            "mode": "dropdown",
+                        }
+                    }),
+                }
+            ),
+            {"collapsed": True},
+        )
+
+    @classmethod
+    def _alert_options_schema(cls, current_data, weekday_options, notify_mode_options):
+        """Return alert rule sections."""
+        return {
+            vol.Required(f"alert{index}_options"): cls._alert_rule_schema(
+                index,
+                current_data,
+                weekday_options,
+                notify_mode_options,
+            )
+            for index in range(1, ALERT_COUNT + 1)
+        }
+
+    def _user_config_schema(self, stations, station_name, monitor_type_options, update_mode_options, weekday_options, notify_mode_options):
         """Return the schema for the user configuration form with station options."""
         options = [
             {"label": f"{station['name']} - {station['transportTypes']} ({station['globalId']})", "value": station['globalId']}
@@ -475,6 +703,8 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # Whether or not the section is initially collapsed (default = False)
                 {"collapsed": True},
             ),
+            # Alerts
+            **self._alert_options_schema(None, weekday_options, notify_mode_options),
             # Advanced Options
             vol.Required("advanced_options"): data_entry_flow.section(
                 vol.Schema(
@@ -488,6 +718,7 @@ class AnotherMVGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         vol.Optional(CONF_STATS_TEMPLATE,      default=DEFAULT_STATS_TEMPLATE): TextSelector({"type": "text", "multiline": True}),
                         vol.Optional(CONF_CSS_CODE,            default=DEFAULT_CSS_CODE): TextSelector({"type": "text", "multiline": True}),
                         vol.Optional(CONF_CSS_CODE_DARKMODE_ONLY, default=DEFAULT_CSS_CODE_DARKMODE_ONLY): bool,
+                        vol.Optional(CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER, default=DEFAULT_EXCLUDE_ATTRIBUTES_FROM_RECORDER): bool,
                     }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
@@ -712,6 +943,9 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
             
             if CONF_CSS_CODE_DARKMODE_ONLY in advanced_options:
                 user_input[CONF_CSS_CODE_DARKMODE_ONLY] = advanced_options[CONF_CSS_CODE_DARKMODE_ONLY]
+
+            if CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER in advanced_options:
+                user_input[CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER] = advanced_options[CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER]
             
             if CONF_TIMEZONE_FROM in advanced_options:
                 user_input[CONF_TIMEZONE_FROM] = advanced_options[CONF_TIMEZONE_FROM]
@@ -743,6 +977,8 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         
             if CONF_FORCE_PROXY in proxy_options:
                 user_input[CONF_FORCE_PROXY] = proxy_options[CONF_FORCE_PROXY]
+
+            AnotherMVGConfigFlow._flatten_alert_options(user_input, current_data)
 
             if CONF_MQTT_ENABLED in mqtt_options:
                 user_input[CONF_MQTT_ENABLED] = mqtt_options[CONF_MQTT_ENABLED]
@@ -803,6 +1039,8 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
         )
         monitor_type_options = AnotherMVGConfigFlow._monitor_type_options(translations)
         update_mode_options = AnotherMVGConfigFlow._update_mode_options(translations)
+        weekday_options = AnotherMVGConfigFlow._alert_weekday_options(translations)
+        notify_mode_options = AnotherMVGConfigFlow._alert_notify_mode_options(translations)
 
         self.options_schema = vol.Schema({
             vol.Required(CONF_NAME,           default=current_data.get(CONF_NAME)): str,
@@ -849,6 +1087,8 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                 # Whether or not the section is initially collapsed (default = False)
                 {"collapsed": True},
             ),
+            # Alerts
+            **AnotherMVGConfigFlow._alert_options_schema(current_data, weekday_options, notify_mode_options),
             # Advanced Options
             vol.Required("advanced_options"): data_entry_flow.section(
                 vol.Schema(
@@ -862,6 +1102,7 @@ class AnotherMVGOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Optional(CONF_STATS_TEMPLATE,      description={"suggested_value": current_data.get(CONF_STATS_TEMPLATE, "")}): TextSelector({"type": "text", "multiline": True}),
                         vol.Optional(CONF_CSS_CODE,            description={"suggested_value": current_data.get(CONF_CSS_CODE, DEFAULT_CSS_CODE)}): TextSelector({"type": "text", "multiline": True}),
                         vol.Optional(CONF_CSS_CODE_DARKMODE_ONLY, description={"suggested_value": current_data.get(CONF_CSS_CODE_DARKMODE_ONLY, DEFAULT_CSS_CODE_DARKMODE_ONLY)}): bool,
+                        vol.Optional(CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER, default=current_data.get(CONF_EXCLUDE_ATTRIBUTES_FROM_RECORDER, DEFAULT_EXCLUDE_ATTRIBUTES_FROM_RECORDER)): bool,
                     }
                 ),
                 # Whether or not the section is initially collapsed (default = False)
